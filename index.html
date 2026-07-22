@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#151515">
-<title>Bingo Host 受付 Ver.1</title>
+<title>Bingo Host 受付 Ver.2.10</title>
 <style>
 *{box-sizing:border-box}body{margin:0;background:#f3f4f6;color:#171717;font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Yu Gothic",sans-serif}
 button,input,select{font:inherit}button{cursor:pointer}
@@ -58,10 +58,13 @@ input,select{width:100%;border:2px solid #777;border-radius:12px;padding:13px;ba
 
 .role-switch{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px}
 .guest-lock{opacity:.45!important;pointer-events:none!important}
+
+.guest-hidden{display:none!important}
+.guest-lock{opacity:.55;pointer-events:none}
 </style>
 </head>
 <body>
-<header><h1>Bingo Host</h1><div class="sub">A〜E 全250枚対応・受付＋抽選 Ver.2.9</div></header>
+<header><h1>Bingo Host</h1><div class="sub">A〜E 全250枚対応・受付＋抽選 Ver.2.10</div></header>
 <main>
 <form id="form" class="panel entry">
 <h2>参加者を登録</h2>
@@ -186,28 +189,29 @@ function parseCard(v){
 function globalNo(id){return (id.charCodeAt(0)-65)*50+Number(id.slice(2))}
 function note(msg,type=""){let e=$("notice");e.textContent=msg;e.className="notice "+type}
 function add(){
+ if(typeof isGuestMode==="function" && isGuestMode()){note("ゲストは閲覧専用です。","err");return}
  let name=$("name").value.trim(),id=parseCard($("card").value);
  if(!name){note("⚠️ 名前を入力してください。","err");$("name").focus();return}
  if(!id||!BYID.has(id)){note("⚠️ 1〜250、または A-001〜E-050 で入力してください。","err");$("card").focus();return}
  let dup=state.regs.find(r=>r.cardId===id);if(dup){note(`⚠️ No.${globalNo(id)}（${id}）は ${dup.name}さんに登録済みです。`,"err");$("card").focus();return}
  state.regs.push({key:Date.now()+"-"+Math.random(),name,cardId:id});$("card").value="";save();note(`✅ ${name}さん → No.${globalNo(id)}（${id}）を登録しました。`,"ok");$("card").focus();
 }
-function remove(key){let r=state.regs.find(x=>x.key===key);if(r&&confirm(`${r.name}さんの No.${globalNo(r.cardId)} を削除しますか？`)){state.regs=state.regs.filter(x=>x.key!==key);save()}}
+function remove(key){if(typeof isGuestMode==="function" && isGuestMode())return;let r=state.regs.find(x=>x.key===key);if(r&&confirm(`${r.name}さんの No.${globalNo(r.cardId)} を削除しますか？`)){state.regs=state.regs.filter(x=>x.key!==key);save()}}
 function render(){
  let q=$("search").value.trim().toLowerCase(),arr=state.regs.slice();
  if($("sort").value==="name")arr.sort((a,b)=>a.name.localeCompare(b.name,"ja")||globalNo(a.cardId)-globalNo(b.cardId));
  if($("sort").value==="card")arr.sort((a,b)=>globalNo(a.cardId)-globalNo(b.cardId));
  if(q)arr=arr.filter(r=>r.name.toLowerCase().includes(q)||r.cardId.toLowerCase().includes(q)||String(globalNo(r.cardId)).includes(q));
  let groups=[];for(let r of arr){let g=groups.find(x=>x.name===r.name);if(!g){g={name:r.name,items:[]};groups.push(g)}g.items.push(r)}
- $("list").innerHTML=groups.length?groups.map(g=>`<div class="person"><div class="head"><b>${esc(g.name)}</b><span class="pill">${g.items.length}口</span></div><div class="chips">${g.items.map(r=>`<span class="chip">No.${globalNo(r.cardId)} <small>${r.cardId}</small><button type="button" data-del="${r.key}">×</button></span>`).join("")}</div></div>`).join(""):'<div class="empty">該当する登録はありません。</div>';
+ $("list").innerHTML=groups.length?groups.map(g=>`<div class="person"><div class="head"><b>${esc(g.name)}</b><span class="pill">${g.items.length}口</span></div><div class="chips">${g.items.map(r=>`<span class="chip">No.${globalNo(r.cardId)} <small>${r.cardId}</small>${isGuestMode()?"":`<button type="button" data-del="${r.key}">×</button>`}</span>`).join("")}</div></div>`).join(""):'<div class="empty">該当する登録はありません。</div>';
  document.querySelectorAll("[data-del]").forEach(b=>b.onclick=()=>remove(b.dataset.del));
  let people=new Set(state.regs.map(r=>r.name)).size;$("peoplePill").textContent=`${people}人 / ${state.regs.length}枚`;$("remain").textContent=250-state.regs.length;
  for(let g of "ABCDE")$(g.toLowerCase()+"Count").textContent=state.regs.filter(r=>r.cardId[0]===g).length;
  $("recent").innerHTML=state.regs.length?"<b>直近の登録</b><br>"+state.regs.slice(-5).reverse().map(r=>`✅ ${esc(r.name)}　No.${globalNo(r.cardId)}（${r.cardId}）`).join("<br>"):"まだ登録されていません。";
 }
 async function copyList(){let t=state.regs.map((r,i)=>`${i+1}. ${r.name}　No.${globalNo(r.cardId)}（${r.cardId}）`).join("\n");if(!t)return note("コピーする登録がありません。","err");try{await navigator.clipboard.writeText(t);note("✅ 一覧をコピーしました。","ok")}catch(e){prompt("コピーしてください",t)}}
-function backup(){let a=document.createElement("a");a.href=URL.createObjectURL(new Blob([JSON.stringify(state,null,2)],{type:"application/json"}));a.download="bingo-host-backup.json";a.click()}
-function restore(f){let rd=new FileReader();rd.onload=()=>{try{let x=JSON.parse(rd.result);if(!x||!Array.isArray(x.regs))throw 0;state=x;save();note("✅ 復元しました。","ok")}catch(e){note("⚠️ 復元できませんでした。","err")}};rd.readAsText(f)}
+function backup(){if(typeof isGuestMode==="function" && isGuestMode())return;let a=document.createElement("a");a.href=URL.createObjectURL(new Blob([JSON.stringify(state,null,2)],{type:"application/json"}));a.download="bingo-host-backup.json";a.click()}
+function restore(f){if(typeof isGuestMode==="function" && isGuestMode())return;let rd=new FileReader();rd.onload=()=>{try{let x=JSON.parse(rd.result);if(!x||!Array.isArray(x.regs))throw 0;state=x;save();note("✅ 復元しました。","ok")}catch(e){note("⚠️ 復元できませんでした。","err")}};rd.readAsText(f)}
 const registerBtn=$("registerBtn");
 registerBtn.addEventListener("click",function(e){e.preventDefault();e.stopPropagation();add();});
 $("card").addEventListener("keydown",function(e){if(e.key==="Enter"){e.preventDefault();add();}});
@@ -253,14 +257,15 @@ function judgeCard(cardId){
   return {bingo,reach,waits:[...new Set(waits)].sort((a,b)=>a-b)};
 }
 function drawOne(){
+  if(typeof isGuestMode==="function" && isGuestMode())return;
   const used=new Set(drawState.drawn),remaining=[];
   for(let n=1;n<=75;n++)if(!used.has(n))remaining.push(n);
   if(!remaining.length){note("⚠️ 1〜75すべて抽選済みです。","err");return}
   drawState.drawn.push(remaining[Math.floor(Math.random()*remaining.length)]);
   saveDraw();
 }
-function undoDraw(){if(drawState.drawn.length){drawState.drawn.pop();saveDraw()}}
-function resetDraw(){if(confirm("抽選履歴をすべてリセットしますか？")){drawState={drawn:[]};saveDraw()}}
+function undoDraw(){if(typeof isGuestMode==="function" && isGuestMode())return;if(drawState.drawn.length){drawState.drawn.pop();saveDraw()}}
+function resetDraw(){if(typeof isGuestMode==="function" && isGuestMode())return;if(confirm("抽選履歴をすべてリセットしますか？")){drawState={drawn:[]};saveDraw()}}
 function renderDrawAndJudge(){
   $("drawCount").textContent=`${drawState.drawn.length} / 75`;
   $("drawCurrent").textContent=drawState.drawn.length?drawState.drawn[drawState.drawn.length-1]:"？";
@@ -278,6 +283,7 @@ function renderDrawAndJudge(){
 }
 
 function addManualNumber(){
+  if(typeof isGuestMode==="function" && isGuestMode())return;
   const el=$("manualNumber");
   const raw=(el.value||"").trim();
   const n=Number(raw);
@@ -320,6 +326,7 @@ function saveMode(){
   renderMode();
 
 async function fullReset(){
+  if(typeof isGuestMode==="function" && isGuestMode())return;
   const ok=confirm("登録カード・参加者・抽選履歴など、Bingo Hostの全データを削除しますか？\nこの操作は元に戻せません。");
   if(!ok)return;
   try{
@@ -384,17 +391,29 @@ function isGuestMode(){
 }
 function applyRolePermissions(){
   const guest=isGuestMode();
-  const ids=["name","card","register","drawBtn","manualNumber","manualAddBtn","undoBtn","resetDrawBtn","fullResetBtn"];
-  ids.forEach(id=>{
+
+  // 入力欄は残して無効化し、操作ボタンはゲスト画面から隠す。
+  ["name","card","manualNumber"].forEach(id=>{
     const el=$(id);
     if(!el)return;
     el.disabled=guest;
     el.classList.toggle("guest-lock",guest);
   });
-  document.querySelectorAll(".remove").forEach(el=>{
-    el.classList.toggle("guest-lock",guest);
+
+  ["registerBtn","next","focusCard","drawBtn","manualAddBtn","undoBtn","resetDrawBtn","fullResetBtn","backup","restore"].forEach(id=>{
+    const el=$(id);
+    if(!el)return;
+    el.disabled=guest;
+    el.classList.toggle("guest-hidden",guest);
+  });
+
+  // 一覧は再描画時にも削除ボタンを出さない。既に存在する場合も念のため隠す。
+  document.querySelectorAll("[data-del]").forEach(el=>{
+    el.disabled=guest;
+    el.classList.toggle("guest-hidden",guest);
   });
 }
+
 function renderMode(){
   const shared=appMode.mode==="shared";
   $("modePill").textContent=shared?"共有モード":"個人モード";
@@ -417,6 +436,7 @@ function renderMode(){
   }
   $("hostRoleBtn").className=appMode.role==="host"?"primary":"secondary";
   $("guestRoleBtn").className=appMode.role==="guest"?"primary":"secondary";
+  render();
   applyRolePermissions();
 }
 $("personalModeBtn").onclick=setPersonalMode;
@@ -462,7 +482,7 @@ rolePermissionObserver.observe(document.body,{childList:true,subtree:true});
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-app.js";
 import {
-  getDatabase, ref, onValue, set, remove, get, serverTimestamp
+  getDatabase, ref, onValue, set, get, serverTimestamp
 } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-database.js";
 import {
   getAuth, signInAnonymously, onAuthStateChanged
@@ -549,7 +569,14 @@ window.cloudResetRoom = async function(){
   if(snap.val().hostUid !== user.uid){
     throw new Error("この大会データを削除する権限がありません");
   }
-  await remove(rr);
+  // 部屋自体を削除せず「空の状態」を書き込み、
+  // 接続中のゲストにも全クリアをリアルタイム通知する。
+  await set(rr, {
+    hostUid: user.uid,
+    state: { regs: [] },
+    drawState: { drawn: [] },
+    updatedAt: serverTimestamp()
+  });
 };
 
 window.cloudConnect = async function(){
@@ -589,6 +616,10 @@ window.cloudConnect = async function(){
         window.applyCloudPayload?.(data);
         setRoomStatus(`${role==="host"?"ホスト":"ゲスト"}／大会コード：${room}　● 本番クラウド同期中`);
       }else{
+        // 部屋が存在しない場合、ゲスト側に古いローカル表示を残さない。
+        if(role === "guest") {
+          window.applyCloudPayload?.({state:{regs:[]}, drawState:{drawn:[]}});
+        }
         setRoomStatus(role==="host"
           ? `ホスト／大会コード：${room}　クラウド部屋を作成しています…`
           : `ゲスト／大会コード：${room}　ホストの開始を待っています`);

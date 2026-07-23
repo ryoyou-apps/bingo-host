@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#151515">
-<title>Bingo Host 受付 Ver.2.13</title>
+<title>Bingo Host 受付 Ver.2.14</title>
 <style>
 *{box-sizing:border-box}body{margin:0;background:#f3f4f6;color:#171717;font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Yu Gothic",sans-serif}
 button,input,select{font:inherit}button{cursor:pointer}
@@ -65,6 +65,15 @@ input,select{width:100%;border:2px solid #777;border-radius:12px;padding:13px;ba
 .manual-help{font-size:13px;color:#64748b;margin-top:8px}
 
 
+.draw-alert-person{padding:8px 0;border-top:1px solid rgba(17,24,39,.14)}
+.draw-alert-person:first-child{border-top:0}
+.draw-alert-person-name{font-weight:900;font-size:18px;margin-bottom:6px}
+.draw-alert-wait-card{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;padding:7px 9px;margin-top:6px;border-radius:10px;background:rgba(255,255,255,.58)}
+.draw-alert-wait-number{font-size:18px;font-weight:800}
+.draw-alert-wait-number b{font-size:28px;line-height:1}
+.draw-alert-card-no{font-size:13px;color:#4b5563;white-space:nowrap}
+@media (max-width:520px){.draw-alert-wait-card{grid-template-columns:1fr}.draw-alert-card-no{white-space:normal}}
+
 .wait-line{margin-top:7px;padding:8px 10px;border-radius:10px;background:#111827;color:white;font-size:16px}
 .wait-line b{font-size:22px}
 
@@ -82,7 +91,7 @@ input,select{width:100%;border:2px solid #777;border-radius:12px;padding:13px;ba
 </style>
 </head>
 <body>
-<header><h1>Bingo Host</h1><div class="sub">A〜E 全250枚対応・受付＋抽選 Ver.2.13</div></header>
+<header><h1>Bingo Host</h1><div class="sub">A〜E 全250枚対応・受付＋抽選 Ver.2.14</div></header>
 <main>
 <form id="form" class="panel entry">
 <h2>参加者を登録</h2>
@@ -373,7 +382,13 @@ function renderDrawAndJudge(){
       rows.push(`<button type="button" class="draw-alert-row draw-alert-bingo" data-jump="bingo"><div class="draw-alert-title">🎉 ビンゴ発生 ${newBingo.length}人</div><div class="draw-alert-detail">${detail}</div></button>`);
     }
     if(newReach.length){
-      const detail=newReach.map(g=>`${esc(g.name)}（${g.items.map(r=>`No.${globalNo(r.cardId)}`).join("・")}）`).join("<br>");
+      const detail=newReach.map(g=>{
+        const cards=g.items.slice().sort((a,b)=>globalNo(a.cardId)-globalNo(b.cardId)).map(r=>{
+          const waits=(r.waits||[]).slice().sort((a,b)=>a-b).join("・");
+          return `<div class="draw-alert-wait-card"><div class="draw-alert-wait-number">あと <b>${waits}</b></div><div class="draw-alert-card-no">No.${globalNo(r.cardId)}（${r.cardId}）</div></div>`;
+        }).join("");
+        return `<div class="draw-alert-person"><div class="draw-alert-person-name">${esc(g.name)}（${g.items.length}枚）</div>${cards}</div>`;
+      }).join("");
       rows.push(`<button type="button" class="draw-alert-row draw-alert-reach" data-jump="reach"><div class="draw-alert-title">🔥 リーチ発生 ${newReach.length}人</div><div class="draw-alert-detail">${detail}</div></button>`);
     }
     if(rows.length){

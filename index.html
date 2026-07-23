@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#151515">
-<title>Bingo Host 受付 Ver.2.10.1</title>
+<title>Bingo Host 受付 Ver.2.11</title>
 <style>
 *{box-sizing:border-box}body{margin:0;background:#f3f4f6;color:#171717;font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Yu Gothic",sans-serif}
 button,input,select{font:inherit}button{cursor:pointer}
@@ -35,6 +35,7 @@ input,select{width:100%;border:2px solid #777;border-radius:12px;padding:13px;ba
 .judge-card{border:1px solid #ddd;border-radius:13px;padding:11px;margin-top:8px}
 .judge-card.reach{background:#fff7d6}
 .judge-card.bingo{background:#e7f7ea}
+.judge-card.bingo.latest-bingo{background:#ffe76a;border:2px solid #d99a00}
 .judge-name{font-weight:900;font-size:18px}
 .judge-meta{margin-top:4px;font-size:14px}
 
@@ -64,7 +65,7 @@ input,select{width:100%;border:2px solid #777;border-radius:12px;padding:13px;ba
 </style>
 </head>
 <body>
-<header><h1>Bingo Host</h1><div class="sub">A〜E 全250枚対応・受付＋抽選 Ver.2.10.1</div></header>
+<header><h1>Bingo Host</h1><div class="sub">A〜E 全250枚対応・受付＋抽選 Ver.2.11</div></header>
 <main>
 <form id="form" class="panel entry">
 <h2>参加者を登録</h2>
@@ -268,20 +269,34 @@ function drawOne(){
 }
 function undoDraw(){if(typeof isGuestMode==="function" && isGuestMode())return;if(drawState.drawn.length){drawState.drawn.pop();saveDraw()}}
 function resetDraw(){if(typeof isGuestMode==="function" && isGuestMode())return;if(confirm("抽選履歴をすべてリセットしますか？")){drawState={drawn:[]};saveDraw()}}
+function firstBingoStep(cardId){
+  const card=BYID.get(cardId);
+  if(!card||!card.grid)return 0;
+  const lines=getLines(card.grid);
+  const hit=new Set([0]); // FREE
+  for(let i=0;i<drawState.drawn.length;i++){
+    hit.add(drawState.drawn[i]);
+    if(lines.some(line=>line.every(n=>hit.has(n))))return i+1;
+  }
+  return 0;
+}
 function renderDrawAndJudge(){
   $("drawCount").textContent=`${drawState.drawn.length} / 75`;
   $("drawCurrent").textContent=drawState.drawn.length?drawState.drawn[drawState.drawn.length-1]:"？";
   $("drawHistory").innerHTML=drawState.drawn.map(n=>`<span class="draw-ball">${n}</span>`).join("");
   const reaches=[],bingos=[];
-  for(const r of state.regs){
+  state.regs.forEach((r,registrationIndex)=>{
     const j=judgeCard(r.cardId);
-    if(j.bingo>0)bingos.push({...r,count:j.bingo});
+    if(j.bingo>0)bingos.push({...r,count:j.bingo,firstStep:firstBingoStep(r.cardId),registrationIndex});
     else if(j.reach>0)reaches.push({...r,count:j.reach,waits:j.waits});
-  }
+  });
+  // 最新のビンゴを最上段へ。同じ抽選番号で成立した人は登録順を維持する。
+  bingos.sort((a,b)=>(b.firstStep-a.firstStep)||(a.registrationIndex-b.registrationIndex));
+  const latestStep=drawState.drawn.length;
   $("reachCount").textContent=`${reaches.length}件`;
   $("bingoCount").textContent=`${bingos.length}件`;
   $("reachList").innerHTML=reaches.length?reaches.map(r=>`<div class="judge-card reach"><div class="judge-name">🔥 ${esc(r.name)}　${r.count}リーチ</div><div class="judge-meta">No.${globalNo(r.cardId)}（${r.cardId}）</div><div class="wait-line">あと <b>${r.waits.join("・")}</b> でビンゴ</div></div>`).join(""):"リーチなし";
-  $("bingoList").innerHTML=bingos.length?bingos.map(r=>`<div class="judge-card bingo"><div class="judge-name">🎉 ${esc(r.name)}　BINGO！</div><div class="judge-meta">No.${globalNo(r.cardId)}（${r.cardId}）／${r.count}列</div></div>`).join(""):"ビンゴなし";
+  $("bingoList").innerHTML=bingos.length?bingos.map(r=>`<div class="judge-card bingo${r.firstStep===latestStep?" latest-bingo":""}"><div class="judge-name">🎉 ${esc(r.name)}　BINGO！</div><div class="judge-meta">No.${globalNo(r.cardId)}（${r.cardId}）／${r.count}列</div></div>`).join(""):"ビンゴなし";
 }
 
 function addManualNumber(){

@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#151515">
-<title>Bingo Host 受付 Ver.2.16</title>
+<title>Bingo Host 受付 Ver.2.16.1</title>
 <style>
 *{box-sizing:border-box}body{margin:0;background:#f3f4f6;color:#171717;font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Yu Gothic",sans-serif}
 button,input,select{font:inherit}button{cursor:pointer}
@@ -91,7 +91,7 @@ input,select{width:100%;border:2px solid #777;border-radius:12px;padding:13px;ba
 </style>
 </head>
 <body>
-<header><h1>Bingo Host</h1><div class="sub">A〜E 全250枚対応・受付＋抽選 Ver.2.16</div></header>
+<header><h1>Bingo Host</h1><div class="sub">A〜E 全250枚対応・受付＋抽選 Ver.2.16.1</div></header>
 <main>
 <form id="form" class="panel entry">
 <h2>参加者を登録</h2>
@@ -777,12 +777,22 @@ window.cloudConnect = async function(){
       if(connectedRoom !== room) return;
 
       if(liveSnap.exists()){
-        const data = liveSnap.val();
+        const data = liveSnap.val() || {};
         if(role==="host" && data.hostUid!==user.uid){
           window.forceGuestMode?.(room,"⚠️ ホスト権限が変更されたため、ゲストに切り替えました。");
           role="guest";
         }
-        window.applyCloudPayload?.(data);
+        // Realtime Databaseでは空配列 [] が保存時に消えるため、
+        // drawState / state が存在しない場合は「空」として明示的に同期する。
+        window.applyCloudPayload?.({
+          ...data,
+          state: data.state && Array.isArray(data.state.regs)
+            ? data.state
+            : {regs:[]},
+          drawState: data.drawState && Array.isArray(data.drawState.drawn)
+            ? data.drawState
+            : {drawn:[]}
+        });
         setRoomStatus(`${role==="host"?"ホスト":"ゲスト"}／大会コード：${room}　● 本番クラウド同期中`);
       }else{
         if(role === "guest") {

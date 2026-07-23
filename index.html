@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#151515">
-<title>Bingo Host 受付 Ver.2.11</title>
+<title>Bingo Host 受付 Ver.2.12</title>
 <style>
 *{box-sizing:border-box}body{margin:0;background:#f3f4f6;color:#171717;font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Yu Gothic",sans-serif}
 button,input,select{font:inherit}button{cursor:pointer}
@@ -36,6 +36,13 @@ input,select{width:100%;border:2px solid #777;border-radius:12px;padding:13px;ba
 .judge-card.reach{background:#fff7d6}
 .judge-card.bingo{background:#e7f7ea}
 .judge-card.bingo.latest-bingo{background:#ffe76a;border:2px solid #d99a00}
+.judge-card.reach.latest-reach{background:#ffe76a;border:2px solid #d99a00}
+.person-summary{display:flex;justify-content:space-between;gap:8px;align-items:center;flex-wrap:wrap}
+.total-lines{font-weight:900;font-size:18px;background:#151515;color:#fff;border-radius:999px;padding:5px 10px}
+.card-detail{margin-top:8px;padding:9px 10px;border-radius:10px;background:#ffffffb8;border:1px solid #ddd}
+.card-detail+.card-detail{margin-top:6px}
+.card-detail-title{font-weight:900}
+.card-detail-meta{margin-top:3px;font-size:14px;color:#444}
 .judge-name{font-weight:900;font-size:18px}
 .judge-meta{margin-top:4px;font-size:14px}
 
@@ -65,7 +72,7 @@ input,select{width:100%;border:2px solid #777;border-radius:12px;padding:13px;ba
 </style>
 </head>
 <body>
-<header><h1>Bingo Host</h1><div class="sub">A〜E 全250枚対応・受付＋抽選 Ver.2.11</div></header>
+<header><h1>Bingo Host</h1><div class="sub">A〜E 全250枚対応・受付＋抽選 Ver.2.12</div></header>
 <main>
 <form id="form" class="panel entry">
 <h2>参加者を登録</h2>
@@ -269,34 +276,81 @@ function drawOne(){
 }
 function undoDraw(){if(typeof isGuestMode==="function" && isGuestMode())return;if(drawState.drawn.length){drawState.drawn.pop();saveDraw()}}
 function resetDraw(){if(typeof isGuestMode==="function" && isGuestMode())return;if(confirm("抽選履歴をすべてリセットしますか？")){drawState={drawn:[]};saveDraw()}}
-function firstBingoStep(cardId){
+function judgeCardAtStep(cardId,step){
   const card=BYID.get(cardId);
-  if(!card||!card.grid)return 0;
-  const lines=getLines(card.grid);
-  const hit=new Set([0]); // FREE
-  for(let i=0;i<drawState.drawn.length;i++){
-    hit.add(drawState.drawn[i]);
-    if(lines.some(line=>line.every(n=>hit.has(n))))return i+1;
+  if(!card||!card.grid)return {bingo:0,reach:0,waits:[]};
+  const hit=new Set(drawState.drawn.slice(0,step));
+  hit.add(0);
+  let bingo=0,reach=0;
+  const waits=[];
+  for(const line of getLines(card.grid)){
+    const missing=line.filter(n=>!hit.has(n));
+    if(missing.length===0)bingo++;
+    else if(missing.length===1){reach++;waits.push(missing[0]);}
+  }
+  return {bingo,reach,waits:[...new Set(waits)].sort((a,b)=>a-b)};
+}
+function firstBingoStep(cardId){
+  for(let step=1;step<=drawState.drawn.length;step++){
+    if(judgeCardAtStep(cardId,step).bingo>0)return step;
   }
   return 0;
+}
+function firstReachStep(cardId){
+  for(let step=1;step<=drawState.drawn.length;step++){
+    const j=judgeCardAtStep(cardId,step);
+    if(j.bingo===0 && j.reach>0)return step;
+  }
+  return 0;
+}
+function groupByPerson(items){
+  const groups=new Map();
+  for(const item of items){
+    const key=(item.name||"").trim().toLocaleLowerCase("ja-JP");
+    if(!groups.has(key))groups.set(key,{name:item.name,items:[],latestStep:0,totalLines:0});
+    const g=groups.get(key);
+    g.items.push(item);
+    g.latestStep=Math.max(g.latestStep,item.eventStep||0);
+    g.totalLines+=item.count||0;
+  }
+  return [...groups.values()];
 }
 function renderDrawAndJudge(){
   $("drawCount").textContent=`${drawState.drawn.length} / 75`;
   $("drawCurrent").textContent=drawState.drawn.length?drawState.drawn[drawState.drawn.length-1]:"？";
   $("drawHistory").innerHTML=drawState.drawn.map(n=>`<span class="draw-ball">${n}</span>`).join("");
-  const reaches=[],bingos=[];
+
+  const reachCards=[],bingoCards=[];
   state.regs.forEach((r,registrationIndex)=>{
     const j=judgeCard(r.cardId);
-    if(j.bingo>0)bingos.push({...r,count:j.bingo,firstStep:firstBingoStep(r.cardId),registrationIndex});
-    else if(j.reach>0)reaches.push({...r,count:j.reach,waits:j.waits});
+    if(j.bingo>0){
+      bingoCards.push({...r,count:j.bingo,eventStep:firstBingoStep(r.cardId),registrationIndex});
+    }else if(j.reach>0){
+      reachCards.push({...r,count:j.reach,waits:j.waits,eventStep:firstReachStep(r.cardId),registrationIndex});
+    }
   });
-  // 最新のビンゴを最上段へ。同じ抽選番号で成立した人は登録順を維持する。
-  bingos.sort((a,b)=>(b.firstStep-a.firstStep)||(a.registrationIndex-b.registrationIndex));
+
+  const reachGroups=groupByPerson(reachCards);
+  const bingoGroups=groupByPerson(bingoCards);
+  reachGroups.forEach(g=>g.items.sort((a,b)=>(b.eventStep-a.eventStep)||(a.registrationIndex-b.registrationIndex)));
+  bingoGroups.forEach(g=>g.items.sort((a,b)=>(b.eventStep-a.eventStep)||(a.registrationIndex-b.registrationIndex)));
+  reachGroups.sort((a,b)=>(b.latestStep-a.latestStep)||a.name.localeCompare(b.name,"ja"));
+  bingoGroups.sort((a,b)=>(b.latestStep-a.latestStep)||a.name.localeCompare(b.name,"ja"));
+
   const latestStep=drawState.drawn.length;
-  $("reachCount").textContent=`${reaches.length}件`;
-  $("bingoCount").textContent=`${bingos.length}件`;
-  $("reachList").innerHTML=reaches.length?reaches.map(r=>`<div class="judge-card reach"><div class="judge-name">🔥 ${esc(r.name)}　${r.count}リーチ</div><div class="judge-meta">No.${globalNo(r.cardId)}（${r.cardId}）</div><div class="wait-line">あと <b>${r.waits.join("・")}</b> でビンゴ</div></div>`).join(""):"リーチなし";
-  $("bingoList").innerHTML=bingos.length?bingos.map(r=>`<div class="judge-card bingo${r.firstStep===latestStep?" latest-bingo":""}"><div class="judge-name">🎉 ${esc(r.name)}　BINGO！</div><div class="judge-meta">No.${globalNo(r.cardId)}（${r.cardId}）／${r.count}列</div></div>`).join(""):"ビンゴなし";
+  $("reachCount").textContent=`${reachGroups.length}人`;
+  $("bingoCount").textContent=`${bingoGroups.length}人`;
+
+  $("reachList").innerHTML=reachGroups.length?reachGroups.map(g=>{
+    const totalReach=g.items.reduce((sum,r)=>sum+r.count,0);
+    const details=g.items.map(r=>`<div class="card-detail"><div class="card-detail-title">No.${globalNo(r.cardId)}（${r.cardId}）／${r.count}リーチ</div><div class="wait-line">あと <b>${r.waits.join("・")}</b> でビンゴ</div></div>`).join("");
+    return `<div class="judge-card reach${g.latestStep===latestStep?" latest-reach":""}"><div class="person-summary"><div class="judge-name">🔥 ${esc(g.name)}</div><div class="total-lines">${g.items.length}枚・合計${totalReach}リーチ</div></div>${details}</div>`;
+  }).join(""):"リーチなし";
+
+  $("bingoList").innerHTML=bingoGroups.length?bingoGroups.map(g=>{
+    const details=g.items.map(r=>`<div class="card-detail"><div class="card-detail-title">No.${globalNo(r.cardId)}（${r.cardId}）</div><div class="card-detail-meta">${r.count}ライン達成</div></div>`).join("");
+    return `<div class="judge-card bingo${g.latestStep===latestStep?" latest-bingo":""}"><div class="person-summary"><div class="judge-name">🎉 ${esc(g.name)}　BINGO！</div><div class="total-lines">合計${g.totalLines}ライン</div></div>${details}</div>`;
+  }).join(""):"ビンゴなし";
 }
 
 function addManualNumber(){

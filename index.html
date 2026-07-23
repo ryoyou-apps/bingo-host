@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#151515">
-<title>Bingo Host 受付 Ver.2.12</title>
+<title>Bingo Host 受付 Ver.2.13</title>
 <style>
 *{box-sizing:border-box}body{margin:0;background:#f3f4f6;color:#171717;font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Yu Gothic",sans-serif}
 button,input,select{font:inherit}button{cursor:pointer}
@@ -31,6 +31,16 @@ input,select{width:100%;border:2px solid #777;border-radius:12px;padding:13px;ba
 .draw-current{font-size:92px;font-weight:900;text-align:center;line-height:1.1;padding:14px 0}
 .draw-btn{width:100%;font-size:24px}
 .draw-history{display:flex;flex-wrap:wrap;gap:7px;margin-top:12px}
+.draw-alert{margin-top:12px;border:2px solid #cbd5e1;border-radius:14px;overflow:hidden;background:#fff;box-shadow:0 5px 16px rgba(15,23,42,.08)}
+.draw-alert[hidden]{display:none}
+.draw-alert-head{padding:9px 12px;background:#111827;color:#fff;font-weight:900;font-size:16px}
+.draw-alert-row{width:100%;border:0;border-radius:0;padding:12px 14px;text-align:left;display:block}
+.draw-alert-row+.draw-alert-row{border-top:1px solid rgba(15,23,42,.15)}
+.draw-alert-bingo{background:#ffe36e;color:#5d3b00}
+.draw-alert-reach{background:#fff5c7;color:#503900}
+.draw-alert-title{font-size:18px;font-weight:900;margin-bottom:4px}
+.draw-alert-detail{font-size:14px;font-weight:700;line-height:1.5}
+
 .draw-ball{min-width:42px;height:42px;padding:0 8px;border-radius:999px;background:#111827;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:900}
 .judge-card{border:1px solid #ddd;border-radius:13px;padding:11px;margin-top:8px}
 .judge-card.reach{background:#fff7d6}
@@ -72,7 +82,7 @@ input,select{width:100%;border:2px solid #777;border-radius:12px;padding:13px;ba
 </style>
 </head>
 <body>
-<header><h1>Bingo Host</h1><div class="sub">A〜E 全250枚対応・受付＋抽選 Ver.2.12</div></header>
+<header><h1>Bingo Host</h1><div class="sub">A〜E 全250枚対応・受付＋抽選 Ver.2.13</div></header>
 <main>
 <form id="form" class="panel entry">
 <h2>参加者を登録</h2>
@@ -136,6 +146,7 @@ input,select{width:100%;border:2px solid #777;border-radius:12px;padding:13px;ba
   <div class="head"><h2>抽選</h2><span id="drawCount" class="pill">0 / 75</span></div>
   <div class="draw-current" id="drawCurrent">？</div>
   <button id="drawBtn" class="primary draw-btn" type="button">抽選する</button>
+  <div id="drawAlert" class="draw-alert" role="status" aria-live="polite" hidden></div>
 
   <div class="manual-box">
     <div class="manual-title">アナログ抽選入力</div>
@@ -351,6 +362,35 @@ function renderDrawAndJudge(){
     const details=g.items.map(r=>`<div class="card-detail"><div class="card-detail-title">No.${globalNo(r.cardId)}（${r.cardId}）</div><div class="card-detail-meta">${r.count}ライン達成</div></div>`).join("");
     return `<div class="judge-card bingo${g.latestStep===latestStep?" latest-bingo":""}"><div class="person-summary"><div class="judge-name">🎉 ${esc(g.name)}　BINGO！</div><div class="total-lines">合計${g.totalLines}ライン</div></div>${details}</div>`;
   }).join(""):"ビンゴなし";
+
+  const alert=$("drawAlert");
+  if(latestStep>0){
+    const newBingo=bingoGroups.filter(g=>g.latestStep===latestStep);
+    const newReach=reachGroups.filter(g=>g.latestStep===latestStep);
+    const rows=[];
+    if(newBingo.length){
+      const detail=newBingo.map(g=>`${esc(g.name)}（${g.items.map(r=>`No.${globalNo(r.cardId)}`).join("・")}）`).join("<br>");
+      rows.push(`<button type="button" class="draw-alert-row draw-alert-bingo" data-jump="bingo"><div class="draw-alert-title">🎉 ビンゴ発生 ${newBingo.length}人</div><div class="draw-alert-detail">${detail}</div></button>`);
+    }
+    if(newReach.length){
+      const detail=newReach.map(g=>`${esc(g.name)}（${g.items.map(r=>`No.${globalNo(r.cardId)}`).join("・")}）`).join("<br>");
+      rows.push(`<button type="button" class="draw-alert-row draw-alert-reach" data-jump="reach"><div class="draw-alert-title">🔥 リーチ発生 ${newReach.length}人</div><div class="draw-alert-detail">${detail}</div></button>`);
+    }
+    if(rows.length){
+      alert.hidden=false;
+      alert.innerHTML=`<div class="draw-alert-head">抽選番号 ${drawState.drawn[latestStep-1]} の結果</div>${rows.join("")}`;
+      alert.querySelectorAll("[data-jump]").forEach(btn=>btn.onclick=()=>{
+        const id=btn.dataset.jump==="bingo"?"bingoList":"reachList";
+        $(id).scrollIntoView({behavior:"smooth",block:"start"});
+      });
+    }else{
+      alert.hidden=true;
+      alert.innerHTML="";
+    }
+  }else{
+    alert.hidden=true;
+    alert.innerHTML="";
+  }
 }
 
 function addManualNumber(){

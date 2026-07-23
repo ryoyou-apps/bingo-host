@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#151515">
-<title>Bingo Host 受付 Ver.2.14</title>
+<title>Bingo Host 受付 Ver.2.15</title>
 <style>
 *{box-sizing:border-box}body{margin:0;background:#f3f4f6;color:#171717;font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Yu Gothic",sans-serif}
 button,input,select{font:inherit}button{cursor:pointer}
@@ -91,7 +91,7 @@ input,select{width:100%;border:2px solid #777;border-radius:12px;padding:13px;ba
 </style>
 </head>
 <body>
-<header><h1>Bingo Host</h1><div class="sub">A〜E 全250枚対応・受付＋抽選 Ver.2.14</div></header>
+<header><h1>Bingo Host</h1><div class="sub">A〜E 全250枚対応・受付＋抽選 Ver.2.15</div></header>
 <main>
 <form id="form" class="panel entry">
 <h2>参加者を登録</h2>
@@ -378,7 +378,10 @@ function renderDrawAndJudge(){
     const newReach=reachGroups.filter(g=>g.latestStep===latestStep);
     const rows=[];
     if(newBingo.length){
-      const detail=newBingo.map(g=>`${esc(g.name)}（${g.items.map(r=>`No.${globalNo(r.cardId)}`).join("・")}）`).join("<br>");
+      const detail=newBingo.map(g=>{
+        const cards=g.items.slice().sort((a,b)=>globalNo(a.cardId)-globalNo(b.cardId)).map(r=>`No.${globalNo(r.cardId)}`).join("・");
+        return `<div class="draw-alert-person"><div class="draw-alert-person-name">${esc(g.name)}</div><div class="draw-alert-card-no">${cards}</div></div>`;
+      }).join("");
       rows.push(`<button type="button" class="draw-alert-row draw-alert-bingo" data-jump="bingo"><div class="draw-alert-title">🎉 ビンゴ発生 ${newBingo.length}人</div><div class="draw-alert-detail">${detail}</div></button>`);
     }
     if(newReach.length){

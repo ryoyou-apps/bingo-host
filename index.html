@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#151515">
-<title>Bingo Host 受付 Ver.2.17</title>
+<title>Bingo Host 受付 Ver.2.18 Security</title>
 <style>
 *{box-sizing:border-box}body{margin:0;background:#f3f4f6;color:#171717;font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Yu Gothic",sans-serif}
 button,input,select{font:inherit}button{cursor:pointer}
@@ -94,10 +94,17 @@ input,select{width:100%;border:2px solid #777;border-radius:12px;padding:13px;ba
 
 .guest-hidden{display:none!important}
 .guest-lock{opacity:.55;pointer-events:none}
+
+.admin-panel{border:2px solid #111827;background:#f8fafc}
+.admin-status{margin-top:10px;padding:11px;border-radius:10px;background:#eef2f7;line-height:1.5;font-weight:700}
+.admin-status.ok{background:#e8f7ea;color:#145e20}
+.admin-status.warn{background:#fff4cc;color:#6b4b00}
+.admin-login-btn{width:100%;min-height:58px}
+.admin-email{font-size:13px;word-break:break-all;margin-top:4px}
 </style>
 </head>
 <body>
-<header><h1>Bingo Host</h1><div class="sub">A〜E 全250枚対応・受付＋抽選 Ver.2.17</div></header>
+<header><h1>Bingo Host</h1><div class="sub">A〜E 全250枚対応・受付＋抽選 Ver.2.18 Security</div></header>
 <main>
 <form id="form" class="panel entry">
 <h2>参加者を登録</h2>
@@ -136,6 +143,16 @@ input,select{width:100%;border:2px solid #777;border-radius:12px;padding:13px;ba
 <div id="list"></div>
 </div>
 
+
+<div class="panel admin-panel">
+  <div class="head"><h2>管理者認証</h2><span id="adminPill" class="pill">未ログイン</span></div>
+  <div class="hint">管理者としてログインした端末だけ、個人モードとホスト操作を利用できます。一般の方はゲスト閲覧専用です。</div>
+  <div class="actions">
+    <button id="adminLoginBtn" class="primary admin-login-btn" type="button">Googleで管理者ログイン</button>
+    <button id="adminLogoutBtn" class="secondary guest-hidden" type="button">ログアウト</button>
+  </div>
+  <div id="adminStatus" class="admin-status warn">管理者ログインが必要です。</div>
+</div>
 
 <div class="panel">
   <div class="head"><h2>使用モード</h2><span id="modePill" class="pill">個人モード</span></div>
@@ -214,6 +231,8 @@ const MODE_STORAGE="bingoHostModeV23";
 let state={regs:[]};
 let appMode={mode:"personal",room:"",role:""};
 let hostAuthorized=false;
+let adminAuthenticated=false;
+let adminEmail="";
 const $=id=>document.getElementById(id);
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]));
 function load(){try{let x=JSON.parse(localStorage.getItem(STORAGE));if(x&&Array.isArray(x.regs))state=x}catch(e){}}
@@ -506,6 +525,7 @@ async function fullReset(){
 $("fullResetBtn").onclick=fullReset;
 
 function setPersonalMode(){
+  if(!adminAuthenticated){note("⚠️ 個人モードは管理者ログインが必要です。","err");return}
   hostAuthorized=false;
   appMode={mode:"personal",room:"",role:""};
   saveMode();
@@ -531,6 +551,7 @@ function joinRoom(){
 }
 
 function chooseHostRole(){
+  if(!adminAuthenticated){note("⚠️ ホスト開始には管理者ログインが必要です。","err");return}
   hostAuthorized=false;
   appMode.mode="shared";
   appMode.role="host";
@@ -548,9 +569,20 @@ function isGuestMode(){
   return appMode.mode==="shared" && appMode.role==="guest";
 }
 function canOperate(){
+  if(!adminAuthenticated) return false;
   if(appMode.mode==="personal") return true;
   return appMode.mode==="shared" && appMode.role==="host" && hostAuthorized===true;
 }
+window.setAdminAuthentication=function(allowed,email){
+  adminAuthenticated=allowed===true;
+  adminEmail=email||"";
+  if(!adminAuthenticated && appMode.role==="host"){
+    hostAuthorized=false;
+    appMode={mode:"shared",room:appMode.room||"",role:"guest"};
+    try{localStorage.setItem(MODE_STORAGE,JSON.stringify(appMode))}catch(e){}
+  }
+  renderMode();
+};
 window.canCloudHostWrite=()=>canOperate();
 window.setCloudHostAuthorization=function(allowed){
   hostAuthorized=allowed===true;
@@ -586,6 +618,13 @@ function applyRolePermissions(){
     el.disabled=locked;
     el.classList.toggle("guest-hidden",locked);
   });
+
+  ["personalModeBtn","hostRoleBtn"].forEach(id=>{
+    const el=$(id);
+    if(!el)return;
+    el.disabled=!adminAuthenticated;
+    el.classList.toggle("guest-lock",!adminAuthenticated);
+  });
 }
 
 function renderMode(){
@@ -610,6 +649,16 @@ function renderMode(){
   }
   $("hostRoleBtn").className=appMode.role==="host"?"primary":"secondary";
   $("guestRoleBtn").className=appMode.role==="guest"?"primary":"secondary";
+  const ap=$("adminPill"),as=$("adminStatus"),login=$("adminLoginBtn"),logout=$("adminLogoutBtn");
+  if(ap)ap.textContent=adminAuthenticated?"管理者":"未ログイン";
+  if(as){
+    as.className="admin-status "+(adminAuthenticated?"ok":"warn");
+    as.innerHTML=adminAuthenticated
+      ? `✅ 管理者としてログイン中<div class="admin-email">${esc(adminEmail)}</div>`
+      : "管理者ログインが必要です。一般の方はゲストとして参加できます。";
+  }
+  if(login)login.classList.toggle("guest-hidden",adminAuthenticated);
+  if(logout)logout.classList.toggle("guest-hidden",!adminAuthenticated);
   render();
   applyRolePermissions();
 }
@@ -660,7 +709,8 @@ import {
   getDatabase, ref, onValue, set, get, runTransaction, serverTimestamp
 } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-database.js";
 import {
-  getAuth, signInAnonymously, onAuthStateChanged
+  getAuth, signInAnonymously, onAuthStateChanged, GoogleAuthProvider,
+  signInWithPopup, signInWithRedirect, getRedirectResult, signOut
 } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
 
 const firebaseConfig = {
@@ -676,6 +726,12 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 const auth = getAuth(app);
+const googleProvider = new GoogleAuthProvider();
+googleProvider.setCustomParameters({prompt:"select_account"});
+const ADMIN_EMAILS = new Set([
+  "joytoeat141@gmail.com"
+  // ちゃちゃさんのGmailは、確認後ここへ追加します。
+]);
 
 let unsubscribe = null;
 let connectedRoom = "";
@@ -696,9 +752,50 @@ async function ensureAuth(){
   return currentUser;
 }
 
+function isApprovedAdmin(user){
+  return !!(user && user.email && ADMIN_EMAILS.has(user.email.toLowerCase()));
+}
+function syncAdminState(user){
+  currentUser=user||null;
+  window.setAdminAuthentication?.(isApprovedAdmin(user),user?.email||"");
+}
 onAuthStateChanged(auth, user => {
-  currentUser = user || null;
+  syncAdminState(user);
 });
+
+async function adminLogin(){
+  try{
+    const result=await signInWithPopup(auth,googleProvider);
+    if(!isApprovedAdmin(result.user)){
+      await signOut(auth);
+      await signInAnonymously(auth);
+      alert("このGoogleアカウントは管理者として登録されていません。");
+    }
+  }catch(err){
+    console.warn("popup login failed",err);
+    if(["auth/popup-blocked","auth/popup-closed-by-user","auth/cancelled-popup-request","auth/operation-not-supported-in-this-environment"].includes(err.code)){
+      await signInWithRedirect(auth,googleProvider);
+      return;
+    }
+    alert(`管理者ログインに失敗しました：${err.message}`);
+  }
+}
+async function adminLogout(){
+  try{
+    await signOut(auth);
+    await signInAnonymously(auth);
+    window.setAdminAuthentication?.(false,"");
+  }catch(err){
+    alert(`ログアウトに失敗しました：${err.message}`);
+  }
+}
+document.getElementById("adminLoginBtn")?.addEventListener("click",adminLogin);
+document.getElementById("adminLogoutBtn")?.addEventListener("click",adminLogout);
+getRedirectResult(auth).then(result=>{
+  if(result?.user && !isApprovedAdmin(result.user)){
+    return signOut(auth).then(()=>signInAnonymously(auth)).then(()=>alert("このGoogleアカウントは管理者として登録されていません。"));
+  }
+}).catch(err=>console.error("redirect result",err));
 
 function roomPath(){
   const room = window.getCloudRoom?.();
@@ -713,7 +810,7 @@ function roomRef(){
 window.cloudPush = async function(){
   const rr = roomRef();
   const room = window.getCloudRoom?.();
-  if(!rr || !room || window.getCloudRole?.() !== "host" || !window.canCloudHostWrite?.()) return;
+  if(!rr || !room || window.getCloudRole?.() !== "host" || !window.canCloudHostWrite?.() || !isApprovedAdmin(auth.currentUser)) return;
 
   const user = await ensureAuth();
   const payload = window.getCloudPayload?.();
@@ -737,7 +834,7 @@ window.cloudPush = async function(){
 
 window.cloudResetRoom = async function(){
   const rr = roomRef();
-  if(!rr || window.getCloudRole?.() !== "host" || !window.canCloudHostWrite?.()) return;
+  if(!rr || window.getCloudRole?.() !== "host" || !window.canCloudHostWrite?.() || !isApprovedAdmin(auth.currentUser)) return;
   const user = await ensureAuth();
   const result = await runTransaction(rr,current=>{
     if(!current || current.hostUid!==user.uid) return;
@@ -766,6 +863,13 @@ window.cloudConnect = async function(){
 
     connectedRoom = room;
     const rr = ref(db, `rooms/${room}`);
+
+    if(role === "host"){
+      if(!isApprovedAdmin(user)){
+        window.forceGuestMode?.(room,"⚠️ 管理者ログインが必要なため、ゲストに切り替えました。");
+        role="guest";
+      }
+    }
 
     if(role === "host"){
       window.setCloudHostAuthorization?.(false);

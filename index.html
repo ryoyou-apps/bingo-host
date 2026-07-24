@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#151515">
-<title>Bingo Host 受付 Ver.2.22</title>
+<title>Bingo Host 受付 Ver.2.23</title>
 <style>
 *{box-sizing:border-box}body{margin:0;background:#f3f4f6;color:#171717;font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Yu Gothic",sans-serif}
 button,input,select{font:inherit}button{cursor:pointer}
@@ -55,6 +55,23 @@ input,select{width:100%;border:2px solid #777;border-radius:12px;padding:13px;ba
 .card-detail-meta{margin-top:3px;font-size:14px;color:#444}
 .judge-name{font-weight:900;font-size:18px}
 .judge-meta{margin-top:4px;font-size:14px}
+
+/* Ver.2.23: 待ち番号ごとのリーチ表示 */
+.reach-wait-group{border:2px solid #d7a812;border-radius:15px;margin-top:10px;overflow:hidden;background:#fffaf0;box-shadow:0 3px 10px #00000010;transition:.18s ease}
+.reach-wait-group.reach-wait-selected{background:#ffe36e;border-color:#9b6800;box-shadow:0 0 0 4px #ffd54a66,0 6px 18px #9b680033;transform:translateY(-1px)}
+.reach-wait-head{width:100%;border:0;border-radius:0;background:#171717;color:#fff;padding:11px 13px;display:flex;align-items:center;justify-content:space-between;text-align:left;gap:10px}
+.reach-wait-number{font-size:17px;font-weight:900;display:flex;align-items:baseline;gap:7px}
+.reach-wait-number b{font-size:36px;line-height:1;color:#f3cf67}
+.reach-wait-count{font-size:12px;font-weight:900;background:#f3cf67;color:#2d2100;border-radius:999px;padding:5px 8px;white-space:nowrap}
+.reach-wait-people{padding:4px 12px 11px}
+.reach-wait-person{padding:10px 0;border-top:1px solid #e5d9b7}
+.reach-wait-person:first-child{border-top:0}
+.reach-wait-person-name{font-size:18px;font-weight:900;margin-bottom:5px}
+.reach-wait-cards{display:flex;flex-wrap:wrap;gap:6px}
+.reach-card-chip{display:inline-flex;align-items:center;border-radius:999px;background:#fff;border:1px solid #cdbb85;padding:6px 9px;font-weight:900;font-size:14px}
+.reach-card-chip small{font-weight:700;color:#6b6252;margin-left:4px}
+.reach-wait-help{font-size:12px;color:#6b6252;margin:7px 2px 0;text-align:right}
+@media(max-width:520px){.reach-wait-number b{font-size:32px}.reach-wait-person-name{font-size:17px}}
 
 .max-bingo-summary{margin:10px 0 12px;padding:12px;border:2px solid #d99a00;border-radius:13px;background:#fff6cf}
 .max-bingo-summary[hidden]{display:none}
@@ -128,7 +145,7 @@ body.flash-reach::after{background:#ffe45c}body.flash-bingo::after{background:ra
 </style>
 </head>
 <body>
-<header><h1 id="appTitle" aria-label="Bingo Host">Bingo Host<span id="adminCrown" class="guest-hidden">👑</span></h1><div class="sub">A〜E 全250枚対応・受付＋抽選 Ver.2.22</div></header>
+<header><h1 id="appTitle" aria-label="Bingo Host">Bingo Host<span id="adminCrown" class="guest-hidden">👑</span></h1><div class="sub">A〜E 全250枚対応・受付＋抽選 Ver.2.23</div></header>
 <main>
 <form id="form" class="panel entry">
 <h2>参加者を登録</h2>
@@ -546,11 +563,36 @@ function renderDrawAndJudge(){
     maxSummary.hidden=true;
   }
 
-  $("reachList").innerHTML=reachGroups.length?reachGroups.map(g=>{
-    const totalReach=g.items.reduce((sum,r)=>sum+r.count,0);
-    const details=g.items.map(r=>`<div class="card-detail"><div class="card-detail-title">No.${globalNo(r.cardId)}（${r.cardId}）／${r.count}リーチ</div><div class="wait-line">あと <b>${r.waits.join("・")}</b> でビンゴ</div></div>`).join("");
-    return `<div class="judge-card reach${g.latestStep===latestStep?" latest-reach":""}"><div class="person-summary"><div class="judge-name">🔥 ${esc(g.name)}</div><div class="total-lines">${g.items.length}枚・合計${totalReach}リーチ</div></div>${details}</div>`;
+  // 待ち番号ごとにまとめ、同じ人のカード番号を横並びにする。
+  const waitMap=new Map();
+  for(const r of reachCards){
+    for(const wait of (r.waits||[])){
+      if(!waitMap.has(wait))waitMap.set(wait,{wait,people:new Map(),latestStep:0});
+      const wg=waitMap.get(wait);
+      const personKey=(r.name||"").trim().toLocaleLowerCase("ja-JP");
+      if(!wg.people.has(personKey))wg.people.set(personKey,{name:r.name,cards:[],latestStep:0});
+      const pg=wg.people.get(personKey);
+      if(!pg.cards.some(x=>x.cardId===r.cardId))pg.cards.push(r);
+      pg.latestStep=Math.max(pg.latestStep,r.eventStep||0);
+      wg.latestStep=Math.max(wg.latestStep,r.eventStep||0);
+    }
+  }
+  const waitGroups=[...waitMap.values()].sort((a,b)=>a.wait-b.wait);
+  $("reachList").innerHTML=waitGroups.length?waitGroups.map(wg=>{
+    const people=[...wg.people.values()].sort((a,b)=>a.name.localeCompare(b.name,"ja"));
+    const cardCount=people.reduce((sum,p)=>sum+p.cards.length,0);
+    const peopleHtml=people.map(p=>{
+      const cards=p.cards.slice().sort((a,b)=>globalNo(a.cardId)-globalNo(b.cardId)).map(r=>`<span class="reach-card-chip">No.${globalNo(r.cardId)} <small>${r.cardId}</small></span>`).join("");
+      return `<div class="reach-wait-person"><div class="reach-wait-person-name">🔥 ${esc(p.name)}</div><div class="reach-wait-cards">${cards}</div></div>`;
+    }).join("");
+    return `<div class="reach-wait-group${wg.latestStep===latestStep?" latest-reach":""}" data-wait-group="${wg.wait}"><button type="button" class="reach-wait-head" data-wait-highlight="${wg.wait}"><span class="reach-wait-number">あと <b>${wg.wait}</b> でビンゴ</span><span class="reach-wait-count">${people.length}人・${cardCount}枚</span></button><div class="reach-wait-people">${peopleHtml}<div class="reach-wait-help">数字をタップすると強調できます</div></div></div>`;
   }).join(""):"リーチなし";
+  $("reachList").querySelectorAll("[data-wait-highlight]").forEach(btn=>btn.onclick=()=>{
+    const target=btn.closest(".reach-wait-group");
+    const wasSelected=target.classList.contains("reach-wait-selected");
+    $("reachList").querySelectorAll(".reach-wait-selected").forEach(el=>el.classList.remove("reach-wait-selected"));
+    if(!wasSelected)target.classList.add("reach-wait-selected");
+  });
 
   $("bingoList").innerHTML=bingoGroups.length?bingoGroups.map(g=>{
     const details=g.items.map(r=>`<div class="card-detail"><div class="card-detail-title">No.${globalNo(r.cardId)}（${r.cardId}）</div><div class="card-detail-meta">${r.count}ライン達成</div></div>`).join("");

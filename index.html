@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#151515">
-<title>Bingo Host 受付 Ver.2.21</title>
+<title>Bingo Host 受付 Ver.2.22</title>
 <style>
 *{box-sizing:border-box}body{margin:0;background:#f3f4f6;color:#171717;font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Yu Gothic",sans-serif}
 button,input,select{font:inherit}button{cursor:pointer}
@@ -96,6 +96,9 @@ input,select{width:100%;border:2px solid #777;border-radius:12px;padding:13px;ba
 .guest-lock{opacity:.55;pointer-events:none}
 
 .admin-panel{border:2px solid #c99b2d;background:#111;padding:0;overflow:hidden;box-shadow:0 5px 18px #00000024}
+.admin-panel.admin-concealed{display:none!important}
+#adminCrown{display:inline-block;margin-left:7px;color:#f3cf67;font-size:16px;vertical-align:1px;text-shadow:0 1px 7px #d8b24a88}
+.version-footer{text-align:center;color:#7b7b7b;font-size:11px;padding:4px 0 18px;letter-spacing:.04em}
 .admin-panel summary{list-style:none;cursor:pointer;padding:15px;font-weight:900;display:flex;justify-content:space-between;align-items:center;background:#151515;color:#d8b24a}
 .admin-panel summary::-webkit-details-marker{display:none}
 .admin-panel summary::after{content:"＋";font-size:22px;color:#d8b24a}
@@ -120,12 +123,12 @@ input,select{width:100%;border:2px solid #777;border-radius:12px;padding:13px;ba
 .celebration-overlay.bingo .celebration-card{background:radial-gradient(circle at top,#fff7ae,#f4b927 50%,#b66a00);border:5px solid #fff5bd;color:#3d2500}
 .celebration-icon{font-size:68px;line-height:1}.celebration-title{font-size:40px;font-weight:1000;margin:8px 0}.celebration-number{font-size:22px;font-weight:900;margin-bottom:14px}.celebration-person{background:#ffffffb8;border-radius:15px;padding:12px;margin-top:9px;font-size:20px;font-weight:900}.celebration-detail{font-size:16px;margin-top:5px}.celebration-close{margin-top:18px;border:0;border-radius:999px;padding:10px 22px;background:#111;color:#fff;font-weight:900}
 body.flash-reach::after,body.flash-bingo::after{content:"";position:fixed;inset:0;z-index:9998;pointer-events:none;animation:screenFlash .7s ease-out}
-body.flash-reach::after{background:#ffe45c}body.flash-bingo::after{background:#fff1a0}
-@keyframes screenFlash{0%{opacity:.9}100%{opacity:0}}@keyframes overlayIn{from{opacity:0}to{opacity:1}}@keyframes celebratePop{from{transform:scale(.72);opacity:0}to{transform:scale(1);opacity:1}}
+body.flash-reach::after{background:#ffe45c}body.flash-bingo::after{background:radial-gradient(circle,#fffbe0 0%,#ffd84d 48%,#ef9b00 100%);animation:screenFlashBingo 1.05s ease-out}
+@keyframes screenFlash{0%{opacity:.9}100%{opacity:0}}@keyframes screenFlashBingo{0%{opacity:1}35%{opacity:.4}50%{opacity:.92}100%{opacity:0}}@keyframes overlayIn{from{opacity:0}to{opacity:1}}@keyframes celebratePop{from{transform:scale(.72);opacity:0}to{transform:scale(1);opacity:1}}
 </style>
 </head>
 <body>
-<header><h1>Bingo Host</h1><div class="sub">A〜E 全250枚対応・受付＋抽選 Ver.2.21</div></header>
+<header><h1 id="appTitle" aria-label="Bingo Host">Bingo Host<span id="adminCrown" class="guest-hidden">👑</span></h1><div class="sub">A〜E 全250枚対応・受付＋抽選 Ver.2.22</div></header>
 <main>
 <form id="form" class="panel entry">
 <h2>参加者を登録</h2>
@@ -165,7 +168,7 @@ body.flash-reach::after{background:#ffe45c}body.flash-bingo::after{background:#f
 </div>
 
 
-<details id="adminPanel" class="panel admin-panel">
+<details id="adminPanel" class="panel admin-panel admin-concealed">
   <summary id="adminSummary">🔒 ログイン</summary>
   <div class="admin-body">
     <div id="adminMainBox">
@@ -284,6 +287,9 @@ let appMode={mode:"personal",room:"",role:""};
 let hostAuthorized=false;
 let adminAuthenticated=false;
 let adminEmail="";
+let adminPanelRevealed=new URLSearchParams(location.search).get("setup")==="1";
+let titleTapCount=0;
+let titleTapTimer=null;
 const $=id=>document.getElementById(id);
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]));
 function load(){try{let x=JSON.parse(localStorage.getItem(STORAGE));if(x&&Array.isArray(x.regs))state=x}catch(e){}}
@@ -447,10 +453,35 @@ function tone(freq,start,duration,gain=0.12,type="sine"){
     o.connect(g);g.connect(audioContext.destination);o.start(audioContext.currentTime+start);o.stop(audioContext.currentTime+start+duration+.03);
   }catch(e){}
 }
+function noiseBurst(start,duration,gain=0.13,highpass=700){
+  if(!soundEnabled)return;
+  try{
+    audioContext=audioContext||new (window.AudioContext||window.webkitAudioContext)();
+    const length=Math.max(1,Math.floor(audioContext.sampleRate*duration));
+    const buffer=audioContext.createBuffer(1,length,audioContext.sampleRate);
+    const data=buffer.getChannelData(0);
+    for(let i=0;i<length;i++) data[i]=(Math.random()*2-1)*(1-i/length);
+    const source=audioContext.createBufferSource(),filter=audioContext.createBiquadFilter(),g=audioContext.createGain();
+    source.buffer=buffer;filter.type="highpass";filter.frequency.value=highpass;
+    const at=audioContext.currentTime+start;
+    g.gain.setValueAtTime(0,at);g.gain.linearRampToValueAtTime(gain,at+.008);g.gain.exponentialRampToValueAtTime(.001,at+duration);
+    source.connect(filter);filter.connect(g);g.connect(audioContext.destination);source.start(at);
+  }catch(e){}
+}
+function playApplauseAndCheer(){
+  // 拍手の粒を少し不規則に重ね、最後に歓声の上昇音を加える。
+  const claps=[0,.11,.23,.34,.48,.62,.75,.89,1.03,1.18,1.34,1.51,1.69,1.88,2.08];
+  claps.forEach((t,i)=>noiseBurst(t+(Math.random()*.035),.075,.12+(i%4)*.012,900));
+  [196,220,247,294,330].forEach((f,i)=>tone(f,.08+i*.045,1.75,.055,"sawtooth"));
+  [523,659,784,1047].forEach((f,i)=>tone(f,.12+i*.11,.48,.12,"triangle"));
+  tone(1175,.62,.65,.13,"sine");tone(1319,1.1,.9,.12,"sine");
+  // 二度目の拍手の波
+  [1.3,1.48,1.66,1.84,2.04,2.25].forEach((t,i)=>noiseBurst(t,.09,.14-(i*.008),750));
+}
 function playEffect(kind){
   if(kind==="ready"){tone(660,0,.12,.07);tone(880,.1,.14,.06);return;}
   if(kind==="reach"){tone(523,0,.17,.11,"triangle");tone(659,.14,.18,.12,"triangle");tone(784,.29,.3,.13,"triangle");return;}
-  if(kind==="bingo"){[523,659,784,1047].forEach((f,i)=>tone(f,i*.1,.38,.13,"triangle"));tone(1319,.43,.65,.14,"sine");}
+  if(kind==="bingo")playApplauseAndCheer();
 }
 function closeCelebration(){
   if(celebrationTimer)clearTimeout(celebrationTimer);
@@ -778,7 +809,12 @@ function renderMode(){
   const setupMode=new URLSearchParams(location.search).get("setup")==="1" && !adminAuthenticated;
   const setupBtn=$("adminSetupBtn"),confirmInput=$("adminPasswordConfirm"),changeBtn=$("adminChangeBtn"),resetBtn=$("adminResetBtn"),help=$("adminHelp");
   if(ap)ap.textContent=adminAuthenticated?"管理者":"未ログイン";
-  if(panel)panel.classList.toggle("admin-on",adminAuthenticated);
+  if(adminAuthenticated)adminPanelRevealed=true;
+  if(panel){
+    panel.classList.toggle("admin-on",adminAuthenticated);
+    panel.classList.toggle("admin-concealed",!adminAuthenticated&&!adminPanelRevealed&&!setupMode);
+  }
+  const crown=$("adminCrown");if(crown)crown.classList.toggle("guest-hidden",!adminAuthenticated);
   if(summary)summary.textContent=adminAuthenticated?"◆ 管理者モード":setupMode?"🔐 初回設定":"🔒 ログイン";
   if(as){
     as.className="admin-status "+(adminAuthenticated?"ok":"warn");
@@ -795,6 +831,24 @@ function renderMode(){
   render();
   applyRolePermissions();
 }
+function revealAdminPanel(){
+  adminPanelRevealed=true;
+  const panel=$("adminPanel");
+  if(panel){panel.classList.remove("admin-concealed");panel.open=true;}
+  try{navigator.vibrate?.(35);}catch(e){}
+  setTimeout(()=>$("adminPassword")?.focus(),80);
+}
+const appTitle=$("appTitle");
+if(appTitle){
+  appTitle.style.userSelect="none";
+  appTitle.addEventListener("click",()=>{
+    titleTapCount++;
+    if(titleTapTimer)clearTimeout(titleTapTimer);
+    if(titleTapCount>=3){titleTapCount=0;revealAdminPanel();return;}
+    titleTapTimer=setTimeout(()=>{titleTapCount=0;},850);
+  });
+}
+
 $("personalModeBtn").onclick=setPersonalMode;
 $("sharedModeBtn").onclick=setSharedMode;
 $("hostRoleBtn").onclick=chooseHostRole;
@@ -1056,6 +1110,9 @@ async function adminLogout(){
     await signOut(auth);
     await signInAnonymously(auth);
     window.setAdminAuthentication?.(false,"");
+    adminPanelRevealed=false;
+    const panel=document.getElementById("adminPanel");
+    if(panel){panel.open=false;panel.classList.add("admin-concealed");}
   }catch(err){
     alert(`ログアウトに失敗しました：${err.message}`);
   }

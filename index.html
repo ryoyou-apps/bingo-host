@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#151515">
-<title>Bingo Host 受付 Ver.2.18 Security</title>
+<title>Bingo Host 受付 Ver.2.20</title>
 <style>
 *{box-sizing:border-box}body{margin:0;background:#f3f4f6;color:#171717;font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Yu Gothic",sans-serif}
 button,input,select{font:inherit}button{cursor:pointer}
@@ -95,16 +95,24 @@ input,select{width:100%;border:2px solid #777;border-radius:12px;padding:13px;ba
 .guest-hidden{display:none!important}
 .guest-lock{opacity:.55;pointer-events:none}
 
-.admin-panel{border:2px solid #111827;background:#f8fafc}
-.admin-status{margin-top:10px;padding:11px;border-radius:10px;background:#eef2f7;line-height:1.5;font-weight:700}
+.admin-panel{border:1px solid #cbd5e1;background:#fff;padding:0;overflow:hidden}
+.admin-panel summary{list-style:none;cursor:pointer;padding:14px;font-weight:900;display:flex;justify-content:space-between;align-items:center;background:#f8fafc}
+.admin-panel summary::-webkit-details-marker{display:none}
+.admin-panel summary::after{content:"＋";font-size:20px;color:#64748b}
+.admin-panel[open] summary::after{content:"−"}
+.admin-panel.admin-on summary{background:#e8f7ea;color:#145e20}
+.admin-body{padding:14px;border-top:1px solid #e5e7eb}
+.admin-status{margin-top:10px;padding:10px;border-radius:10px;background:#eef2f7;line-height:1.5;font-weight:700}
 .admin-status.ok{background:#e8f7ea;color:#145e20}
 .admin-status.warn{background:#fff4cc;color:#6b4b00}
 .admin-login-btn{width:100%;min-height:58px}
-.admin-email{font-size:13px;word-break:break-all;margin-top:4px}
+.admin-password{margin-top:4px;font-size:28px;font-weight:900;letter-spacing:.22em;text-align:center}
+.admin-help{font-size:12px;color:#64748b;margin-top:7px;line-height:1.5}
+.admin-lock{font-size:13px;color:#8d1717;margin-top:8px;font-weight:800}
 </style>
 </head>
 <body>
-<header><h1>Bingo Host</h1><div class="sub">A〜E 全250枚対応・受付＋抽選 Ver.2.18 Security</div></header>
+<header><h1>Bingo Host</h1><div class="sub">A〜E 全250枚対応・受付＋抽選 Ver.2.20</div></header>
 <main>
 <form id="form" class="panel entry">
 <h2>参加者を登録</h2>
@@ -144,15 +152,21 @@ input,select{width:100%;border:2px solid #777;border-radius:12px;padding:13px;ba
 </div>
 
 
-<div class="panel admin-panel">
-  <div class="head"><h2>管理者認証</h2><span id="adminPill" class="pill">未ログイン</span></div>
-  <div class="hint">管理者としてログインした端末だけ、個人モードとホスト操作を利用できます。一般の方はゲスト閲覧専用です。</div>
-  <div class="actions">
-    <button id="adminLoginBtn" class="primary admin-login-btn" type="button">Googleで管理者ログイン</button>
-    <button id="adminLogoutBtn" class="secondary guest-hidden" type="button">ログアウト</button>
+<details id="adminPanel" class="panel admin-panel">
+  <summary id="adminSummary">🔒 ログイン</summary>
+  <div class="admin-body">
+    <input id="adminPassword" class="admin-password" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="8" autocomplete="current-password" placeholder="8桁の数字">
+    <div class="actions">
+      <button id="adminLoginBtn" class="primary admin-login-btn" type="button">ログイン</button>
+      <button id="adminLogoutBtn" class="secondary guest-hidden" type="button">ログアウト</button>
+      <button id="adminSetupBtn" class="secondary guest-hidden" type="button">初回パスワードを設定</button>
+    </div>
+    <div class="admin-help">管理操作を行う場合のみログインしてください。</div>
+    <div id="adminLockMessage" class="admin-lock"></div>
+    <div id="adminStatus" class="admin-status warn">閲覧モード</div>
+    <span id="adminPill" class="guest-hidden">未ログイン</span>
   </div>
-  <div id="adminStatus" class="admin-status warn">管理者ログインが必要です。</div>
-</div>
+</details>
 
 <div class="panel">
   <div class="head"><h2>使用モード</h2><span id="modePill" class="pill">個人モード</span></div>
@@ -575,6 +589,7 @@ function canOperate(){
 }
 window.setAdminAuthentication=function(allowed,email){
   adminAuthenticated=allowed===true;
+  window.adminAuthenticated=adminAuthenticated;
   adminEmail=email||"";
   if(!adminAuthenticated && appMode.role==="host"){
     hostAuthorized=false;
@@ -649,16 +664,17 @@ function renderMode(){
   }
   $("hostRoleBtn").className=appMode.role==="host"?"primary":"secondary";
   $("guestRoleBtn").className=appMode.role==="guest"?"primary":"secondary";
-  const ap=$("adminPill"),as=$("adminStatus"),login=$("adminLoginBtn"),logout=$("adminLogoutBtn");
+  const ap=$("adminPill"),as=$("adminStatus"),login=$("adminLoginBtn"),logout=$("adminLogoutBtn"),password=$("adminPassword"),panel=$("adminPanel"),summary=$("adminSummary");
   if(ap)ap.textContent=adminAuthenticated?"管理者":"未ログイン";
+  if(panel)panel.classList.toggle("admin-on",adminAuthenticated);
+  if(summary)summary.textContent=adminAuthenticated?"🟢 管理者モード":"🔒 ログイン";
   if(as){
     as.className="admin-status "+(adminAuthenticated?"ok":"warn");
-    as.innerHTML=adminAuthenticated
-      ? `✅ 管理者としてログイン中<div class="admin-email">${esc(adminEmail)}</div>`
-      : "管理者ログインが必要です。一般の方はゲストとして参加できます。";
+    as.textContent=adminAuthenticated?"✓ 管理操作が有効です":"閲覧モード";
   }
   if(login)login.classList.toggle("guest-hidden",adminAuthenticated);
   if(logout)logout.classList.toggle("guest-hidden",!adminAuthenticated);
+  if(password){password.classList.toggle("guest-hidden",adminAuthenticated); if(adminAuthenticated)password.value="";}
   render();
   applyRolePermissions();
 }
@@ -709,8 +725,8 @@ import {
   getDatabase, ref, onValue, set, get, runTransaction, serverTimestamp
 } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-database.js";
 import {
-  getAuth, signInAnonymously, onAuthStateChanged, GoogleAuthProvider,
-  signInWithPopup, signInWithRedirect, getRedirectResult, signOut
+  getAuth, signInAnonymously, onAuthStateChanged,
+  signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut
 } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
 
 const firebaseConfig = {
@@ -726,12 +742,7 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 const auth = getAuth(app);
-const googleProvider = new GoogleAuthProvider();
-googleProvider.setCustomParameters({prompt:"select_account"});
-const ADMIN_EMAILS = new Set([
-  "joytoeat141@gmail.com"
-  // ちゃちゃさんのGmailは、確認後ここへ追加します。
-]);
+const ADMIN_LOGIN_EMAIL = "chacha-bingo-admin@bingo-host.app";
 
 let unsubscribe = null;
 let connectedRoom = "";
@@ -753,33 +764,106 @@ async function ensureAuth(){
 }
 
 function isApprovedAdmin(user){
-  return !!(user && user.email && ADMIN_EMAILS.has(user.email.toLowerCase()));
+  return !!(user && user.email && user.email.toLowerCase() === ADMIN_LOGIN_EMAIL);
 }
 function syncAdminState(user){
   currentUser=user||null;
-  window.setAdminAuthentication?.(isApprovedAdmin(user),user?.email||"");
+  window.setAdminAuthentication?.(isApprovedAdmin(user),isApprovedAdmin(user)?"管理者":"");
 }
 onAuthStateChanged(auth, user => {
   syncAdminState(user);
 });
 
+const ADMIN_FAIL_KEY="bingoAdminFailV220";
+const ADMIN_LOCK_KEY="bingoAdminLockV220";
+function getAdminLockUntil(){return Number(localStorage.getItem(ADMIN_LOCK_KEY)||0)}
+function getAdminFailCount(){return Number(localStorage.getItem(ADMIN_FAIL_KEY)||0)}
+function clearAdminFailures(){localStorage.removeItem(ADMIN_FAIL_KEY);localStorage.removeItem(ADMIN_LOCK_KEY);updateAdminLockMessage()}
+function registerAdminFailure(){
+  const count=getAdminFailCount()+1;
+  if(count>=5){
+    localStorage.setItem(ADMIN_FAIL_KEY,"0");
+    localStorage.setItem(ADMIN_LOCK_KEY,String(Date.now()+30000));
+  }else localStorage.setItem(ADMIN_FAIL_KEY,String(count));
+  updateAdminLockMessage();
+}
+function updateAdminLockMessage(){
+  const el=document.getElementById("adminLockMessage");
+  const button=document.getElementById("adminLoginBtn");
+  const remain=Math.max(0,Math.ceil((getAdminLockUntil()-Date.now())/1000));
+  if(el)el.textContent=remain>0?`入力を一時停止しています（あと${remain}秒）`:"";
+  if(button && !window.adminAuthenticated)button.disabled=remain>0;
+  if(remain>0)setTimeout(updateAdminLockMessage,1000);
+}
+function validEightDigitPassword(value){return /^\d{8}$/.test(value)}
+function friendlyAuthError(err){
+  const code=err?.code||"";
+  if(code==="auth/invalid-credential" || code==="auth/wrong-password" || code==="auth/user-not-found") return "パスワードが違います。";
+  if(code==="auth/too-many-requests") return "確認回数が多いため、一時的に停止されています。少し時間を空けてください。";
+  if(code==="auth/network-request-failed") return "通信に失敗しました。インターネット接続を確認してください。";
+  return `ログインに失敗しました：${err?.message||code||"不明なエラー"}`;
+}
+
 async function adminLogin(){
+  const input=document.getElementById("adminPassword");
+  const button=document.getElementById("adminLoginBtn");
+  const password=(input?.value||"").trim();
+  if(getAdminLockUntil()>Date.now()){updateAdminLockMessage();return;}
+  if(!validEightDigitPassword(password)){
+    alert("8桁の数字を入力してください。");
+    input?.focus();
+    return;
+  }
   try{
-    const result=await signInWithPopup(auth,googleProvider);
-    if(!isApprovedAdmin(result.user)){
-      await signOut(auth);
-      await signInAnonymously(auth);
-      alert("このGoogleアカウントは管理者として登録されていません。");
-    }
+    if(button){button.disabled=true;button.textContent="確認中…";}
+    await signInWithEmailAndPassword(auth,ADMIN_LOGIN_EMAIL,password);
+    clearAdminFailures();
+    if(input)input.value="";
+    const panel=document.getElementById("adminPanel");
+    if(panel)panel.open=false;
   }catch(err){
-    console.warn("popup login failed",err);
-    if(["auth/popup-blocked","auth/popup-closed-by-user","auth/cancelled-popup-request","auth/operation-not-supported-in-this-environment"].includes(err.code)){
-      await signInWithRedirect(auth,googleProvider);
-      return;
-    }
-    alert(`管理者ログインに失敗しました：${err.message}`);
+    console.warn("admin password login failed",err);
+    registerAdminFailure();
+    alert(friendlyAuthError(err));
+    input?.select();
+  }finally{
+    if(button){button.textContent="ログイン";button.disabled=getAdminLockUntil()>Date.now();}
   }
 }
+
+async function adminSetup(){
+  const input=document.getElementById("adminPassword");
+  const button=document.getElementById("adminSetupBtn");
+  const password=(input?.value||"").trim();
+  if(!validEightDigitPassword(password)){
+    alert("初回パスワードは8桁の数字で設定してください。");
+    input?.focus();
+    return;
+  }
+  if(!confirm("この8桁を管理者パスワードとして設定しますか？")) return;
+  try{
+    if(button){button.disabled=true;button.textContent="設定中…";}
+    await createUserWithEmailAndPassword(auth,ADMIN_LOGIN_EMAIL,password);
+    clearAdminFailures();
+    if(input)input.value="";
+    alert("管理者パスワードを設定しました。");
+    history.replaceState(null,"",location.pathname);
+    button?.classList.add("guest-hidden");
+  }catch(err){
+    const code=err?.code||"";
+    if(code==="auth/email-already-in-use"){
+      alert("初回設定は完了済みです。『ログイン』を使ってください。");
+    }else if(code==="auth/weak-password"){
+      alert("8桁の数字で設定してください。");
+    }else{
+      console.warn("admin setup failed",err);
+      alert(`初回設定に失敗しました：${err?.message||code||"不明なエラー"}`);
+    }
+  }finally{
+    if(button){button.disabled=false;button.textContent="初回パスワードを設定";}
+  }
+}
+
 async function adminLogout(){
   try{
     await signOut(auth);
@@ -790,12 +874,13 @@ async function adminLogout(){
   }
 }
 document.getElementById("adminLoginBtn")?.addEventListener("click",adminLogin);
+document.getElementById("adminSetupBtn")?.addEventListener("click",adminSetup);
+const setupBtn=document.getElementById("adminSetupBtn");
+if(setupBtn && new URLSearchParams(location.search).get("setup")==="1") setupBtn.classList.remove("guest-hidden");
 document.getElementById("adminLogoutBtn")?.addEventListener("click",adminLogout);
-getRedirectResult(auth).then(result=>{
-  if(result?.user && !isApprovedAdmin(result.user)){
-    return signOut(auth).then(()=>signInAnonymously(auth)).then(()=>alert("このGoogleアカウントは管理者として登録されていません。"));
-  }
-}).catch(err=>console.error("redirect result",err));
+document.getElementById("adminPassword")?.addEventListener("input",e=>{e.target.value=e.target.value.replace(/\D/g,"").slice(0,8);});
+document.getElementById("adminPassword")?.addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();adminLogin();}});
+updateAdminLockMessage();
 
 function roomPath(){
   const room = window.getCloudRoom?.();
@@ -866,7 +951,7 @@ window.cloudConnect = async function(){
 
     if(role === "host"){
       if(!isApprovedAdmin(user)){
-        window.forceGuestMode?.(room,"⚠️ 管理者ログインが必要なため、ゲストに切り替えました。");
+        window.forceGuestMode?.(room,"⚠️ ログインが必要なため、ゲストに切り替えました。");
         role="guest";
       }
     }

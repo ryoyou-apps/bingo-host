@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#151515">
-<title>Bingo Host 受付 Ver.2.20</title>
+<title>Bingo Host 受付 Ver.2.20a</title>
 <style>
 *{box-sizing:border-box}body{margin:0;background:#f3f4f6;color:#171717;font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Yu Gothic",sans-serif}
 button,input,select{font:inherit}button{cursor:pointer}
@@ -106,13 +106,13 @@ input,select{width:100%;border:2px solid #777;border-radius:12px;padding:13px;ba
 .admin-status.ok{background:#e8f7ea;color:#145e20}
 .admin-status.warn{background:#fff4cc;color:#6b4b00}
 .admin-login-btn{width:100%;min-height:58px}
-.admin-password{margin-top:4px;font-size:28px;font-weight:900;letter-spacing:.22em;text-align:center}
+.admin-password{margin-top:8px;font-size:28px;font-weight:900;letter-spacing:.22em;text-align:center}
 .admin-help{font-size:12px;color:#64748b;margin-top:7px;line-height:1.5}
 .admin-lock{font-size:13px;color:#8d1717;margin-top:8px;font-weight:800}
 </style>
 </head>
 <body>
-<header><h1>Bingo Host</h1><div class="sub">A〜E 全250枚対応・受付＋抽選 Ver.2.20</div></header>
+<header><h1>Bingo Host</h1><div class="sub">A〜E 全250枚対応・受付＋抽選 Ver.2.20a</div></header>
 <main>
 <form id="form" class="panel entry">
 <h2>参加者を登録</h2>
@@ -155,13 +155,26 @@ input,select{width:100%;border:2px solid #777;border-radius:12px;padding:13px;ba
 <details id="adminPanel" class="panel admin-panel">
   <summary id="adminSummary">🔒 ログイン</summary>
   <div class="admin-body">
-    <input id="adminPassword" class="admin-password" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="8" autocomplete="current-password" placeholder="8桁の数字">
-    <div class="actions">
-      <button id="adminLoginBtn" class="primary admin-login-btn" type="button">ログイン</button>
-      <button id="adminLogoutBtn" class="secondary guest-hidden" type="button">ログアウト</button>
-      <button id="adminSetupBtn" class="secondary guest-hidden" type="button">初回パスワードを設定</button>
+    <div id="adminMainBox">
+      <input id="adminPassword" class="admin-password" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="8" autocomplete="current-password" placeholder="8桁の数字">
+      <input id="adminPasswordConfirm" class="admin-password guest-hidden" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="8" autocomplete="new-password" placeholder="確認でもう一度">
+      <div class="actions">
+        <button id="adminLoginBtn" class="primary admin-login-btn" type="button">ログイン</button>
+        <button id="adminLogoutBtn" class="secondary guest-hidden" type="button">ログアウト</button>
+        <button id="adminSetupBtn" class="primary admin-login-btn guest-hidden" type="button">8桁を登録</button>
+        <button id="adminChangeBtn" class="secondary guest-hidden" type="button">パスワード変更</button>
+      </div>
     </div>
-    <div class="admin-help">管理操作を行う場合のみログインしてください。</div>
+    <div id="adminChangeBox" class="guest-hidden">
+      <input id="adminCurrentPassword" class="admin-password" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="8" autocomplete="current-password" placeholder="現在の8桁">
+      <input id="adminNewPassword" class="admin-password" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="8" autocomplete="new-password" placeholder="新しい8桁">
+      <input id="adminNewPasswordConfirm" class="admin-password" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="8" autocomplete="new-password" placeholder="新しい8桁を再入力">
+      <div class="actions">
+        <button id="adminChangeSaveBtn" class="primary" type="button">変更を保存</button>
+        <button id="adminChangeCancelBtn" class="secondary" type="button">キャンセル</button>
+      </div>
+    </div>
+    <div id="adminHelp" class="admin-help">管理操作を行う場合のみログインしてください。</div>
     <div id="adminLockMessage" class="admin-lock"></div>
     <div id="adminStatus" class="admin-status warn">閲覧モード</div>
     <span id="adminPill" class="guest-hidden">未ログイン</span>
@@ -665,15 +678,21 @@ function renderMode(){
   $("hostRoleBtn").className=appMode.role==="host"?"primary":"secondary";
   $("guestRoleBtn").className=appMode.role==="guest"?"primary":"secondary";
   const ap=$("adminPill"),as=$("adminStatus"),login=$("adminLoginBtn"),logout=$("adminLogoutBtn"),password=$("adminPassword"),panel=$("adminPanel"),summary=$("adminSummary");
+  const setupMode=new URLSearchParams(location.search).get("setup")==="1" && !adminAuthenticated;
+  const setupBtn=$("adminSetupBtn"),confirmInput=$("adminPasswordConfirm"),changeBtn=$("adminChangeBtn"),help=$("adminHelp");
   if(ap)ap.textContent=adminAuthenticated?"管理者":"未ログイン";
   if(panel)panel.classList.toggle("admin-on",adminAuthenticated);
-  if(summary)summary.textContent=adminAuthenticated?"🟢 管理者モード":"🔒 ログイン";
+  if(summary)summary.textContent=adminAuthenticated?"🟢 管理者モード":setupMode?"🔐 初回設定":"🔒 ログイン";
   if(as){
     as.className="admin-status "+(adminAuthenticated?"ok":"warn");
-    as.textContent=adminAuthenticated?"✓ 管理操作が有効です":"閲覧モード";
+    as.textContent=adminAuthenticated?"✓ 管理操作が有効です":setupMode?"8桁の数字を2回入力して登録してください":"閲覧モード";
   }
-  if(login)login.classList.toggle("guest-hidden",adminAuthenticated);
+  if(login)login.classList.toggle("guest-hidden",adminAuthenticated||setupMode);
   if(logout)logout.classList.toggle("guest-hidden",!adminAuthenticated);
+  if(setupBtn)setupBtn.classList.toggle("guest-hidden",!setupMode);
+  if(confirmInput)confirmInput.classList.toggle("guest-hidden",!setupMode);
+  if(changeBtn)changeBtn.classList.toggle("guest-hidden",!adminAuthenticated);
+  if(help)help.textContent=setupMode?"ここで登録した8桁が、今後のログイン用パスワードになります。":"管理操作を行う場合のみログインしてください。";
   if(password){password.classList.toggle("guest-hidden",adminAuthenticated); if(adminAuthenticated)password.value="";}
   render();
   applyRolePermissions();
@@ -726,7 +745,8 @@ import {
 } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-database.js";
 import {
   getAuth, signInAnonymously, onAuthStateChanged,
-  signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut
+  signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut,
+  EmailAuthProvider, reauthenticateWithCredential, updatePassword
 } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
 
 const firebaseConfig = {
@@ -833,26 +853,37 @@ async function adminLogin(){
 
 async function adminSetup(){
   const input=document.getElementById("adminPassword");
+  const confirmInput=document.getElementById("adminPasswordConfirm");
   const button=document.getElementById("adminSetupBtn");
   const password=(input?.value||"").trim();
+  const confirmation=(confirmInput?.value||"").trim();
   if(!validEightDigitPassword(password)){
-    alert("初回パスワードは8桁の数字で設定してください。");
+    alert("登録するパスワードは8桁の数字で入力してください。");
     input?.focus();
     return;
   }
-  if(!confirm("この8桁を管理者パスワードとして設定しますか？")) return;
+  if(password!==confirmation){
+    alert("2回入力した数字が一致しません。");
+    confirmInput?.focus();
+    confirmInput?.select();
+    return;
+  }
+  if(!confirm("この8桁を管理者パスワードとして登録しますか？")) return;
   try{
-    if(button){button.disabled=true;button.textContent="設定中…";}
+    if(button){button.disabled=true;button.textContent="登録中…";}
     await createUserWithEmailAndPassword(auth,ADMIN_LOGIN_EMAIL,password);
     clearAdminFailures();
     if(input)input.value="";
-    alert("管理者パスワードを設定しました。");
+    if(confirmInput)confirmInput.value="";
+    alert("管理者パスワードを登録しました。");
     history.replaceState(null,"",location.pathname);
-    button?.classList.add("guest-hidden");
+    renderMode();
   }catch(err){
     const code=err?.code||"";
     if(code==="auth/email-already-in-use"){
-      alert("初回設定は完了済みです。『ログイン』を使ってください。");
+      alert("初回登録は完了済みです。通常ページからログインしてください。");
+      history.replaceState(null,"",location.pathname);
+      renderMode();
     }else if(code==="auth/weak-password"){
       alert("8桁の数字で設定してください。");
     }else{
@@ -860,7 +891,45 @@ async function adminSetup(){
       alert(`初回設定に失敗しました：${err?.message||code||"不明なエラー"}`);
     }
   }finally{
-    if(button){button.disabled=false;button.textContent="初回パスワードを設定";}
+    if(button){button.disabled=false;button.textContent="8桁を登録";}
+  }
+}
+
+function openAdminChange(){
+  document.getElementById("adminMainBox")?.classList.add("guest-hidden");
+  document.getElementById("adminChangeBox")?.classList.remove("guest-hidden");
+  document.getElementById("adminCurrentPassword")?.focus();
+}
+function closeAdminChange(){
+  document.getElementById("adminChangeBox")?.classList.add("guest-hidden");
+  document.getElementById("adminMainBox")?.classList.remove("guest-hidden");
+  ["adminCurrentPassword","adminNewPassword","adminNewPasswordConfirm"].forEach(id=>{const el=document.getElementById(id);if(el)el.value="";});
+}
+async function changeAdminPassword(){
+  const current=(document.getElementById("adminCurrentPassword")?.value||"").trim();
+  const next=(document.getElementById("adminNewPassword")?.value||"").trim();
+  const confirmation=(document.getElementById("adminNewPasswordConfirm")?.value||"").trim();
+  const button=document.getElementById("adminChangeSaveBtn");
+  if(!isApprovedAdmin(auth.currentUser)){alert("先に管理者ログインしてください。");return;}
+  if(!validEightDigitPassword(current)||!validEightDigitPassword(next)){
+    alert("現在と新しいパスワードを、どちらも8桁の数字で入力してください。");return;
+  }
+  if(next!==confirmation){alert("新しい8桁が一致しません。");return;}
+  if(current===next){alert("現在とは異なる8桁を設定してください。");return;}
+  if(!confirm("管理者パスワードを変更しますか？"))return;
+  try{
+    if(button){button.disabled=true;button.textContent="変更中…";}
+    const credential=EmailAuthProvider.credential(ADMIN_LOGIN_EMAIL,current);
+    await reauthenticateWithCredential(auth.currentUser,credential);
+    await updatePassword(auth.currentUser,next);
+    alert("パスワードを変更しました。新しい8桁で再ログインしてください。");
+    closeAdminChange();
+    await adminLogout();
+  }catch(err){
+    console.warn("admin password change failed",err);
+    alert(friendlyAuthError(err));
+  }finally{
+    if(button){button.disabled=false;button.textContent="変更を保存";}
   }
 }
 
@@ -875,12 +944,17 @@ async function adminLogout(){
 }
 document.getElementById("adminLoginBtn")?.addEventListener("click",adminLogin);
 document.getElementById("adminSetupBtn")?.addEventListener("click",adminSetup);
-const setupBtn=document.getElementById("adminSetupBtn");
-if(setupBtn && new URLSearchParams(location.search).get("setup")==="1") setupBtn.classList.remove("guest-hidden");
 document.getElementById("adminLogoutBtn")?.addEventListener("click",adminLogout);
-document.getElementById("adminPassword")?.addEventListener("input",e=>{e.target.value=e.target.value.replace(/\D/g,"").slice(0,8);});
-document.getElementById("adminPassword")?.addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();adminLogin();}});
+document.getElementById("adminChangeBtn")?.addEventListener("click",openAdminChange);
+document.getElementById("adminChangeCancelBtn")?.addEventListener("click",closeAdminChange);
+document.getElementById("adminChangeSaveBtn")?.addEventListener("click",changeAdminPassword);
+["adminPassword","adminPasswordConfirm","adminCurrentPassword","adminNewPassword","adminNewPasswordConfirm"].forEach(id=>{
+  document.getElementById(id)?.addEventListener("input",e=>{e.target.value=e.target.value.replace(/\D/g,"").slice(0,8);});
+});
+document.getElementById("adminPassword")?.addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();new URLSearchParams(location.search).get("setup")==="1"?adminSetup():adminLogin();}});
+document.getElementById("adminPasswordConfirm")?.addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();adminSetup();}});
 updateAdminLockMessage();
+setTimeout(()=>renderMode(),0);
 
 function roomPath(){
   const room = window.getCloudRoom?.();

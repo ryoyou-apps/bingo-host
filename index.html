@@ -28,6 +28,11 @@ input,select{width:100%;border:2px solid #777;border-radius:12px;padding:13px;ba
 @media(max-width:520px){.row{grid-template-columns:1fr 120px}}
 
 .draw-panel{border:3px solid #111827}
+.history-status{margin:10px 0 14px;padding:12px 14px;border-radius:14px;font-weight:800;line-height:1.5;background:#ecfdf5;border:2px solid #16a34a;color:#166534}
+.history-status.review{background:#fff7ed;border-color:#f59e0b;color:#9a3412}
+.history-status small{display:block;font-weight:700;opacity:.9}
+.history-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.history-actions button:disabled{opacity:.45;cursor:not-allowed}
 .draw-current{font-size:92px;font-weight:900;text-align:center;line-height:1.1;padding:14px 0}
 .draw-btn{width:100%;font-size:24px}
 .draw-history{display:flex;flex-wrap:wrap;gap:7px;margin-top:12px}
@@ -218,7 +223,7 @@ body.tik-mode-open{overflow:hidden}
 </style>
 </head>
 <body>
-<header><h1 id="appTitle" aria-label="Bingo Host">Bingo Host<span id="adminCrown" class="guest-hidden">👑</span></h1><div class="sub">A〜E 全250枚対応・受付＋抽選 Ver.2.25／Tik 3-3A Tikカード自動発行版</div></header>
+<header><h1 id="appTitle" aria-label="Bingo Host">Bingo Host<span id="adminCrown" class="guest-hidden">👑</span></h1><div class="sub">A〜E 全250枚対応・受付＋抽選 Ver.2.25／通常モード 抽選履歴確認版</div></header>
 <main>
 <form id="form" class="panel entry">
 <h2>参加者を登録</h2>
@@ -323,6 +328,7 @@ body.tik-mode-open{overflow:hidden}
 
 <div class="panel draw-panel">
   <div class="head"><h2>抽選</h2><span id="drawCount" class="pill">0 / 75</span></div>
+  <div id="drawHistoryModeStatus" class="history-status">● 最新状態<small>新しい抽選を実行できます。</small></div>
   <div class="draw-current" id="drawCurrent">？</div>
   <button id="drawBtn" class="primary draw-btn" type="button">抽選する</button>
   <div id="drawAlert" class="draw-alert" role="status" aria-live="polite" hidden></div>
@@ -337,8 +343,11 @@ body.tik-mode-open{overflow:hidden}
     <div class="manual-help">カラカラで出た番号を1〜75で入力。登録済み番号は重複追加しません。</div>
   </div>
 
-  <div class="actions">
-    <button id="undoBtn" class="secondary" type="button">1つ戻す</button>
+  <div class="history-actions">
+    <button id="undoBtn" class="secondary" type="button">一つ戻る</button>
+    <button id="redoBtn" class="secondary" type="button">一つ進む</button>
+  </div>
+  <div class="actions" style="margin-top:10px">
     <button id="resetDrawBtn" class="secondary" type="button">抽選リセット</button>
   </div>
   <div id="drawHistory" class="draw-history"></div>
@@ -369,7 +378,7 @@ body.tik-mode-open{overflow:hidden}
   </button>
 </div>
 
-<div id="appVersionFooter" style="text-align:center;color:#777;font-size:11px;padding:2px 0 18px">Ver.2.25 Tikカード自動発行版</div>
+<div id="appVersionFooter" style="text-align:center;color:#777;font-size:11px;padding:2px 0 18px">Ver.2.25 抽選履歴確認版</div>
 </main>
 <section id="tikModeScreen" class="tik-mode-screen" hidden aria-label="Tikモード">
   <div class="tik-mode-header">
@@ -584,12 +593,15 @@ load();
 
 const DRAW_STORAGE="bingoHostDrawV2";
 let drawState={drawn:[]};
+let drawViewPosition=0;
+let drawNavigationOnly=false;
 let lastRenderedDrawLength=null;
 let celebrationTimer=null;
 let audioContext=null;
 let soundEnabled=localStorage.getItem("bingoSoundEnabledV221")==="1";
-function loadDraw(){try{const x=JSON.parse(localStorage.getItem(DRAW_STORAGE));if(x&&Array.isArray(x.drawn))drawState=x}catch(e){}}
+function loadDraw(){try{const x=JSON.parse(localStorage.getItem(DRAW_STORAGE));if(x&&Array.isArray(x.drawn))drawState=x}catch(e){}drawViewPosition=drawState.drawn.length}
 function saveDraw(){
+  drawViewPosition=drawState.drawn.length;
   try{localStorage.setItem(DRAW_STORAGE,JSON.stringify(drawState))}catch(e){}
   renderDrawAndJudge();
   if(window.cloudPush && canOperate() && appMode?.mode==="shared" && appMode?.role==="host") window.cloudPush().catch(e=>note(`⚠️ 同期できません：${e.message}`,"err"));
@@ -602,10 +614,15 @@ function getLines(grid){
   lines.push([0,1,2,3,4].map(i=>grid[i][4-i]));
   return lines;
 }
+function getVisibleDrawn(){return drawState.drawn.slice(0,drawViewPosition)}
+function isDrawHistoryMode(){return drawViewPosition<drawState.drawn.length}
+function recordDrawHistoryEvent(eventTypeCode,result,detail,status="完了"){
+  try{window.appEventLog?.record({eventTypeCode,eventType:eventTypeLabel(eventTypeCode),status,result,detail,source:"normal-draw"})}catch(e){console.warn("draw history log failed",e)}
+}
 function judgeCard(cardId){
   const card=BYID.get(cardId);
   if(!card||!card.grid)return {bingo:0,reach:0,waits:[]};
-  const hit=new Set(drawState.drawn);
+  const hit=new Set(getVisibleDrawn());
   hit.add(0); // FREE
   let bingo=0,reach=0;
   const waits=[];
@@ -622,14 +639,35 @@ function judgeCard(cardId){
 }
 function drawOne(){
   if(!canOperate()){note("⚠️ ホストのみ抽選できます。","err");return;}
+  if(isDrawHistoryMode()){
+    note("⚠️ 現在は履歴確認中です。『一つ進む』で最新状態へ戻ってから抽選してください。","err");
+    recordDrawHistoryEvent("DRAW_HISTORY_DRAW_REJECTED","履歴途中のため拒否",`現在位置 ${drawViewPosition} / ${drawState.drawn.length}`,"無効");
+    return;
+  }
   const used=new Set(drawState.drawn),remaining=[];
   for(let n=1;n<=75;n++)if(!used.has(n))remaining.push(n);
   if(!remaining.length){note("⚠️ 1〜75すべて抽選済みです。","err");return}
   drawState.drawn.push(remaining[Math.floor(Math.random()*remaining.length)]);
   saveDraw();
 }
-function undoDraw(){if(!canOperate()){note("⚠️ ホストのみ操作できます。","err");return;}if(drawState.drawn.length){drawState.drawn.pop();saveDraw()}}
-function resetDraw(){if(!canOperate()){note("⚠️ ホストのみ抽選をリセットできます。","err");return;}if(confirm("抽選履歴をすべてリセットしますか？")){drawState={drawn:[]};saveDraw()}}
+function undoDraw(){
+  if(!canOperate()){note("⚠️ ホストのみ操作できます。","err");return;}
+  if(drawViewPosition<=0)return;
+  const before=drawViewPosition;
+  drawViewPosition--;
+  drawNavigationOnly=true;renderDrawAndJudge();drawNavigationOnly=false;
+  recordDrawHistoryEvent(before===drawState.drawn.length?"DRAW_HISTORY_MODE_STARTED":"DRAW_HISTORY_BACK","成功",`履歴位置 ${before} → ${drawViewPosition} / ${drawState.drawn.length}`);
+}
+function redoDraw(){
+  if(!canOperate()){note("⚠️ ホストのみ操作できます。","err");return;}
+  if(drawViewPosition>=drawState.drawn.length)return;
+  const before=drawViewPosition;
+  drawViewPosition++;
+  drawNavigationOnly=true;renderDrawAndJudge();drawNavigationOnly=false;
+  const latest=drawViewPosition===drawState.drawn.length;
+  recordDrawHistoryEvent(latest?"DRAW_HISTORY_LATEST_RESTORED":"DRAW_HISTORY_FORWARD","成功",`履歴位置 ${before} → ${drawViewPosition} / ${drawState.drawn.length}`);
+}
+function resetDraw(){if(!canOperate()){note("⚠️ ホストのみ抽選をリセットできます。","err");return;}if(confirm("抽選履歴をすべてリセットしますか？")){drawState={drawn:[]};drawViewPosition=0;saveDraw()}}
 function judgeCardAtStep(cardId,step){
   const card=BYID.get(cardId);
   if(!card||!card.grid)return {bingo:0,reach:0,waits:[]};
@@ -761,9 +799,18 @@ function showCelebration(kind,number,groups){
   celebrationTimer=setTimeout(closeCelebration,kind==="bingo"?6500:4500);
 }
 function renderDrawAndJudge(){
-  $("drawCount").textContent=`${drawState.drawn.length} / 75`;
-  $("drawCurrent").textContent=drawState.drawn.length?drawState.drawn[drawState.drawn.length-1]:"？";
-  $("drawHistory").innerHTML=drawState.drawn.map(n=>`<span class="draw-ball">${n}</span>`).join("");
+  const visibleDrawn=getVisibleDrawn();
+  const historyMode=isDrawHistoryMode();
+  $("drawCount").textContent=`${drawViewPosition} / 75`;
+  $("drawCurrent").textContent=visibleDrawn.length?visibleDrawn[visibleDrawn.length-1]:"？";
+  $("drawHistory").innerHTML=visibleDrawn.map(n=>`<span class="draw-ball">${n}</span>`).join("");
+  const hs=$("drawHistoryModeStatus");
+  if(hs){hs.classList.toggle("review",historyMode);hs.innerHTML=historyMode?`⚠️ 履歴確認中（${drawViewPosition} / ${drawState.drawn.length}）<small>過去の抽選状態を表示しています。新しい抽選はできません。「一つ進む」で最新状態へ戻してください。</small>`:`● 最新状態<small>新しい抽選を実行できます。</small>`;}
+  const drawBtn=$("drawBtn"),manualBtn=$("manualAddBtn"),undoBtn=$("undoBtn"),redoBtn=$("redoBtn");
+  if(drawBtn)drawBtn.disabled=historyMode;
+  if(manualBtn)manualBtn.disabled=historyMode;
+  if(undoBtn)undoBtn.disabled=drawViewPosition<=0;
+  if(redoBtn)redoBtn.disabled=drawViewPosition>=drawState.drawn.length;
 
   const reachCards=[],bingoCards=[];
   state.regs.forEach((r,registrationIndex)=>{
@@ -782,7 +829,7 @@ function renderDrawAndJudge(){
   reachGroups.sort((a,b)=>(b.latestStep-a.latestStep)||a.name.localeCompare(b.name,"ja"));
   bingoGroups.sort((a,b)=>(b.latestStep-a.latestStep)||a.name.localeCompare(b.name,"ja"));
 
-  const latestStep=drawState.drawn.length;
+  const latestStep=drawViewPosition;
   $("reachCount").textContent=`${reachGroups.length}人`;
   $("bingoCount").textContent=`${bingoGroups.length}人`;
   const maxSummary=$("maxBingoSummary");
@@ -829,7 +876,7 @@ function renderDrawAndJudge(){
   if(latestStep>0){
     const newBingo=bingoGroups.filter(g=>g.latestStep===latestStep);
     const newReach=reachGroups.filter(g=>g.latestStep===latestStep);
-    const drawAdvanced=lastRenderedDrawLength!==null && latestStep>lastRenderedDrawLength;
+    const drawAdvanced=!drawNavigationOnly && !historyMode && lastRenderedDrawLength!==null && latestStep>lastRenderedDrawLength;
     if(drawAdvanced){
       const number=drawState.drawn[latestStep-1];
       if(newBingo.length)showCelebration("bingo",number,newBingo);
@@ -873,6 +920,7 @@ function renderDrawAndJudge(){
 
 function addManualNumber(){
   if(!canOperate()){note("⚠️ ホストのみ番号を追加できます。","err");return;}
+  if(isDrawHistoryMode()){note("⚠️ 現在は履歴確認中です。『一つ進む』で最新状態へ戻ってから番号を追加してください。","err");recordDrawHistoryEvent("DRAW_HISTORY_DRAW_REJECTED","履歴途中のため拒否",`手動入力／現在位置 ${drawViewPosition} / ${drawState.drawn.length}`,"無効");return;}
   const el=$("manualNumber");
   const raw=(el.value||"").trim();
   const n=Number(raw);
@@ -894,6 +942,7 @@ function addManualNumber(){
 
 $("drawBtn").onclick=drawOne;
 $("undoBtn").onclick=undoDraw;
+$("redoBtn").onclick=redoDraw;
 $("resetDrawBtn").onclick=resetDraw;
 $("manualAddBtn").onclick=addManualNumber;
 $("manualNumber").addEventListener("keydown",e=>{if(e.key==="Enter")addManualNumber()});
@@ -962,7 +1011,7 @@ async function fullReset(){
     removeKeys.forEach(k=>localStorage.removeItem(k));
   }catch(e){}
   state={regs:[]};
-  drawState={drawn:[]};
+  drawState={drawn:[]};drawViewPosition=0;
   appMode={mode:"personal",room:"",role:""};
   alert("全データをリセットしました。");
   location.reload();
@@ -1053,7 +1102,7 @@ function applyRolePermissions(){
     el.classList.toggle("guest-lock",locked);
   });
 
-  ["registerBtn","next","focusCard","drawBtn","manualAddBtn","undoBtn","resetDrawBtn","fullResetBtn","backup","restore"].forEach(id=>{
+  ["registerBtn","next","focusCard","drawBtn","manualAddBtn","undoBtn","redoBtn","resetDrawBtn","fullResetBtn","backup","restore"].forEach(id=>{
     const el=$(id);
     if(!el)return;
     el.disabled=locked;
@@ -1311,7 +1360,7 @@ function generateTikUsers(){
 
 
 function eventTypeLabel(type){
-  const labels={USER_CREATED:"疑似ユーザー作成",COMMENT_RECEIVED:"疑似コメント受信",HEART_RECEIVED:"疑似ハートミー受信",EVENT_DELETED:"イベント削除",SETTINGS_CHANGED:"設定変更",COMMENT_CONDITION_MET:"参加コメント条件成立",HEART_CONDITION_MET:"ハートミー条件成立",PARTICIPATION_CONDITION_MET:"参加条件成立",CARD_ISSUE_STARTED:"カード発行開始",CARD_ISSUED:"カード発行完了",PARTICIPANT_REGISTERED:"既存参加者登録完了",RECEPTION_COMPLETED:"受付完了",CONDITION_WAITING:"条件待ち",DUPLICATE_RECEPTION_REJECTED:"重複受付拒否",DUPLICATE_CARD_REJECTED:"カード二重発行拒否",FULL_RECEPTION_REJECTED:"満員受付拒否",CARD_ISSUE_ERROR:"カード発行エラー",PARTICIPANT_REGISTER_ERROR:"参加者登録エラー",ERROR:"エラー"};
+  const labels={USER_CREATED:"疑似ユーザー作成",COMMENT_RECEIVED:"疑似コメント受信",HEART_RECEIVED:"疑似ハートミー受信",EVENT_DELETED:"イベント削除",SETTINGS_CHANGED:"設定変更",COMMENT_CONDITION_MET:"参加コメント条件成立",HEART_CONDITION_MET:"ハートミー条件成立",PARTICIPATION_CONDITION_MET:"参加条件成立",CARD_ISSUE_STARTED:"カード発行開始",CARD_ISSUED:"カード発行完了",PARTICIPANT_REGISTERED:"既存参加者登録完了",RECEPTION_COMPLETED:"受付完了",CONDITION_WAITING:"条件待ち",DUPLICATE_RECEPTION_REJECTED:"重複受付拒否",DUPLICATE_CARD_REJECTED:"カード二重発行拒否",FULL_RECEPTION_REJECTED:"満員受付拒否",CARD_ISSUE_ERROR:"カード発行エラー",PARTICIPANT_REGISTER_ERROR:"参加者登録エラー",DRAW_HISTORY_MODE_STARTED:"履歴確認モード開始",DRAW_HISTORY_BACK:"一つ戻る",DRAW_HISTORY_FORWARD:"一つ進む",DRAW_HISTORY_LATEST_RESTORED:"最新状態へ復帰",DRAW_HISTORY_DRAW_REJECTED:"履歴途中での抽選拒否",DRAW_HISTORY_MOVE_ERROR:"履歴移動エラー",ERROR:"エラー"};
   return labels[type]||String(type||"イベント");
 }
 function eventCssType(type,status){

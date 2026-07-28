@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#151515">
-<title>Bingo Host 受付 Ver.2.29</title>
+<title>Bingo Host 受付 Ver.2.30</title>
 <style>
 *{box-sizing:border-box}body{margin:0;background:#f3f4f6;color:#171717;font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Yu Gothic",sans-serif}
 button,input,select{font:inherit}button{cursor:pointer}
@@ -227,11 +227,15 @@ body.draw-floating-visible main{padding-bottom:calc(96px + env(safe-area-inset-b
 .tik-log-time{font-size:11px;color:#64748b}.tik-log-title{font-weight:1000;color:#111827;margin-top:2px}.tik-log-detail{font-size:12px;color:#475569;margin-top:3px;line-height:1.45;overflow-wrap:anywhere}
 .tik-log-clear{border:1px solid #b84a42;border-radius:9px;background:#fff1f0;color:#9d211a;padding:7px 10px;font-weight:900}
 .tik-event-badges{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}.tik-event-badge{border-radius:999px;padding:5px 8px;font-size:11px;font-weight:900;background:#e5e7eb;color:#475569}.tik-event-badge.on{background:#dcfce7;color:#166534}
-/* 工程3-3A.6：大会管理基盤 */
+/* Ver.2.30：大会情報は通常モードをマスターとして一元管理 */
+.current-tournament-banner{border:3px solid #8a6b25;background:linear-gradient(135deg,#fff9df,#fff3bd);padding:13px 15px}
+.current-tournament-label{font-size:12px;font-weight:1000;color:#7a5b0b}.current-tournament-title{margin-top:3px;font-size:23px;font-weight:1000;color:#111827;overflow-wrap:anywhere}.current-tournament-id{margin-top:5px;font-size:13px;font-weight:900;color:#475569;overflow-wrap:anywhere}
+.tournament-management summary{cursor:pointer;font-size:19px;font-weight:1000;list-style:none}.tournament-management summary::-webkit-details-marker{display:none}.tournament-management summary::after{content:" ▼";font-size:13px}.tournament-management[open] summary::after{content:" ▲"}
+.tournament-body{margin-top:14px;padding-top:12px;border-top:1px solid #d7dbe2}.tournament-grid{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:end}.tournament-input,.tournament-memo{width:100%;border:2px solid #64748b;border-radius:13px;background:#fff;color:#111827;padding:12px;font-size:17px;font-weight:800}.tournament-memo{min-height:100px;resize:vertical;font-weight:700;line-height:1.55}.tournament-input:focus,.tournament-memo:focus{outline:3px solid #f5cf5d66;border-color:#9a751c}.tournament-now-btn{min-height:50px;border:2px solid #8a6b25;border-radius:12px;background:#fff9df;color:#5d4300;padding:10px 13px;font-weight:1000;white-space:nowrap}.tournament-facts{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:14px}.tournament-fact{border:1px solid #d6dae1;border-radius:12px;background:#f8fafc;padding:11px}.tournament-fact strong{display:block;color:#111827;font-size:14px;overflow-wrap:anywhere}.tournament-fact small{display:block;margin-top:4px;color:#64748b;font-weight:800}.tournament-actions{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:14px}.tournament-save-btn{min-height:54px;border:0;border-radius:13px;background:#151515;color:#f4cf66;padding:13px 15px;font-size:17px;font-weight:1000}.tournament-danger-btn{min-height:54px;border:2px solid #b42318;border-radius:13px;background:#fff1f0;color:#9d211a;padding:13px 15px;font-size:17px;font-weight:1000}.tournament-message{margin-top:12px;padding:11px 13px;border-radius:11px;font-weight:800;line-height:1.5;background:#eef2f7;color:#475569}.tournament-message.ok{background:#e7f8ec;color:#116530}.tournament-message.err{background:#fff0f0;color:#a2231d}
 .tik-current-tournament{position:sticky;top:66px;z-index:5;margin-bottom:14px;border:2px solid #8a6b25;border-radius:16px;background:rgba(255,249,223,.97);padding:13px 15px;box-shadow:0 5px 18px rgba(15,23,42,.14);backdrop-filter:blur(8px)}
 .tik-current-tournament-label{font-size:12px;font-weight:1000;color:#7a5b0b}.tik-current-tournament-title{margin-top:3px;font-size:20px;font-weight:1000;color:#111827;overflow-wrap:anywhere}.tik-current-tournament-id{margin-top:5px;font-size:13px;font-weight:900;color:#475569;overflow-wrap:anywhere}
-.tik-tournament-grid{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:end}.tik-tournament-input,.tik-tournament-memo{width:100%;border:2px solid #64748b;border-radius:13px;background:#fff;color:#111827;padding:12px;font-size:17px;font-weight:800}.tik-tournament-memo{min-height:110px;resize:vertical;font-weight:700;line-height:1.55}.tik-tournament-input:focus,.tik-tournament-memo:focus{outline:3px solid #f5cf5d66;border-color:#9a751c}.tik-now-btn{min-height:50px;border:2px solid #8a6b25;border-radius:12px;background:#fff9df;color:#5d4300;padding:10px 13px;font-weight:1000;white-space:nowrap;touch-action:manipulation}.tik-tournament-facts{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:14px}.tik-tournament-fact{border:1px solid #d6dae1;border-radius:12px;background:#f8fafc;padding:11px}.tik-tournament-fact strong{display:block;color:#111827;font-size:14px;overflow-wrap:anywhere}.tik-tournament-fact small{display:block;margin-top:4px;color:#64748b;font-weight:800}.tik-reset-options{display:grid;gap:9px;margin-top:12px}.tik-reset-option{display:flex;align-items:flex-start;gap:10px;border:2px solid #d7dde3;border-radius:13px;background:#f8fafc;padding:12px;font-weight:800;line-height:1.45}.tik-reset-option input{width:20px;height:20px;margin-top:1px;flex:0 0 auto}.tik-danger-btn{width:100%;min-height:54px;margin-top:14px;border:2px solid #b42318;border-radius:13px;background:#fff1f0;color:#9d211a;padding:13px 15px;font-size:17px;font-weight:1000;touch-action:manipulation}.tik-danger-btn:active{transform:translateY(1px);background:#ffe3e0}
-@media(max-width:560px){.tik-current-tournament{top:64px}.tik-tournament-grid{grid-template-columns:1fr}.tik-now-btn{width:100%}.tik-tournament-facts{grid-template-columns:1fr}}
+.tournament-reset-overlay{position:fixed;inset:0;z-index:13000;background:rgba(7,9,14,.72);display:flex;align-items:center;justify-content:center;padding:18px}.tournament-reset-overlay[hidden]{display:none!important}.tournament-reset-dialog{width:min(560px,96vw);max-height:86vh;overflow:auto;background:#fff;border-radius:20px;padding:20px;box-shadow:0 24px 80px #0008}.tournament-reset-dialog h2{color:#9d211a}.tournament-reset-check{display:flex;gap:10px;align-items:flex-start;border:2px solid #d7dde3;border-radius:13px;background:#f8fafc;padding:12px;margin:14px 0;font-weight:800;line-height:1.45}.tournament-reset-check input{width:22px;height:22px;flex:0 0 auto}.tournament-reset-summary{padding:11px;border-radius:11px;background:#fff7ed;color:#9a3412;font-weight:800;line-height:1.55}.tournament-reset-buttons{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:16px}.tournament-reset-cancel,.tournament-reset-confirm{min-height:52px;border-radius:13px;padding:12px;font-weight:1000}.tournament-reset-cancel{border:1px solid #94a3b8;background:#fff;color:#334155}.tournament-reset-confirm{border:0;background:#b42318;color:#fff}
+@media(max-width:560px){.tik-current-tournament{top:64px}.tournament-grid,.tournament-actions,.tournament-reset-buttons{grid-template-columns:1fr}.tournament-now-btn{width:100%}.tournament-facts{grid-template-columns:1fr}}
 body.tik-mode-open{overflow:hidden}
 @media(max-width:560px){.tik-setting-summary{grid-template-columns:1fr}.tik-preset-grid{grid-template-columns:repeat(3,1fr)}.tik-user-form,.tik-generator-row,.tik-event-comment-row{grid-template-columns:1fr}.tik-user-add-btn,.tik-generate-btn,.tik-event-btn{width:100%}.tik-user-item-head{flex-direction:column}.tik-user-actions{width:100%}.tik-user-action{flex:1}.tik-event-status-grid{grid-template-columns:1fr}}
 
@@ -246,8 +250,39 @@ body.tik-mode-open{overflow:hidden}
 </style>
 </head>
 <body>
-<header><h1 id="appTitle" aria-label="Bingo Host">Bingo Host<span id="adminCrown" class="guest-hidden">👑</span></h1><div class="sub">A〜E 全250枚対応・受付＋抽選 Ver.2.29／大会管理基盤版</div></header>
+<header><h1 id="appTitle" aria-label="Bingo Host">Bingo Host<span id="adminCrown" class="guest-hidden">👑</span></h1><div class="sub">A〜E 全250枚対応・受付＋抽選 Ver.2.30／大会情報一元管理版</div></header>
 <main>
+<section id="currentTournamentBanner" class="panel current-tournament-banner" aria-label="現在の大会">
+  <div class="current-tournament-label">現在の大会</div>
+  <div id="currentTournamentTitle" class="current-tournament-title">大会タイトル未設定</div>
+  <div id="currentTournamentId" class="current-tournament-id">大会ID：作成中</div>
+</section>
+
+<details id="tournamentManagementPanel" class="panel tournament-management">
+  <summary>大会情報を編集</summary>
+  <div class="tournament-body">
+    <div class="hint">大会情報は通常モードだけで編集します。保存すると通常モード上部とTikモードへ同時に反映されます。</div>
+    <label class="label" for="tournamentTitle">大会タイトル</label>
+    <div class="tournament-grid">
+      <input id="tournamentTitle" class="tournament-input" type="text" maxlength="100" autocomplete="off" placeholder="例：2026年7月28日 TikTokちゃちゃ杯">
+      <button id="tournamentNowBtn" class="tournament-now-btn" type="button">今日の日付を入力</button>
+    </div>
+    <div class="tournament-facts">
+      <div class="tournament-fact"><strong id="tournamentIdValue">—</strong><small>大会ID</small></div>
+      <div class="tournament-fact"><strong id="tournamentStatusValue">準備中</strong><small>大会状態</small></div>
+      <div class="tournament-fact"><strong id="tournamentStartValue">—</strong><small>大会開始日時</small></div>
+      <div class="tournament-fact"><strong id="tournamentEndValue">未設定</strong><small>大会終了日時（予約）</small></div>
+    </div>
+    <label class="label" for="tournamentMemo">大会メモ</label>
+    <textarea id="tournamentMemo" class="tournament-memo" maxlength="1000" placeholder="景品内容、運営メモ、スポンサー、司会者、注意事項など"></textarea>
+    <div class="tournament-actions">
+      <button id="saveTournamentBtn" class="tournament-save-btn" type="button">大会情報を保存</button>
+      <button id="openTournamentResetBtn" class="tournament-danger-btn" type="button">大会受付データをリセット</button>
+    </div>
+    <div id="tournamentMessage" class="tournament-message" role="status" aria-live="polite">大会情報を読み込んでいます。</div>
+  </div>
+</details>
+
 <form id="form" class="panel entry">
 <h2>参加者を登録</h2>
 <div class="label">① 名前</div>
@@ -402,7 +437,7 @@ body.tik-mode-open{overflow:hidden}
   </button>
 </div>
 
-<div id="appVersionFooter" style="text-align:center;color:#777;font-size:11px;padding:2px 0 18px">Ver.2.29 大会管理基盤版</div>
+<div id="appVersionFooter" style="text-align:center;color:#777;font-size:11px;padding:2px 0 18px">Ver.2.30 大会情報一元管理版</div>
 </main>
 
 <div id="drawHistoryFloatingBar" class="draw-history-floating-bar" hidden aria-label="抽選履歴操作">
@@ -414,7 +449,7 @@ body.tik-mode-open{overflow:hidden}
 <section id="tikModeScreen" class="tik-mode-screen" hidden aria-label="Tikモード">
   <div class="tik-mode-header">
     <button id="closeTikModeBtn" class="tik-mode-back" type="button">← 通常モードへ戻る</button>
-    <div><div class="tik-mode-title">Tikモード</div><div class="tik-mode-sub">工程3-3A.6 大会管理基盤</div></div>
+    <div><div class="tik-mode-title">Tikモード</div><div class="tik-mode-sub">現在の大会を参照して受付します</div></div>
   </div>
   <div class="tik-mode-main">
     <div class="tik-current-tournament" aria-label="現在の大会">
@@ -423,41 +458,6 @@ body.tik-mode-open{overflow:hidden}
       <div id="tikCurrentTournamentId" class="tik-current-tournament-id">大会ID：作成中</div>
     </div>
 
-    <div class="tik-mode-card">
-      <span class="tik-mode-badge">工程3-3A.6</span>
-      <h2>大会情報</h2>
-      <div class="tik-mode-note">現在の大会を識別する情報です。大会IDは自動生成され、タイトルを変更しても変わりません。</div>
-
-      <label class="tik-limit-label" for="tikTournamentTitle">大会タイトル</label>
-      <div class="tik-tournament-grid">
-        <input id="tikTournamentTitle" class="tik-tournament-input" type="text" maxlength="100" autocomplete="off" placeholder="大会タイトル未設定">
-        <button id="tikTournamentNowBtn" class="tik-now-btn" type="button">現在日時を入力</button>
-      </div>
-
-      <div class="tik-tournament-facts">
-        <div class="tik-tournament-fact"><strong id="tikTournamentIdValue">—</strong><small>大会ID</small></div>
-        <div class="tik-tournament-fact"><strong id="tikTournamentStatusValue">準備中</strong><small>大会状態</small></div>
-        <div class="tik-tournament-fact"><strong id="tikTournamentStartValue">—</strong><small>大会開始日時</small></div>
-        <div class="tik-tournament-fact"><strong id="tikTournamentEndValue">未設定</strong><small>大会終了日時（予約）</small></div>
-      </div>
-
-      <label class="tik-limit-label" for="tikTournamentMemo">大会メモ</label>
-      <textarea id="tikTournamentMemo" class="tik-tournament-memo" maxlength="1000" placeholder="景品内容、運営メモ、スポンサー、司会者、注意事項など"></textarea>
-      <button id="saveTikTournamentBtn" class="tik-save-btn" type="button">大会情報を保存</button>
-      <div id="tikTournamentMessage" class="tik-setting-message" role="status" aria-live="polite">大会情報を読み込んでいます。</div>
-    </div>
-
-    <div class="tik-mode-card tik-event-panel">
-      <span class="tik-mode-badge">安全操作</span>
-      <h2>Tikモード大会データをリセット</h2>
-      <div class="tik-mode-note">疑似ユーザー、条件待ち、受付完了、Tikイベントログなどを初期化し、新しい大会IDを作成します。手動登録した通常モード参加者は削除しません。</div>
-      <div class="tik-reset-options" role="radiogroup" aria-label="大会データのリセット範囲">
-        <label class="tik-reset-option"><input type="radio" name="tikTournamentResetScope" value="tik-only" checked><span>① Tikモード受付情報だけリセット<br><small>通常モードに登録済みの参加者は残します。</small></span></label>
-        <label class="tik-reset-option"><input type="radio" name="tikTournamentResetScope" value="with-participants"><span>② Tikモード経由で登録した参加者も通常モードから削除<br><small>手動登録した参加者は削除しません。</small></span></label>
-      </div>
-      <button id="resetTikTournamentBtn" class="tik-danger-btn" type="button">Tikモード大会データをリセット</button>
-      <div id="tikTournamentResetMessage" class="tik-setting-message" role="status" aria-live="polite">リセットは二段階確認後に実行されます。</div>
-    </div>
 
     <div class="tik-mode-card">
       <span class="tik-mode-badge">管理者専用</span>
@@ -581,6 +581,19 @@ body.tik-mode-open{overflow:hidden}
     </div>
   </div>
 </section>
+<div id="tournamentResetOverlay" class="tournament-reset-overlay" hidden role="dialog" aria-modal="true" aria-labelledby="tournamentResetTitle">
+  <div class="tournament-reset-dialog">
+    <h2 id="tournamentResetTitle">大会受付データをリセット</h2>
+    <div class="tournament-reset-summary">疑似ユーザー、コメント・ハートミー状態、条件待ち、受付完了、Tikイベントログを初期化し、新しい大会IDを作成します。この操作は元に戻せません。</div>
+    <label class="tournament-reset-check"><input id="deleteTikParticipantsOnReset" type="checkbox"><span>Tikモード経由で現在の大会に登録した参加者も、通常モードの参加者一覧から削除する<br><small>通常モードで手動登録した参加者は削除しません。</small></span></label>
+    <div id="tournamentResetCount" class="hint"></div>
+    <div class="tournament-reset-buttons">
+      <button id="cancelTournamentResetBtn" class="tournament-reset-cancel" type="button">キャンセル</button>
+      <button id="confirmTournamentResetBtn" class="tournament-reset-confirm" type="button">リセット実行</button>
+    </div>
+  </div>
+</div>
+
 <div id="celebrationOverlay" class="celebration-overlay" hidden role="dialog" aria-live="assertive" aria-modal="true">
   <div class="celebration-card">
     <div id="celebrationIcon" class="celebration-icon"></div>
@@ -1238,14 +1251,14 @@ function applyRolePermissions(){
   const locked=!canOperate();
 
   // 入力欄は残して無効化し、操作ボタンはゲスト画面から隠す。
-  ["name","card","manualNumber"].forEach(id=>{
+  ["name","card","manualNumber","tournamentTitle","tournamentMemo"].forEach(id=>{
     const el=$(id);
     if(!el)return;
     el.disabled=locked;
     el.classList.toggle("guest-lock",locked);
   });
 
-  ["registerBtn","next","focusCard","drawBtn","manualAddBtn","undoBtn","redoBtn","resetDrawBtn","fullResetBtn","backup","restore"].forEach(id=>{
+  ["registerBtn","next","focusCard","drawBtn","manualAddBtn","undoBtn","redoBtn","resetDrawBtn","fullResetBtn","backup","restore","tournamentNowBtn","saveTournamentBtn","openTournamentResetBtn"].forEach(id=>{
     const el=$(id);
     if(!el)return;
     el.disabled=locked;
@@ -1326,6 +1339,7 @@ function renderMode(){
   if(help)help.textContent=setupMode?"ここで登録した8桁が、今後のログイン用パスワードになります。":"管理操作を行う場合のみログインしてください。";
   if(password){password.classList.toggle("guest-hidden",adminAuthenticated); if(adminAuthenticated)password.value="";}
   render();
+  renderTournament(false);
   applyRolePermissions();
   updateDrawHistoryFloatingControls();
 }
@@ -1412,55 +1426,73 @@ function loadTikTournament(){
   let created=false;
   try{tikTournament=normalizeTikTournament(JSON.parse(localStorage.getItem(TIK_TOURNAMENT_STORAGE)));}catch(e){tikTournament=null;}
   if(!tikTournament){tikTournament=createTikTournament();saveTikTournamentState();created=true;}
-  renderTikTournament(true);
-  setTikTournamentMessage(created?"新しい大会IDを自動生成しました。大会タイトルとメモを保存してください。":"大会情報を読み込みました。");
+  renderTournament(true);
+  setTournamentMessage(created?"新しい大会IDを自動生成しました。大会タイトルとメモを保存してください。":"大会情報を読み込みました。");
 }
-function setTikTournamentMessage(message,type=""){
-  const el=$("tikTournamentMessage");if(!el)return;
-  el.textContent=message;el.className=`tik-setting-message${type?` ${type}`:""}`;
+function setTournamentMessage(message,type=""){
+  const el=$("tournamentMessage");if(!el)return;
+  el.textContent=message;el.className=`tournament-message${type?` ${type}`:""}`;
 }
-function setTikTournamentResetMessage(message,type=""){
-  const el=$("tikTournamentResetMessage");if(!el)return;
-  el.textContent=message;el.className=`tik-setting-message${type?` ${type}`:""}`;
-}
-function renderTikTournament(fillInputs=false){
+function renderTournament(fillInputs=false){
   if(!tikTournament)return;
   const displayTitle=tikTournament.title||"大会タイトル未設定";
+  if($("currentTournamentTitle"))$("currentTournamentTitle").textContent=displayTitle;
+  if($("currentTournamentId"))$("currentTournamentId").textContent=`大会ID：${tikTournament.tournamentId}`;
   if($("tikCurrentTournamentTitle"))$("tikCurrentTournamentTitle").textContent=displayTitle;
   if($("tikCurrentTournamentId"))$("tikCurrentTournamentId").textContent=`大会ID：${tikTournament.tournamentId}`;
-  if($("tikTournamentIdValue"))$("tikTournamentIdValue").textContent=tikTournament.tournamentId;
-  if($("tikTournamentStatusValue"))$("tikTournamentStatusValue").textContent=tournamentStatusLabel(tikTournament.status);
-  if($("tikTournamentStartValue"))$("tikTournamentStartValue").textContent=formatTikCreatedAt(tikTournament.startedAt);
-  if($("tikTournamentEndValue"))$("tikTournamentEndValue").textContent=tikTournament.scheduledEndAt?formatTikCreatedAt(tikTournament.scheduledEndAt):"未設定";
-  if(fillInputs){if($("tikTournamentTitle"))$("tikTournamentTitle").value=tikTournament.title;if($("tikTournamentMemo"))$("tikTournamentMemo").value=tikTournament.memo;}
+  if($("tournamentIdValue"))$("tournamentIdValue").textContent=tikTournament.tournamentId;
+  if($("tournamentStatusValue"))$("tournamentStatusValue").textContent=tournamentStatusLabel(tikTournament.status);
+  if($("tournamentStartValue"))$("tournamentStartValue").textContent=formatTikCreatedAt(tikTournament.startedAt);
+  if($("tournamentEndValue"))$("tournamentEndValue").textContent=tikTournament.scheduledEndAt?formatTikCreatedAt(tikTournament.scheduledEndAt):"未設定";
+  if(fillInputs){
+    if($("tournamentTitle"))$("tournamentTitle").value=tikTournament.title;
+    if($("tournamentMemo"))$("tournamentMemo").value=tikTournament.memo;
+  }
 }
+function renderTikTournament(fillInputs=false){renderTournament(fillInputs);}
 function fillCurrentDateInTournamentTitle(){
-  if(!requireTikHostPermission("settings"))return;
-  const input=$("tikTournamentTitle");if(!input)return;
+  if(!canOperate()){note("⚠️ 大会情報を編集できるのは管理者または確認済みホストです。","err");return;}
+  const input=$("tournamentTitle");if(!input)return;
   input.value=currentJapaneseDateText();input.focus();input.setSelectionRange(input.value.length,input.value.length);
-  setTikTournamentMessage("現在の日付を入力しました。続けて大会名を追記し、「大会情報を保存」を押してください。");
+  setTournamentMessage("今日の日付を入力しました。続けて大会名を追記し、「大会情報を保存」を押してください。");
 }
-function saveTikTournament(){
-  if(!requireTikHostPermission("settings"))return;
-  if(!tikTournament){tikTournament=createTikTournament();}
-  tikTournament.title=String($("tikTournamentTitle")?.value||"").trim();
-  tikTournament.memo=String($("tikTournamentMemo")?.value||"");
+function previewTournamentTitle(){
+  const draft=String($("tournamentTitle")?.value||"").trim()||"大会タイトル未設定";
+  if($("currentTournamentTitle"))$("currentTournamentTitle").textContent=draft;
+  setTournamentMessage("大会タイトルを編集中です。「大会情報を保存」を押すとTikモードにも反映されます。");
+}
+function saveTournament(){
+  if(!canOperate()){setTournamentMessage("⚠️ 大会情報を保存できるのは管理者または確認済みホストです。","err");return;}
+  if(!tikTournament)tikTournament=createTikTournament();
+  tikTournament.title=String($("tournamentTitle")?.value||"").trim();
+  tikTournament.memo=String($("tournamentMemo")?.value||"");
   tikTournament.updatedAt=Date.now();
-  try{saveTikTournamentState();renderTikTournament(true);setTikTournamentMessage(`✅ ${tikTournament.title||"大会タイトル未設定"} を保存しました。`,"ok");}
-  catch(e){setTikTournamentMessage("⚠️ 大会情報を保存できませんでした。Safariの保存設定を確認してください。","err");}
+  try{
+    saveTikTournamentState();
+    renderTournament(true);
+    setTournamentMessage(`✅ ${tikTournament.title||"大会タイトル未設定"} を保存し、Tikモードにも反映しました。`,"ok");
+  }catch(e){setTournamentMessage("⚠️ 大会情報を保存できませんでした。Safariの保存設定を確認してください。","err");}
+}
+function openTournamentResetDialog(){
+  if(!canOperate()){setTournamentMessage("⚠️ 大会データをリセットできるのは管理者または確認済みホストです。","err");return;}
+  const currentId=tikTournament?.tournamentId||"";
+  const tikRegs=state.regs.filter(r=>r.source==="tik"&&String(r.tournamentId||"")===String(currentId)).length;
+  if($("deleteTikParticipantsOnReset"))$("deleteTikParticipantsOnReset").checked=false;
+  if($("tournamentResetCount"))$("tournamentResetCount").textContent=`現在の大会：${tikTournament?.title||"大会タイトル未設定"}／Tik受付完了 ${tikUsersState.users.filter(u=>u.assignedCardId).length}人／通常モード登録 ${tikRegs}人`;
+  const overlay=$("tournamentResetOverlay");if(overlay)overlay.hidden=false;
+  $("cancelTournamentResetBtn")?.focus();
+}
+function closeTournamentResetDialog(){
+  const overlay=$("tournamentResetOverlay");if(overlay)overlay.hidden=true;
+  $("openTournamentResetBtn")?.focus();
 }
 function resetTikTournamentData(){
-  if(!requireTikHostPermission("event"))return;
-  if(!confirm("大会データをリセットしますか？"))return;
-  const currentTitle=tikTournament?.title||"";
-  const expected=currentTitle||"RESET";
-  const entered=prompt(currentTitle?`確認のため、現在の大会タイトルを入力してください。\n${currentTitle}`:"大会タイトル未設定です。確認のため RESET と入力してください。");
-  if(entered===null)return;
-  if(String(entered).trim()!==expected){setTikTournamentResetMessage("⚠️ 確認文字が一致しないため、リセットを中止しました。","err");return;}
-  const scope=document.querySelector('input[name="tikTournamentResetScope"]:checked')?.value||"tik-only";
+  if(!canOperate()){closeTournamentResetDialog();setTournamentMessage("⚠️ ホスト権限が確認できないため、リセットを中止しました。","err");return;}
+  const oldTournamentId=tikTournament?.tournamentId||"";
+  const removeParticipants=$("deleteTikParticipantsOnReset")?.checked===true;
   try{
-    if(scope==="with-participants"){
-      state.regs=state.regs.filter(r=>r.source!=="tik");
+    if(removeParticipants){
+      state.regs=state.regs.filter(r=>!(r.source==="tik"&&String(r.tournamentId||"")===String(oldTournamentId)));
       save();
     }
     tikUsersState={nextSequence:1,users:[]};
@@ -1477,13 +1509,17 @@ function resetTikTournamentData(){
     localStorage.setItem(TIK_SETTINGS_STORAGE,JSON.stringify(tikSettings));
     renderTikSettings(true);
     renderTikEventLog();
-    renderTikTournament(true);
+    renderTikEventUserSelect();
+    renderTikSelectedEventStatus();
+    renderTikParticipationManagement();
+    renderTournament(true);
+    render();
+    closeTournamentResetDialog();
     setTikUserMessage("疑似ユーザーはまだ登録されていません。");
     setTikEventMessage("疑似ユーザーを選択してください。");
     setTikSettingMessage("大会リセット後の初期値は250人です。","ok");
-    setTikTournamentMessage("新しい大会情報を作成しました。","ok");
-    setTikTournamentResetMessage(scope==="with-participants"?"✅ 大会データとTikモード経由の通常参加者をリセットしました。":"✅ Tikモード大会データをリセットしました。","ok");
-  }catch(e){setTikTournamentResetMessage(`⚠️ リセット処理に失敗しました：${e.message||"不明なエラー"}`,"err");}
+    setTournamentMessage(removeParticipants?"✅ 大会受付データと、この大会のTikモード登録参加者をリセットしました。":"✅ 大会受付データをリセットし、新しい大会IDを作成しました。","ok");
+  }catch(e){closeTournamentResetDialog();setTournamentMessage(`⚠️ リセット処理に失敗しました：${e.message||"不明なエラー"}`,"err");}
 }
 
 function loadTikSettings(){
@@ -1859,10 +1895,14 @@ function closeTikMode(){
   updateDrawHistoryFloatingVisibility();
   $("openTikModeBtn")?.focus();
 }
-$("tikTournamentNowBtn")?.addEventListener("click",fillCurrentDateInTournamentTitle);
-$("saveTikTournamentBtn")?.addEventListener("click",saveTikTournament);
-$("resetTikTournamentBtn")?.addEventListener("click",resetTikTournamentData);
-$("tikTournamentTitle")?.addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();saveTikTournament();}});
+$("tournamentNowBtn")?.addEventListener("click",fillCurrentDateInTournamentTitle);
+$("saveTournamentBtn")?.addEventListener("click",saveTournament);
+$("openTournamentResetBtn")?.addEventListener("click",openTournamentResetDialog);
+$("cancelTournamentResetBtn")?.addEventListener("click",closeTournamentResetDialog);
+$("confirmTournamentResetBtn")?.addEventListener("click",resetTikTournamentData);
+$("tournamentResetOverlay")?.addEventListener("click",e=>{if(e.target===$("tournamentResetOverlay"))closeTournamentResetDialog();});
+$("tournamentTitle")?.addEventListener("input",previewTournamentTitle);
+$("tournamentTitle")?.addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();saveTournament();}});
 
 $("tikParticipantLimit")?.addEventListener("input",e=>{
   const original=e.target.value;
@@ -1898,7 +1938,7 @@ $("clearTikEventLogBtn").onclick=clearTikEventLog;
 $("tikAcceptedToggleBtn")?.addEventListener("click",()=>setTikAcceptedListExpanded(!tikAcceptedListExpanded));
 $("openTikModeBtn").onclick=openTikMode;
 $("closeTikModeBtn").onclick=closeTikMode;
-document.addEventListener("keydown",e=>{if(e.key==="Escape" && !$("tikModeScreen")?.hidden)closeTikMode();});
+document.addEventListener("keydown",e=>{if(e.key!=="Escape")return;if(!$("tournamentResetOverlay")?.hidden){closeTournamentResetDialog();return;}if(!$("tikModeScreen")?.hidden)closeTikMode();});
 loadTikTournament();
 loadTikSettings();
 loadTikUsers();

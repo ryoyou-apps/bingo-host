@@ -147,7 +147,7 @@ body.flash-reach::after,body.flash-bingo::after{content:"";position:fixed;inset:
 body.flash-reach::after{background:#ffe45c}body.flash-bingo::after{background:radial-gradient(circle,#fffbe0 0%,#ffd84d 48%,#ef9b00 100%);animation:screenFlashBingo 1.05s ease-out}
 @keyframes screenFlash{0%{opacity:.9}100%{opacity:0}}@keyframes screenFlashBingo{0%{opacity:1}35%{opacity:.4}50%{opacity:.92}100%{opacity:0}}@keyframes overlayIn{from{opacity:0}to{opacity:1}}@keyframes celebratePop{from{transform:scale(.72);opacity:0}to{transform:scale(1);opacity:1}}
 
-/* Tikモード入口（第1段階：既存機能から独立した画面のみ） */
+/* Tikモード（第1段階・工程2：参加設定） */
 .tik-entry-actions{margin-top:12px;padding-top:12px;border-top:1px solid #5f4b1f}
 .tik-entry-btn{width:100%;min-height:48px;border:1px solid #8a6b25;border-radius:12px;background:#222;color:#f3cf67;font-weight:900}
 .tik-mode-screen{position:fixed;inset:0;z-index:12000;background:#f3f4f6;overflow:auto}
@@ -159,12 +159,26 @@ body.flash-reach::after{background:#ffe45c}body.flash-bingo::after{background:ra
 .tik-mode-card{background:#fff;border-radius:16px;padding:18px;box-shadow:0 2px 9px #00000010;border:2px solid #d7dbe2}
 .tik-mode-badge{display:inline-block;background:#111827;color:#fff;border-radius:999px;padding:6px 10px;font-size:13px;font-weight:900;margin-bottom:12px}
 .tik-mode-card h2{margin:0 0 10px}.tik-mode-note{line-height:1.7;color:#4b5563}
+.tik-setting-summary{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:14px 0}
+.tik-setting-stat{border:1px solid #d6dae1;border-radius:13px;background:#f8fafc;padding:12px 8px;text-align:center}
+.tik-setting-stat strong{display:block;font-size:24px;color:#111827}.tik-setting-stat small{display:block;margin-top:4px;color:#64748b;font-weight:800}
+.tik-limit-label{display:block;font-weight:900;margin:14px 0 7px;color:#111827}
+.tik-limit-input{width:100%;font-size:28px;font-weight:900;text-align:center;border:2px solid #64748b;border-radius:14px;padding:13px;background:#fff;color:#111827}
+.tik-limit-input:focus{outline:3px solid #f5cf5d66;border-color:#9a751c}
+.tik-preset-title{font-size:13px;font-weight:900;color:#64748b;margin:14px 0 7px}
+.tik-preset-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:7px}
+.tik-preset-btn{border:1px solid #9a751c;border-radius:11px;background:#fff9df;color:#5d4300;padding:11px 4px;font-weight:900}
+.tik-preset-btn.active{background:#17130a;color:#f4cf66;border-color:#f4cf66}
+.tik-save-btn{width:100%;margin-top:16px;border:0;border-radius:13px;background:#151515;color:#f4cf66;padding:14px;font-size:18px;font-weight:900}
+.tik-setting-message{margin-top:12px;padding:11px 13px;border-radius:11px;font-weight:800;line-height:1.5;background:#eef2f7;color:#475569}
+.tik-setting-message.ok{background:#e7f8ec;color:#116530}.tik-setting-message.err{background:#fff0f0;color:#a2231d}
 .tik-mode-placeholder{margin-top:14px;padding:14px;border:2px dashed #9ca3af;border-radius:14px;background:#f8fafc;color:#64748b}
 body.tik-mode-open{overflow:hidden}
+@media(max-width:560px){.tik-setting-summary{grid-template-columns:1fr}.tik-preset-grid{grid-template-columns:repeat(3,1fr)}}
 </style>
 </head>
 <body>
-<header><h1 id="appTitle" aria-label="Bingo Host">Bingo Host<span id="adminCrown" class="guest-hidden">👑</span></h1><div class="sub">A〜E 全250枚対応・受付＋抽選 Ver.2.25 Tik入口版</div></header>
+<header><h1 id="appTitle" aria-label="Bingo Host">Bingo Host<span id="adminCrown" class="guest-hidden">👑</span></h1><div class="sub">A〜E 全250枚対応・受付＋抽選 Ver.2.25 Tik設定版</div></header>
 <main>
 <form id="form" class="panel entry">
 <h2>参加者を登録</h2>
@@ -315,19 +329,41 @@ body.tik-mode-open{overflow:hidden}
   </button>
 </div>
 
-<div id="appVersionFooter" style="text-align:center;color:#777;font-size:11px;padding:2px 0 18px">Ver.2.25 Tik入口版</div>
+<div id="appVersionFooter" style="text-align:center;color:#777;font-size:11px;padding:2px 0 18px">Ver.2.25 Tik設定版</div>
 </main>
 <section id="tikModeScreen" class="tik-mode-screen" hidden aria-label="Tikモード">
   <div class="tik-mode-header">
     <button id="closeTikModeBtn" class="tik-mode-back" type="button">← 通常モードへ戻る</button>
-    <div><div class="tik-mode-title">Tikモード</div><div class="tik-mode-sub">第1段階・入口画面</div></div>
+    <div><div class="tik-mode-title">Tikモード</div><div class="tik-mode-sub">第1段階・工程2 参加設定</div></div>
   </div>
   <div class="tik-mode-main">
     <div class="tik-mode-card">
       <span class="tik-mode-badge">管理者専用</span>
-      <h2>Tikモード入口</h2>
-      <div class="tik-mode-note">Tikモードの入口画面まで実装されています。現在はTikTok接続、疑似コメント、疑似ハートミー、カード自動発行はまだ動作しません。</div>
-      <div class="tik-mode-placeholder">次の段階で参加設定画面を追加します。既存の受付・抽選・リーチ・ビンゴ・Firebase同期・保存データには、この画面を開閉しても変更を加えません。</div>
+      <h2>参加設定</h2>
+      <div class="tik-mode-note">Tikモードで受け付ける参加定員を設定します。1〜250人の範囲で保存できます。</div>
+
+      <div class="tik-setting-summary" aria-label="参加定員の設定状況">
+        <div class="tik-setting-stat"><strong id="tikCurrentLimit">250人</strong><small>現在の参加定員</small></div>
+        <div class="tik-setting-stat"><strong id="tikPendingLimit">250人</strong><small>変更後の参加定員</small></div>
+        <div class="tik-setting-stat"><strong id="tikSaveState">未変更</strong><small>保存状態</small></div>
+      </div>
+
+      <label class="tik-limit-label" for="tikParticipantLimit">変更後の参加定員</label>
+      <input id="tikParticipantLimit" class="tik-limit-input" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="3" autocomplete="off" value="250" aria-describedby="tikSettingMessage">
+
+      <div class="tik-preset-title">プリセット</div>
+      <div class="tik-preset-grid">
+        <button class="tik-preset-btn" type="button" data-tik-limit="10">10人</button>
+        <button class="tik-preset-btn" type="button" data-tik-limit="30">30人</button>
+        <button class="tik-preset-btn" type="button" data-tik-limit="50">50人</button>
+        <button class="tik-preset-btn" type="button" data-tik-limit="100">100人</button>
+        <button class="tik-preset-btn" type="button" data-tik-limit="250">250人</button>
+      </div>
+
+      <button id="saveTikSettingsBtn" class="tik-save-btn" type="button">参加定員を保存</button>
+      <div id="tikSettingMessage" class="tik-setting-message" role="status" aria-live="polite">初期値は250人です。</div>
+
+      <div class="tik-mode-placeholder">この工程では参加定員設定のみ実装しています。疑似ユーザー、疑似コメント、疑似ハートミー、参加条件判定、カード自動発行、TikTok接続はまだ動作しません。</div>
     </div>
   </div>
 </section>
@@ -972,10 +1008,61 @@ if(appTitle){
   });
 }
 
+const TIK_SETTINGS_STORAGE="bingoHostTikSettingsV1";
+let tikSettings={participantLimit:250};
+
+function loadTikSettings(){
+  try{
+    const saved=JSON.parse(localStorage.getItem(TIK_SETTINGS_STORAGE));
+    if(saved && Number.isInteger(saved.participantLimit) && saved.participantLimit>=1 && saved.participantLimit<=250){
+      tikSettings={participantLimit:saved.participantLimit};
+    }
+  }catch(e){}
+  renderTikSettings(true);
+}
+function setTikSettingMessage(message,type=""){
+  const el=$("tikSettingMessage");if(!el)return;
+  el.textContent=message;
+  el.className=`tik-setting-message${type?` ${type}`:""}`;
+}
+function parseTikParticipantLimit(){
+  const input=$("tikParticipantLimit");
+  const raw=(input?.value||"").trim();
+  if(!raw)return {ok:false,message:"参加定員を入力してください。"};
+  if(!/^\d+$/.test(raw))return {ok:false,message:"参加定員は数字だけで入力してください。"};
+  const value=Number(raw);
+  if(value<=0)return {ok:false,message:"参加定員は1人以上で入力してください。"};
+  if(value>=251)return {ok:false,message:"参加定員は250人以下で入力してください。"};
+  return {ok:true,value};
+}
+function updateTikPresetState(value){
+  document.querySelectorAll("[data-tik-limit]").forEach(btn=>btn.classList.toggle("active",Number(btn.dataset.tikLimit)===value));
+}
+function renderTikSettings(initial=false){
+  const input=$("tikParticipantLimit");
+  if(initial && input)input.value=String(tikSettings.participantLimit);
+  const parsed=parseTikParticipantLimit();
+  $("tikCurrentLimit").textContent=`${tikSettings.participantLimit}人`;
+  $("tikPendingLimit").textContent=parsed.ok?`${parsed.value}人`:"—";
+  const unchanged=parsed.ok && parsed.value===tikSettings.participantLimit;
+  $("tikSaveState").textContent=unchanged?"保存済み":"未保存";
+  updateTikPresetState(parsed.ok?parsed.value:null);
+}
+function saveTikSettings(){
+  const parsed=parseTikParticipantLimit();
+  if(!parsed.ok){renderTikSettings();setTikSettingMessage(`⚠️ ${parsed.message}`,"err");$("tikParticipantLimit")?.focus();return;}
+  tikSettings={participantLimit:parsed.value};
+  try{
+    localStorage.setItem(TIK_SETTINGS_STORAGE,JSON.stringify(tikSettings));
+  }catch(e){setTikSettingMessage("⚠️ 設定を保存できませんでした。Safariの保存設定を確認してください。","err");return;}
+  renderTikSettings(true);
+  setTikSettingMessage(`✅ 参加定員を${tikSettings.participantLimit}人で保存しました。`,"ok");
+}
 function openTikMode(){
   if(!adminAuthenticated){note("⚠️ Tikモードは管理者ログインが必要です。","err");return;}
   const screen=$("tikModeScreen");
   if(!screen)return;
+  loadTikSettings();
   screen.hidden=false;
   document.body.classList.add("tik-mode-open");
   $("closeTikModeBtn")?.focus();
@@ -987,9 +1074,26 @@ function closeTikMode(){
   document.body.classList.remove("tik-mode-open");
   $("openTikModeBtn")?.focus();
 }
+$("tikParticipantLimit")?.addEventListener("input",e=>{
+  const original=e.target.value;
+  const sanitized=original.replace(/\D/g,"").slice(0,3);
+  e.target.value=sanitized;
+  renderTikSettings();
+  if(original!==sanitized)setTikSettingMessage("数字以外は入力できません。","err");
+  else setTikSettingMessage("変更後は「参加定員を保存」を押してください。");
+});
+document.querySelectorAll("[data-tik-limit]").forEach(btn=>btn.addEventListener("click",()=>{
+  const value=Number(btn.dataset.tikLimit);
+  $("tikParticipantLimit").value=String(value);
+  renderTikSettings();
+  setTikSettingMessage(`${value}人を選択しました。保存ボタンを押すと確定します。`);
+}));
+$("saveTikSettingsBtn").onclick=saveTikSettings;
+$("tikParticipantLimit")?.addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();saveTikSettings();}});
 $("openTikModeBtn").onclick=openTikMode;
 $("closeTikModeBtn").onclick=closeTikMode;
 document.addEventListener("keydown",e=>{if(e.key==="Escape" && !$("tikModeScreen")?.hidden)closeTikMode();});
+loadTikSettings();
 
 $("personalModeBtn").onclick=setPersonalMode;
 $("sharedModeBtn").onclick=setSharedMode;

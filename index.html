@@ -147,7 +147,7 @@ body.flash-reach::after,body.flash-bingo::after{content:"";position:fixed;inset:
 body.flash-reach::after{background:#ffe45c}body.flash-bingo::after{background:radial-gradient(circle,#fffbe0 0%,#ffd84d 48%,#ef9b00 100%);animation:screenFlashBingo 1.05s ease-out}
 @keyframes screenFlash{0%{opacity:.9}100%{opacity:0}}@keyframes screenFlashBingo{0%{opacity:1}35%{opacity:.4}50%{opacity:.92}100%{opacity:0}}@keyframes overlayIn{from{opacity:0}to{opacity:1}}@keyframes celebratePop{from{transform:scale(.72);opacity:0}to{transform:scale(1);opacity:1}}
 
-/* Tikモード（第1段階・工程2：参加設定） */
+/* Tikモード（第1段階・工程3-1：疑似ユーザー管理） */
 .tik-entry-actions{margin-top:12px;padding-top:12px;border-top:1px solid #5f4b1f}
 .tik-entry-btn{width:100%;min-height:48px;border:1px solid #8a6b25;border-radius:12px;background:#222;color:#f3cf67;font-weight:900}
 .tik-mode-screen{position:fixed;inset:0;z-index:12000;background:#f3f4f6;overflow:auto}
@@ -173,12 +173,31 @@ body.flash-reach::after{background:#ffe45c}body.flash-bingo::after{background:ra
 .tik-setting-message{margin-top:12px;padding:11px 13px;border-radius:11px;font-weight:800;line-height:1.5;background:#eef2f7;color:#475569}
 .tik-setting-message.ok{background:#e7f8ec;color:#116530}.tik-setting-message.err{background:#fff0f0;color:#a2231d}
 .tik-mode-placeholder{margin-top:14px;padding:14px;border:2px dashed #9ca3af;border-radius:14px;background:#f8fafc;color:#64748b}
+.tik-user-card{margin-top:14px}
+.tik-user-form{display:grid;grid-template-columns:1fr auto;gap:8px;margin-top:12px}
+.tik-user-name-input,.tik-generator-input{width:100%;border:2px solid #64748b;border-radius:12px;padding:12px;font-size:17px;font-weight:800;background:#fff;color:#111827}
+.tik-user-name-input:focus,.tik-generator-input:focus{outline:3px solid #f5cf5d66;border-color:#9a751c}
+.tik-user-add-btn,.tik-generate-btn{border:0;border-radius:12px;background:#151515;color:#f4cf66;padding:11px 14px;font-weight:900;white-space:nowrap}
+.tik-user-tools{margin-top:16px;padding-top:14px;border-top:1px solid #d7dbe2}
+.tik-generator-row{display:grid;grid-template-columns:1fr auto;gap:8px}
+.tik-user-count{display:flex;justify-content:space-between;align-items:center;gap:10px;margin:16px 0 8px;font-weight:900;color:#111827}
+.tik-user-count .pill{background:#111827;color:#fff}
+.tik-user-list{display:grid;gap:8px}
+.tik-user-item{border:1px solid #d6dae1;border-radius:13px;background:#f8fafc;padding:12px}
+.tik-user-item-head{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
+.tik-user-id{font-size:13px;font-weight:1000;color:#7a5b0b}
+.tik-user-display{font-size:18px;font-weight:1000;color:#111827;margin-top:3px;overflow-wrap:anywhere}
+.tik-user-created{font-size:12px;color:#64748b;margin-top:5px}
+.tik-user-actions{display:flex;gap:6px;flex-shrink:0}
+.tik-user-action{border:1px solid #8a6b25;border-radius:9px;background:#fff9df;color:#5d4300;padding:7px 9px;font-weight:900}
+.tik-user-action.delete{border-color:#b84a42;background:#fff1f0;color:#9d211a}
+.tik-user-empty{text-align:center;color:#64748b;padding:18px 8px;border:2px dashed #c4c9d1;border-radius:12px;background:#fafbfc}
 body.tik-mode-open{overflow:hidden}
-@media(max-width:560px){.tik-setting-summary{grid-template-columns:1fr}.tik-preset-grid{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:560px){.tik-setting-summary{grid-template-columns:1fr}.tik-preset-grid{grid-template-columns:repeat(3,1fr)}.tik-user-form,.tik-generator-row{grid-template-columns:1fr}.tik-user-add-btn,.tik-generate-btn{width:100%}.tik-user-item-head{flex-direction:column}.tik-user-actions{width:100%}.tik-user-action{flex:1}}
 </style>
 </head>
 <body>
-<header><h1 id="appTitle" aria-label="Bingo Host">Bingo Host<span id="adminCrown" class="guest-hidden">👑</span></h1><div class="sub">A〜E 全250枚対応・受付＋抽選 Ver.2.25 Tik設定版</div></header>
+<header><h1 id="appTitle" aria-label="Bingo Host">Bingo Host<span id="adminCrown" class="guest-hidden">👑</span></h1><div class="sub">A〜E 全250枚対応・受付＋抽選 Ver.2.25 Tikユーザー版</div></header>
 <main>
 <form id="form" class="panel entry">
 <h2>参加者を登録</h2>
@@ -329,12 +348,12 @@ body.tik-mode-open{overflow:hidden}
   </button>
 </div>
 
-<div id="appVersionFooter" style="text-align:center;color:#777;font-size:11px;padding:2px 0 18px">Ver.2.25 Tik設定版</div>
+<div id="appVersionFooter" style="text-align:center;color:#777;font-size:11px;padding:2px 0 18px">Ver.2.25 Tikユーザー版</div>
 </main>
 <section id="tikModeScreen" class="tik-mode-screen" hidden aria-label="Tikモード">
   <div class="tik-mode-header">
     <button id="closeTikModeBtn" class="tik-mode-back" type="button">← 通常モードへ戻る</button>
-    <div><div class="tik-mode-title">Tikモード</div><div class="tik-mode-sub">第1段階・工程2 参加設定</div></div>
+    <div><div class="tik-mode-title">Tikモード</div><div class="tik-mode-sub">第1段階・工程3-1 疑似ユーザー管理</div></div>
   </div>
   <div class="tik-mode-main">
     <div class="tik-mode-card">
@@ -363,7 +382,39 @@ body.tik-mode-open{overflow:hidden}
       <button id="saveTikSettingsBtn" class="tik-save-btn" type="button">参加定員を保存</button>
       <div id="tikSettingMessage" class="tik-setting-message" role="status" aria-live="polite">初期値は250人です。</div>
 
-      <div class="tik-mode-placeholder">この工程では参加定員設定のみ実装しています。疑似ユーザー、疑似コメント、疑似ハートミー、参加条件判定、カード自動発行、TikTok接続はまだ動作しません。</div>
+      <div class="tik-mode-placeholder">参加定員設定は保存済みです。工程3-1では疑似ユーザー管理のみを追加しています。疑似コメント、疑似ハートミー、参加条件判定、カード自動発行、定員判定、TikTok接続はまだ動作しません。</div>
+    </div>
+
+    <div class="tik-mode-card tik-user-card">
+      <span class="tik-mode-badge">工程3-1</span>
+      <h2>疑似ユーザー管理</h2>
+      <div class="tik-mode-note">表示名を入力して疑似ユーザーを作成します。疑似ユーザーIDは重複しないよう自動採番されます。</div>
+
+      <label class="tik-limit-label" for="tikUserDisplayName">表示名</label>
+      <div class="tik-user-form">
+        <input id="tikUserDisplayName" class="tik-user-name-input" type="text" maxlength="40" autocomplete="off" placeholder="例：ちゃちゃ">
+        <button id="addTikUserBtn" class="tik-user-add-btn" type="button">1人追加</button>
+      </div>
+
+      <div class="tik-user-tools">
+        <div class="tik-preset-title">テストデータ自動生成</div>
+        <div class="tik-preset-grid">
+          <button class="tik-preset-btn" type="button" data-tik-user-count="10">10人</button>
+          <button class="tik-preset-btn" type="button" data-tik-user-count="30">30人</button>
+          <button class="tik-preset-btn" type="button" data-tik-user-count="50">50人</button>
+          <button class="tik-preset-btn" type="button" data-tik-user-count="100">100人</button>
+          <button class="tik-preset-btn" type="button" data-tik-user-count="250">250人</button>
+        </div>
+        <label class="tik-limit-label" for="tikUserGenerateCount">任意人数</label>
+        <div class="tik-generator-row">
+          <input id="tikUserGenerateCount" class="tik-generator-input" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="3" autocomplete="off" placeholder="1〜250">
+          <button id="generateTikUsersBtn" class="tik-generate-btn" type="button">自動生成</button>
+        </div>
+      </div>
+
+      <div id="tikUserMessage" class="tik-setting-message" role="status" aria-live="polite">疑似ユーザーはまだ登録されていません。</div>
+      <div class="tik-user-count"><span>疑似ユーザー一覧</span><span id="tikUserCount" class="pill">0人</span></div>
+      <div id="tikUserList" class="tik-user-list"><div class="tik-user-empty">疑似ユーザーはまだありません。</div></div>
     </div>
   </div>
 </section>
@@ -1009,7 +1060,9 @@ if(appTitle){
 }
 
 const TIK_SETTINGS_STORAGE="bingoHostTikSettingsV1";
+const TIK_USERS_STORAGE="bingoHostTikUsersV1";
 let tikSettings={participantLimit:250};
+let tikUsersState={nextSequence:1,users:[]};
 
 function loadTikSettings(){
   try{
@@ -1058,11 +1111,95 @@ function saveTikSettings(){
   renderTikSettings(true);
   setTikSettingMessage(`✅ 参加定員を${tikSettings.participantLimit}人で保存しました。`,"ok");
 }
+function normalizeTikUsersState(raw){
+  const users=Array.isArray(raw?.users)?raw.users.filter(u=>u&&typeof u.id==="string"&&typeof u.displayName==="string"):[];
+  const unique=[];const ids=new Set();
+  for(const user of users){
+    if(ids.has(user.id))continue;
+    ids.add(user.id);
+    unique.push({id:user.id,displayName:user.displayName.trim()||user.id,createdAt:Number(user.createdAt)||Date.now()});
+  }
+  const highest=unique.reduce((max,u)=>{const m=u.id.match(/^TEST-(\d+)$/);return m?Math.max(max,Number(m[1])):max;},0);
+  return {nextSequence:Math.max(Number(raw?.nextSequence)||1,highest+1),users:unique};
+}
+function loadTikUsers(){
+  try{tikUsersState=normalizeTikUsersState(JSON.parse(localStorage.getItem(TIK_USERS_STORAGE)));}
+  catch(e){tikUsersState={nextSequence:1,users:[]};}
+  renderTikUsers();
+}
+function saveTikUsers(){
+  localStorage.setItem(TIK_USERS_STORAGE,JSON.stringify(tikUsersState));
+  renderTikUsers();
+}
+function setTikUserMessage(message,type=""){
+  const el=$("tikUserMessage");if(!el)return;
+  el.textContent=message;el.className=`tik-setting-message${type?` ${type}`:""}`;
+}
+function nextTikUserId(){
+  let id;
+  do{id=`TEST-${String(tikUsersState.nextSequence++).padStart(3,"0")}`;}while(tikUsersState.users.some(u=>u.id===id));
+  return id;
+}
+function formatTikCreatedAt(value){
+  try{return new Date(value).toLocaleString("ja-JP",{year:"numeric",month:"2-digit",day:"2-digit",hour:"2-digit",minute:"2-digit",second:"2-digit"});}
+  catch(e){return "—";}
+}
+function renderTikUsers(){
+  const list=$("tikUserList"),count=$("tikUserCount");if(!list||!count)return;
+  count.textContent=`${tikUsersState.users.length}人`;
+  list.innerHTML=tikUsersState.users.length?tikUsersState.users.map(user=>`<div class="tik-user-item"><div class="tik-user-item-head"><div><div class="tik-user-id">${esc(user.id)}</div><div class="tik-user-display">${esc(user.displayName)}</div><div class="tik-user-created">作成：${esc(formatTikCreatedAt(user.createdAt))}</div></div><div class="tik-user-actions"><button class="tik-user-action" type="button" data-tik-user-edit="${esc(user.id)}">編集</button><button class="tik-user-action delete" type="button" data-tik-user-delete="${esc(user.id)}">削除</button></div></div></div>`).join(""):'<div class="tik-user-empty">疑似ユーザーはまだありません。</div>';
+  list.querySelectorAll("[data-tik-user-edit]").forEach(btn=>btn.onclick=()=>editTikUser(btn.dataset.tikUserEdit));
+  list.querySelectorAll("[data-tik-user-delete]").forEach(btn=>btn.onclick=()=>deleteTikUser(btn.dataset.tikUserDelete));
+}
+function addTikUser(){
+  const input=$("tikUserDisplayName");const displayName=(input?.value||"").trim();
+  if(!displayName){setTikUserMessage("⚠️ 表示名を入力してください。","err");input?.focus();return;}
+  if(tikUsersState.users.length>=250){setTikUserMessage("⚠️ 疑似ユーザーは最大250人です。","err");return;}
+  const user={id:nextTikUserId(),displayName,createdAt:Date.now()};
+  tikUsersState.users.push(user);
+  try{saveTikUsers();}catch(e){setTikUserMessage("⚠️ 疑似ユーザーを保存できませんでした。","err");return;}
+  if(input)input.value="";
+  setTikUserMessage(`✅ ${user.displayName}（${user.id}）を作成しました。`,"ok");input?.focus();
+}
+function editTikUser(id){
+  const user=tikUsersState.users.find(u=>u.id===id);if(!user)return;
+  const next=prompt(`${user.id} の表示名を変更します。`,user.displayName);if(next===null)return;
+  const displayName=next.trim();if(!displayName){setTikUserMessage("⚠️ 表示名を空欄にはできません。","err");return;}
+  user.displayName=displayName;
+  try{saveTikUsers();setTikUserMessage(`✅ ${id} の表示名を変更しました。`,"ok");}catch(e){setTikUserMessage("⚠️ 変更を保存できませんでした。","err");}
+}
+function deleteTikUser(id){
+  const user=tikUsersState.users.find(u=>u.id===id);if(!user)return;
+  if(!confirm(`${user.displayName}（${id}）を削除しますか？`))return;
+  tikUsersState.users=tikUsersState.users.filter(u=>u.id!==id);
+  try{saveTikUsers();setTikUserMessage(`✅ ${user.displayName}（${id}）を削除しました。`,"ok");}catch(e){setTikUserMessage("⚠️ 削除を保存できませんでした。","err");}
+}
+function parseTikUserGenerateCount(){
+  const raw=($("tikUserGenerateCount")?.value||"").trim();
+  if(!raw)return {ok:false,message:"生成人数を入力してください。"};
+  if(!/^\d+$/.test(raw))return {ok:false,message:"生成人数は数字だけで入力してください。"};
+  const value=Number(raw);
+  if(value<1||value>250)return {ok:false,message:"生成人数は1〜250人で入力してください。"};
+  if(tikUsersState.users.length+value>250)return {ok:false,message:`現在${tikUsersState.users.length}人のため、追加できるのは${250-tikUsersState.users.length}人までです。`};
+  return {ok:true,value};
+}
+function generateTikUsers(){
+  const parsed=parseTikUserGenerateCount();if(!parsed.ok){setTikUserMessage(`⚠️ ${parsed.message}`,"err");return;}
+  const start=tikUsersState.users.length+1;
+  for(let i=0;i<parsed.value;i++){
+    const id=nextTikUserId();
+    tikUsersState.users.push({id,displayName:`テスト${String(start+i).padStart(3,"0")}`,createdAt:Date.now()+i});
+  }
+  try{saveTikUsers();}catch(e){setTikUserMessage("⚠️ テストデータを保存できませんでした。","err");return;}
+  setTikUserMessage(`✅ 疑似ユーザーを${parsed.value}人生成しました。`,"ok");
+}
+
 function openTikMode(){
   if(!adminAuthenticated){note("⚠️ Tikモードは管理者ログインが必要です。","err");return;}
   const screen=$("tikModeScreen");
   if(!screen)return;
   loadTikSettings();
+  loadTikUsers();
   screen.hidden=false;
   document.body.classList.add("tik-mode-open");
   $("closeTikModeBtn")?.focus();
@@ -1090,10 +1227,17 @@ document.querySelectorAll("[data-tik-limit]").forEach(btn=>btn.addEventListener(
 }));
 $("saveTikSettingsBtn").onclick=saveTikSettings;
 $("tikParticipantLimit")?.addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();saveTikSettings();}});
+$("addTikUserBtn").onclick=addTikUser;
+$("tikUserDisplayName")?.addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();addTikUser();}});
+$("tikUserGenerateCount")?.addEventListener("input",e=>{e.target.value=e.target.value.replace(/\D/g,"").slice(0,3);});
+$("tikUserGenerateCount")?.addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();generateTikUsers();}});
+$("generateTikUsersBtn").onclick=generateTikUsers;
+document.querySelectorAll("[data-tik-user-count]").forEach(btn=>btn.addEventListener("click",()=>{$("tikUserGenerateCount").value=btn.dataset.tikUserCount;setTikUserMessage(`${btn.dataset.tikUserCount}人を選択しました。「自動生成」を押すと追加します。`);}));
 $("openTikModeBtn").onclick=openTikMode;
 $("closeTikModeBtn").onclick=closeTikMode;
 document.addEventListener("keydown",e=>{if(e.key==="Escape" && !$("tikModeScreen")?.hidden)closeTikMode();});
 loadTikSettings();
+loadTikUsers();
 
 $("personalModeBtn").onclick=setPersonalMode;
 $("sharedModeBtn").onclick=setSharedMode;

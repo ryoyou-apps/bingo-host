@@ -146,10 +146,25 @@ input,select{width:100%;border:2px solid #777;border-radius:12px;padding:13px;ba
 body.flash-reach::after,body.flash-bingo::after{content:"";position:fixed;inset:0;z-index:9998;pointer-events:none;animation:screenFlash .7s ease-out}
 body.flash-reach::after{background:#ffe45c}body.flash-bingo::after{background:radial-gradient(circle,#fffbe0 0%,#ffd84d 48%,#ef9b00 100%);animation:screenFlashBingo 1.05s ease-out}
 @keyframes screenFlash{0%{opacity:.9}100%{opacity:0}}@keyframes screenFlashBingo{0%{opacity:1}35%{opacity:.4}50%{opacity:.92}100%{opacity:0}}@keyframes overlayIn{from{opacity:0}to{opacity:1}}@keyframes celebratePop{from{transform:scale(.72);opacity:0}to{transform:scale(1);opacity:1}}
+
+/* Tikモード入口（第1段階：既存機能から独立した画面のみ） */
+.tik-entry-actions{margin-top:12px;padding-top:12px;border-top:1px solid #5f4b1f}
+.tik-entry-btn{width:100%;min-height:48px;border:1px solid #8a6b25;border-radius:12px;background:#222;color:#f3cf67;font-weight:900}
+.tik-mode-screen{position:fixed;inset:0;z-index:12000;background:#f3f4f6;overflow:auto}
+.tik-mode-screen[hidden]{display:none!important}
+.tik-mode-header{position:sticky;top:0;z-index:2;background:#151515;color:#fff;padding:13px 14px;display:flex;align-items:center;gap:10px;box-shadow:0 2px 10px #0003}
+.tik-mode-back{border:1px solid #777;border-radius:10px;background:#fff;color:#111;padding:9px 12px;font-weight:900}
+.tik-mode-title{font-size:20px;font-weight:900}.tik-mode-sub{font-size:12px;opacity:.8;margin-top:2px}
+.tik-mode-main{max-width:850px;margin:auto;padding:12px}
+.tik-mode-card{background:#fff;border-radius:16px;padding:18px;box-shadow:0 2px 9px #00000010;border:2px solid #d7dbe2}
+.tik-mode-badge{display:inline-block;background:#111827;color:#fff;border-radius:999px;padding:6px 10px;font-size:13px;font-weight:900;margin-bottom:12px}
+.tik-mode-card h2{margin:0 0 10px}.tik-mode-note{line-height:1.7;color:#4b5563}
+.tik-mode-placeholder{margin-top:14px;padding:14px;border:2px dashed #9ca3af;border-radius:14px;background:#f8fafc;color:#64748b}
+body.tik-mode-open{overflow:hidden}
 </style>
 </head>
 <body>
-<header><h1 id="appTitle" aria-label="Bingo Host">Bingo Host<span id="adminCrown" class="guest-hidden">👑</span></h1><div class="sub">A〜E 全250枚対応・受付＋抽選 Ver.2.25</div></header>
+<header><h1 id="appTitle" aria-label="Bingo Host">Bingo Host<span id="adminCrown" class="guest-hidden">👑</span></h1><div class="sub">A〜E 全250枚対応・受付＋抽選 Ver.2.25 Tik入口版</div></header>
 <main>
 <form id="form" class="panel entry">
 <h2>参加者を登録</h2>
@@ -221,6 +236,9 @@ body.flash-reach::after{background:#ffe45c}body.flash-bingo::after{background:ra
         <button id="testCloudBtn" class="secondary" type="button">接続確認</button>
       </div>
       <div id="adminTestResult" class="admin-test-result"></div>
+    </div>
+    <div id="tikEntryActions" class="tik-entry-actions guest-hidden">
+      <button id="openTikModeBtn" class="tik-entry-btn" type="button">Tikモードを開く</button>
     </div>
     <div id="adminHelp" class="admin-help">管理操作を行う場合のみログインしてください。</div>
     <div id="adminLockMessage" class="admin-lock"></div>
@@ -297,8 +315,22 @@ body.flash-reach::after{background:#ffe45c}body.flash-bingo::after{background:ra
   </button>
 </div>
 
-<div id="appVersionFooter" style="text-align:center;color:#777;font-size:11px;padding:2px 0 18px">Ver.2.25</div>
+<div id="appVersionFooter" style="text-align:center;color:#777;font-size:11px;padding:2px 0 18px">Ver.2.25 Tik入口版</div>
 </main>
+<section id="tikModeScreen" class="tik-mode-screen" hidden aria-label="Tikモード">
+  <div class="tik-mode-header">
+    <button id="closeTikModeBtn" class="tik-mode-back" type="button">← 通常モードへ戻る</button>
+    <div><div class="tik-mode-title">Tikモード</div><div class="tik-mode-sub">第1段階・入口画面</div></div>
+  </div>
+  <div class="tik-mode-main">
+    <div class="tik-mode-card">
+      <span class="tik-mode-badge">管理者専用</span>
+      <h2>Tikモード入口</h2>
+      <div class="tik-mode-note">Tikモードの入口画面まで実装されています。現在はTikTok接続、疑似コメント、疑似ハートミー、カード自動発行はまだ動作しません。</div>
+      <div class="tik-mode-placeholder">次の段階で参加設定画面を追加します。既存の受付・抽選・リーチ・ビンゴ・Firebase同期・保存データには、この画面を開閉しても変更を加えません。</div>
+    </div>
+  </div>
+</section>
 <div id="celebrationOverlay" class="celebration-overlay" hidden role="dialog" aria-live="assertive" aria-modal="true">
   <div class="celebration-card">
     <div id="celebrationIcon" class="celebration-icon"></div>
@@ -908,6 +940,7 @@ function renderMode(){
   if(changeBtn)changeBtn.classList.toggle("guest-hidden",!adminAuthenticated);
   if(resetBtn)resetBtn.classList.toggle("guest-hidden",!adminAuthenticated);
   if(testBox)testBox.classList.toggle("guest-hidden",!adminAuthenticated);
+  const tikEntry=$("tikEntryActions");if(tikEntry)tikEntry.classList.toggle("guest-hidden",!adminAuthenticated);
   if(help)help.textContent=setupMode?"ここで登録した8桁が、今後のログイン用パスワードになります。":"管理操作を行う場合のみログインしてください。";
   if(password){password.classList.toggle("guest-hidden",adminAuthenticated); if(adminAuthenticated)password.value="";}
   render();
@@ -938,6 +971,25 @@ if(appTitle){
     titleTapTimer=setTimeout(()=>{titleTapCount=0;},850);
   });
 }
+
+function openTikMode(){
+  if(!adminAuthenticated){note("⚠️ Tikモードは管理者ログインが必要です。","err");return;}
+  const screen=$("tikModeScreen");
+  if(!screen)return;
+  screen.hidden=false;
+  document.body.classList.add("tik-mode-open");
+  $("closeTikModeBtn")?.focus();
+}
+function closeTikMode(){
+  const screen=$("tikModeScreen");
+  if(!screen)return;
+  screen.hidden=true;
+  document.body.classList.remove("tik-mode-open");
+  $("openTikModeBtn")?.focus();
+}
+$("openTikModeBtn").onclick=openTikMode;
+$("closeTikModeBtn").onclick=closeTikMode;
+document.addEventListener("keydown",e=>{if(e.key==="Escape" && !$("tikModeScreen")?.hidden)closeTikMode();});
 
 $("personalModeBtn").onclick=setPersonalMode;
 $("sharedModeBtn").onclick=setSharedMode;

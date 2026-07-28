@@ -206,7 +206,7 @@ body.flash-reach::after{background:#ffe45c}body.flash-bingo::after{background:ra
 .tik-log-head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin:16px 0 8px}
 .tik-log-list{display:grid;gap:7px;max-height:420px;overflow:auto}
 .tik-log-item{border-left:5px solid #64748b;border-radius:10px;background:#f8fafc;padding:10px 11px}
-.tik-log-item.comment{border-left-color:#2563eb}.tik-log-item.heart{border-left-color:#db2777}.tik-log-item.duplicate{border-left-color:#f59e0b}.tik-log-item.delete{border-left-color:#dc2626}.tik-log-item.error{border-left-color:#991b1b}
+.tik-log-item.comment{border-left-color:#2563eb}.tik-log-item.heart{border-left-color:#db2777}.tik-log-item.user{border-left-color:#0f766e}.tik-log-item.settings{border-left-color:#7c3aed}.tik-log-item.duplicate{border-left-color:#f59e0b}.tik-log-item.delete{border-left-color:#dc2626}.tik-log-item.error{border-left-color:#991b1b}.tik-log-meta{display:flex;flex-wrap:wrap;gap:5px;margin-top:5px}.tik-log-chip{display:inline-flex;border-radius:999px;background:#e2e8f0;color:#334155;padding:2px 7px;font-size:10px;font-weight:900}.tik-log-chip.done{background:#dcfce7;color:#166534}.tik-log-chip.failed{background:#fee2e2;color:#991b1b}.tik-log-chip.invalid{background:#fef3c7;color:#92400e}
 .tik-log-time{font-size:11px;color:#64748b}.tik-log-title{font-weight:1000;color:#111827;margin-top:2px}.tik-log-detail{font-size:12px;color:#475569;margin-top:3px;line-height:1.45;overflow-wrap:anywhere}
 .tik-log-clear{border:1px solid #b84a42;border-radius:9px;background:#fff1f0;color:#9d211a;padding:7px 10px;font-weight:900}
 .tik-event-badges{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}.tik-event-badge{border-radius:999px;padding:5px 8px;font-size:11px;font-weight:900;background:#e5e7eb;color:#475569}.tik-event-badge.on{background:#dcfce7;color:#166534}
@@ -215,7 +215,7 @@ body.tik-mode-open{overflow:hidden}
 </style>
 </head>
 <body>
-<header><h1 id="appTitle" aria-label="Bingo Host">Bingo Host<span id="adminCrown" class="guest-hidden">👑</span></h1><div class="sub">A〜E 全250枚対応・受付＋抽選 Ver.2.25 Tikイベント版</div></header>
+<header><h1 id="appTitle" aria-label="Bingo Host">Bingo Host<span id="adminCrown" class="guest-hidden">👑</span></h1><div class="sub">A〜E 全250枚対応・受付＋抽選 Ver.2.25 共通ログ基盤版</div></header>
 <main>
 <form id="form" class="panel entry">
 <h2>参加者を登録</h2>
@@ -366,12 +366,12 @@ body.tik-mode-open{overflow:hidden}
   </button>
 </div>
 
-<div id="appVersionFooter" style="text-align:center;color:#777;font-size:11px;padding:2px 0 18px">Ver.2.25 Tikイベント版</div>
+<div id="appVersionFooter" style="text-align:center;color:#777;font-size:11px;padding:2px 0 18px">Ver.2.25 共通ログ基盤版</div>
 </main>
 <section id="tikModeScreen" class="tik-mode-screen" hidden aria-label="Tikモード">
   <div class="tik-mode-header">
     <button id="closeTikModeBtn" class="tik-mode-back" type="button">← 通常モードへ戻る</button>
-    <div><div class="tik-mode-title">Tikモード</div><div class="tik-mode-sub">第1段階・工程3-2 イベント管理</div></div>
+    <div><div class="tik-mode-title">Tikモード</div><div class="tik-mode-sub">第1段階・工程3-2.5 共通イベントログ</div></div>
   </div>
   <div class="tik-mode-main">
     <div class="tik-mode-card">
@@ -400,7 +400,7 @@ body.tik-mode-open{overflow:hidden}
       <button id="saveTikSettingsBtn" class="tik-save-btn" type="button">参加定員を保存</button>
       <div id="tikSettingMessage" class="tik-setting-message" role="status" aria-live="polite">初期値は250人です。</div>
 
-      <div class="tik-mode-placeholder">参加定員設定と疑似ユーザー管理は保存済みです。工程3-2では疑似コメント・疑似ハートミー・イベントログのみを追加しています。参加条件判定、カード自動発行、定員判定、TikTok接続はまだ動作しません。</div>
+      <div class="tik-mode-placeholder">工程3-2.5では、将来アプリ全体で利用できる共通イベントログ基盤を追加しています。参加条件判定、カード自動発行、定員判定、TikTok接続はまだ動作しません。</div>
     </div>
 
     <div class="tik-mode-card tik-user-card">
@@ -455,8 +455,8 @@ body.tik-mode-open{overflow:hidden}
     </div>
 
     <div class="tik-mode-card tik-event-panel">
-      <div class="tik-log-head"><h2 style="margin:0">イベントログ</h2><button id="clearTikEventLogBtn" class="tik-log-clear" type="button">ログを全削除</button></div>
-      <div class="tik-mode-note">最新のイベントを上に表示します。受信回数には重複送信も含みます。</div>
+      <div class="tik-log-head"><h2 style="margin:0">共通イベントログ</h2><button id="clearTikEventLogBtn" class="tik-log-clear" type="button">ログを全削除</button></div>
+      <div class="tik-mode-note">最新のイベントを上に表示します。イベントID・処理状態・処理結果を共通形式で記録します。</div>
       <div id="tikEventLogList" class="tik-log-list"><div class="tik-user-empty">イベントログはまだありません。</div></div>
     </div>
   </div>
@@ -1104,11 +1104,14 @@ if(appTitle){
 
 const TIK_SETTINGS_STORAGE="bingoHostTikSettingsV1";
 const TIK_USERS_STORAGE="bingoHostTikUsersV1";
-const TIK_EVENT_LOG_STORAGE="bingoHostTikEventLogV1";
+const COMMON_EVENT_LOG_STORAGE="bingoHostCommonEventLogV1";
+const LEGACY_TIK_EVENT_LOG_STORAGE="bingoHostTikEventLogV1";
+const COMMON_EVENT_SEQUENCE_STORAGE="bingoHostCommonEventSequenceV1";
 const TIK_DUPLICATE_WINDOW_MS=3000;
 let tikSettings={participantLimit:250};
 let tikUsersState={nextSequence:1,users:[]};
 let tikEventLog=[];
+let commonEventSequence=1;
 
 function loadTikSettings(){
   try{
@@ -1150,10 +1153,12 @@ function renderTikSettings(initial=false){
 function saveTikSettings(){
   const parsed=parseTikParticipantLimit();
   if(!parsed.ok){renderTikSettings();setTikSettingMessage(`⚠️ ${parsed.message}`,"err");$("tikParticipantLimit")?.focus();return;}
+  const previousLimit=tikSettings.participantLimit;
   tikSettings={participantLimit:parsed.value};
   try{
     localStorage.setItem(TIK_SETTINGS_STORAGE,JSON.stringify(tikSettings));
-  }catch(e){setTikSettingMessage("⚠️ 設定を保存できませんでした。Safariの保存設定を確認してください。","err");return;}
+  }catch(e){recordAppEvent({eventTypeCode:"ERROR",status:"失敗",result:"保存エラー",detail:"参加定員設定を保存できませんでした。"});setTikSettingMessage("⚠️ 設定を保存できませんでした。Safariの保存設定を確認してください。","err");return;}
+  recordAppEvent({eventTypeCode:"SETTINGS_CHANGED",status:"完了",result:"成功",detail:`参加定員 ${previousLimit}人 → ${tikSettings.participantLimit}人`});
   renderTikSettings(true);
   setTikSettingMessage(`✅ 参加定員を${tikSettings.participantLimit}人で保存しました。`,"ok");
 }
@@ -1205,7 +1210,8 @@ function addTikUser(){
   if(tikUsersState.users.length>=250){setTikUserMessage("⚠️ 疑似ユーザーは最大250人です。","err");return;}
   const user={id:nextTikUserId(),displayName,createdAt:Date.now(),commentReceived:false,commentReceivedAt:0,commentCount:0,lastComment:"",lastCommentEventAt:0,heartReceived:false,heartReceivedAt:0,heartCount:0,lastHeartEventAt:0};
   tikUsersState.users.push(user);
-  try{saveTikUsers();}catch(e){setTikUserMessage("⚠️ 疑似ユーザーを保存できませんでした。","err");return;}
+  try{saveTikUsers();}catch(e){recordAppEvent({eventTypeCode:"ERROR",user,status:"失敗",result:"保存エラー",detail:"疑似ユーザーを保存できませんでした。"});setTikUserMessage("⚠️ 疑似ユーザーを保存できませんでした。","err");return;}
+  recordAppEvent({eventTypeCode:"USER_CREATED",user,status:"完了",result:"成功",detail:"手動作成"});
   if(input)input.value="";
   setTikUserMessage(`✅ ${user.displayName}（${user.id}）を作成しました。`,"ok");input?.focus();
 }
@@ -1219,9 +1225,8 @@ function editTikUser(id){
 function deleteTikUser(id){
   const user=tikUsersState.users.find(u=>u.id===id);if(!user)return;
   if(!confirm(`${user.displayName}（${id}）を削除しますか？`))return;
-  addTikEventLog("delete",user,"イベント削除","疑似ユーザー削除に伴いイベント状態も削除");
   tikUsersState.users=tikUsersState.users.filter(u=>u.id!==id);
-  try{saveTikUsers();setTikUserMessage(`✅ ${user.displayName}（${id}）を削除しました。`,"ok");}catch(e){setTikUserMessage("⚠️ 削除を保存できませんでした。","err");}
+  try{saveTikUsers();recordAppEvent({eventTypeCode:"EVENT_DELETED",user,status:"完了",result:"成功",detail:"疑似ユーザー削除に伴いイベント状態も削除"});setTikUserMessage(`✅ ${user.displayName}（${id}）を削除しました。`,"ok");}catch(e){recordAppEvent({eventTypeCode:"ERROR",user,status:"失敗",result:"保存エラー",detail:"疑似ユーザー削除を保存できませんでした。"});setTikUserMessage("⚠️ 削除を保存できませんでした。","err");}
 }
 function parseTikUserGenerateCount(){
   const raw=($("tikUserGenerateCount")?.value||"").trim();
@@ -1239,23 +1244,77 @@ function generateTikUsers(){
     const id=nextTikUserId();
     tikUsersState.users.push({id,displayName:`テスト${String(start+i).padStart(3,"0")}`,createdAt:Date.now()+i,commentReceived:false,commentReceivedAt:0,commentCount:0,lastComment:"",lastCommentEventAt:0,heartReceived:false,heartReceivedAt:0,heartCount:0,lastHeartEventAt:0});
   }
-  try{saveTikUsers();}catch(e){setTikUserMessage("⚠️ テストデータを保存できませんでした。","err");return;}
+  const generated=tikUsersState.users.slice(-parsed.value);
+  try{saveTikUsers();}catch(e){recordAppEvent({eventTypeCode:"ERROR",status:"失敗",result:"保存エラー",detail:"テストデータを保存できませんでした。"});setTikUserMessage("⚠️ テストデータを保存できませんでした。","err");return;}
+  generated.forEach(user=>recordAppEvent({eventTypeCode:"USER_CREATED",user,status:"完了",result:"成功",detail:"自動生成",persist:false}));
+  try{saveTikEventLog();}catch(e){console.warn("generated user logs save failed",e);}
   setTikUserMessage(`✅ 疑似ユーザーを${parsed.value}人生成しました。`,"ok");
 }
 
 
+function eventTypeLabel(type){
+  const labels={USER_CREATED:"疑似ユーザー作成",COMMENT_RECEIVED:"疑似コメント受信",HEART_RECEIVED:"疑似ハートミー受信",EVENT_DELETED:"イベント削除",SETTINGS_CHANGED:"設定変更",ERROR:"エラー"};
+  return labels[type]||String(type||"イベント");
+}
+function eventCssType(type,status){
+  if(status==="失敗")return "error";
+  if(status==="無効")return "duplicate";
+  if(type==="COMMENT_RECEIVED")return "comment";
+  if(type==="HEART_RECEIVED")return "heart";
+  if(type==="USER_CREATED")return "user";
+  if(type==="SETTINGS_CHANGED")return "settings";
+  if(type==="EVENT_DELETED")return "delete";
+  return "";
+}
+function eventStatusClass(status){return status==="完了"?"done":status==="失敗"?"failed":status==="無効"?"invalid":"";}
+function getStoredEventSequence(){
+  const n=Number(localStorage.getItem(COMMON_EVENT_SEQUENCE_STORAGE)||1);
+  return Number.isInteger(n)&&n>0?n:1;
+}
+function syncEventSequenceFromLog(){
+  const highest=tikEventLog.reduce((max,event)=>{const m=String(event.eventId||"").match(/^EVT-(\d+)$/);return m?Math.max(max,Number(m[1])):max;},0);
+  commonEventSequence=Math.max(getStoredEventSequence(),highest+1,1);
+  try{localStorage.setItem(COMMON_EVENT_SEQUENCE_STORAGE,String(commonEventSequence));}catch(e){}
+}
+function nextCommonEventId(){
+  const used=new Set(tikEventLog.map(event=>event.eventId));
+  let id;
+  do{id=`EVT-${String(commonEventSequence++).padStart(6,"0")}`;}while(used.has(id));
+  try{localStorage.setItem(COMMON_EVENT_SEQUENCE_STORAGE,String(commonEventSequence));}catch(e){}
+  return id;
+}
 function normalizeTikEventLog(raw){
   if(!Array.isArray(raw))return [];
-  return raw.filter(x=>x&&typeof x.type==="string").slice(-1000).map(x=>({id:String(x.id||`${Date.now()}-${Math.random()}`),at:Number(x.at)||Date.now(),type:String(x.type),eventType:String(x.eventType||"イベント"),userId:String(x.userId||""),displayName:String(x.displayName||""),result:String(x.result||""),detail:String(x.detail||"")}));
+  const normalized=raw.filter(x=>x&&typeof x==="object").slice(-2000).map(x=>{
+    const legacyType=String(x.type||"");
+    const type=x.eventTypeCode||(legacyType==="comment"?"COMMENT_RECEIVED":legacyType==="heart"?"HEART_RECEIVED":legacyType==="delete"?"EVENT_DELETED":legacyType==="error"?"ERROR":legacyType==="duplicate"?(String(x.eventType||"").includes("ハート")?"HEART_RECEIVED":"COMMENT_RECEIVED"):"ERROR");
+    const status=String(x.status||(legacyType==="duplicate"?"無効":legacyType==="error"?"失敗":"完了"));
+    const result=String(x.result||(status==="無効"?"重複のため無効":status==="失敗"?"入力エラー":"成功"));
+    return {eventId:/^EVT-\d{6,}$/.test(String(x.eventId||x.id||""))?String(x.eventId||x.id):"",occurredAt:Number(x.occurredAt||x.at)||Date.now(),eventTypeCode:String(type),eventType:String(x.eventTypeLabel||(!legacyType?x.eventType:"")||eventTypeLabel(type)),userId:String(x.userId||""),displayName:String(x.displayName||""),status,result,detail:String(x.detail||""),source:String(x.source||"tik-mode")};
+  }).sort((a,b)=>a.occurredAt-b.occurredAt);
+  let tempSeq=1;const used=new Set(normalized.filter(x=>x.eventId).map(x=>x.eventId));
+  for(const event of normalized){if(event.eventId)continue;let id;do{id=`EVT-${String(tempSeq++).padStart(6,"0")}`;}while(used.has(id));event.eventId=id;used.add(id);}
+  return normalized;
 }
 function loadTikEventLog(){
-  try{tikEventLog=normalizeTikEventLog(JSON.parse(localStorage.getItem(TIK_EVENT_LOG_STORAGE)));}catch(e){tikEventLog=[];}
+  let raw=null;
+  try{raw=JSON.parse(localStorage.getItem(COMMON_EVENT_LOG_STORAGE));}catch(e){}
+  if(!Array.isArray(raw)){try{raw=JSON.parse(localStorage.getItem(LEGACY_TIK_EVENT_LOG_STORAGE));}catch(e){raw=[];}}
+  tikEventLog=normalizeTikEventLog(raw);syncEventSequenceFromLog();
+  try{localStorage.setItem(COMMON_EVENT_LOG_STORAGE,JSON.stringify(tikEventLog));}catch(e){}
   renderTikEventLog();
 }
-function saveTikEventLog(){localStorage.setItem(TIK_EVENT_LOG_STORAGE,JSON.stringify(tikEventLog.slice(-1000)));renderTikEventLog();}
+function saveTikEventLog(){localStorage.setItem(COMMON_EVENT_LOG_STORAGE,JSON.stringify(tikEventLog.slice(-2000)));renderTikEventLog();}
+function recordAppEvent({eventTypeCode,eventType,user=null,status="完了",result="成功",detail="",source="tik-mode",persist=true}){
+  const event={eventId:nextCommonEventId(),occurredAt:Date.now(),eventTypeCode:String(eventTypeCode||"ERROR"),eventType:String(eventType||eventTypeLabel(eventTypeCode)),userId:String(user?.id||""),displayName:String(user?.displayName||""),status:String(status),result:String(result),detail:String(detail||""),source:String(source||"app")};
+  tikEventLog.push(event);if(persist){try{saveTikEventLog();}catch(e){console.warn("event log save failed",e);}}return event;
+}
+function updateAppEvent(eventId,changes={}){const event=tikEventLog.find(x=>x.eventId===eventId);if(!event)return null;Object.assign(event,changes);try{saveTikEventLog();}catch(e){console.warn("event log update failed",e);}return event;}
+window.appEventLog={record:recordAppEvent,update:updateAppEvent,list:()=>tikEventLog.slice()};
 function addTikEventLog(type,user,result,detail=""){
-  tikEventLog.push({id:`${Date.now()}-${Math.random()}`,at:Date.now(),type,eventType:type==="comment"?"コメント受信":type==="heart"?"ハートミー受信":type==="duplicate"?"重複イベント":type==="delete"?"イベント削除":type==="error"?"エラー発生":"イベント",userId:user?.id||"",displayName:user?.displayName||"",result,detail});
-  try{saveTikEventLog();}catch(e){}
+  const duplicate=type==="duplicate",isError=type==="error";
+  const eventTypeCode=type==="comment"||String(result).includes("コメント")?"COMMENT_RECEIVED":type==="heart"||String(result).includes("ハート")?"HEART_RECEIVED":type==="delete"?"EVENT_DELETED":isError?"ERROR":"ERROR";
+  return recordAppEvent({eventTypeCode,user,status:duplicate?"無効":isError?"失敗":"完了",result:duplicate?"重複のため無効":isError?String(result||"入力エラー"):"成功",detail:detail||result});
 }
 function formatTikEventAt(value){return value?formatTikCreatedAt(value):"—";}
 function renderTikEventUserSelect(){
@@ -1275,8 +1334,12 @@ function renderTikSelectedEventStatus(){
 }
 function renderTikEventLog(){
   const list=$("tikEventLogList");if(!list)return;
-  const rows=tikEventLog.slice().sort((a,b)=>b.at-a.at);
-  list.innerHTML=rows.length?rows.map(x=>`<div class="tik-log-item ${esc(x.type)}"><div class="tik-log-time">${esc(formatTikEventAt(x.at))}</div><div class="tik-log-title">${esc(x.eventType)}｜${esc(x.result)}</div><div class="tik-log-detail">${esc(x.userId)} ${esc(x.displayName)}${x.detail?`<br>${esc(x.detail)}`:""}</div></div>`).join(""):'<div class="tik-user-empty">イベントログはまだありません。</div>';
+  const rows=tikEventLog.slice().sort((a,b)=>b.occurredAt-a.occurredAt);
+  list.innerHTML=rows.length?rows.map(x=>{
+    const who=[x.userId,x.displayName].filter(Boolean).join(" ")||"システム";
+    const css=eventCssType(x.eventTypeCode,x.status);
+    return `<div class="tik-log-item ${esc(css)}"><div class="tik-log-time">${esc(formatTikEventAt(x.occurredAt))}　${esc(x.eventId)}</div><div class="tik-log-title">${esc(x.eventType)}</div><div class="tik-log-meta"><span class="tik-log-chip ${esc(eventStatusClass(x.status))}">状態：${esc(x.status)}</span><span class="tik-log-chip">結果：${esc(x.result)}</span></div><div class="tik-log-detail">${esc(who)}${x.detail?`<br>${esc(x.detail)}`:""}</div></div>`;
+  }).join(""):'<div class="tik-user-empty">イベントログはまだありません。</div>';
 }
 function sendTikComment(){
   const user=selectedTikEventUser();const input=$("tikCommentInput");const text=(input?.value||"").trim();
@@ -1285,24 +1348,23 @@ function sendTikComment(){
   const now=Date.now();user.commentCount=(user.commentCount||0)+1;
   const duplicate=user.lastComment===text && now-(user.lastCommentEventAt||0)<TIK_DUPLICATE_WINDOW_MS;
   user.lastCommentEventAt=now;
-  if(duplicate){addTikEventLog("duplicate",user,"重複コメントを無効化",`受信回数 ${user.commentCount}回／内容：${text}`);}
-  else{user.commentReceived=true;user.commentReceivedAt=now;user.lastComment=text;addTikEventLog("comment",user,"受信状態を更新",`受信回数 ${user.commentCount}回／内容：${text}`);}
-  try{saveTikUsers();setTikEventMessage(duplicate?"⚠️ 同じコメントの連続送信を重複として無効化しました。":"✅ 疑似コメントを受信しました。",duplicate?"err":"ok");}catch(e){addTikEventLog("error",user,"保存失敗",e.message||"不明なエラー");setTikEventMessage("⚠️ コメント状態を保存できませんでした。","err");}
+  if(duplicate){recordAppEvent({eventTypeCode:"COMMENT_RECEIVED",user,status:"無効",result:"重複のため無効",detail:`受信回数 ${user.commentCount}回／内容：${text}`});}
+  else{user.commentReceived=true;user.commentReceivedAt=now;user.lastComment=text;recordAppEvent({eventTypeCode:"COMMENT_RECEIVED",user,status:"完了",result:"成功",detail:`受信回数 ${user.commentCount}回／内容：${text}`});}
+  try{saveTikUsers();setTikEventMessage(duplicate?"⚠️ 同じコメントの連続送信を重複として無効化しました。":"✅ 疑似コメントを受信しました。",duplicate?"err":"ok");}catch(e){recordAppEvent({eventTypeCode:"ERROR",user,status:"失敗",result:"保存エラー",detail:e.message||"不明なエラー"});setTikEventMessage("⚠️ コメント状態を保存できませんでした。","err");}
 }
 function sendTikHeart(){
   const user=selectedTikEventUser();if(!user){setTikEventMessage("⚠️ 疑似ユーザーを選択してください。","err");return;}
   const now=Date.now();user.heartCount=(user.heartCount||0)+1;
   const duplicate=now-(user.lastHeartEventAt||0)<TIK_DUPLICATE_WINDOW_MS;user.lastHeartEventAt=now;
-  if(duplicate){addTikEventLog("duplicate",user,"重複ハートミーを無効化",`受信回数 ${user.heartCount}回`);}
-  else{user.heartReceived=true;user.heartReceivedAt=now;addTikEventLog("heart",user,"受信状態を更新",`受信回数 ${user.heartCount}回`);}
-  try{saveTikUsers();setTikEventMessage(duplicate?"⚠️ ハートミーの連続送信を重複として無効化しました。":"✅ 疑似ハートミーを受信しました。",duplicate?"err":"ok");}catch(e){addTikEventLog("error",user,"保存失敗",e.message||"不明なエラー");setTikEventMessage("⚠️ ハートミー状態を保存できませんでした。","err");}
+  if(duplicate){recordAppEvent({eventTypeCode:"HEART_RECEIVED",user,status:"無効",result:"重複のため無効",detail:`受信回数 ${user.heartCount}回`});}
+  else{user.heartReceived=true;user.heartReceivedAt=now;recordAppEvent({eventTypeCode:"HEART_RECEIVED",user,status:"完了",result:"成功",detail:`受信回数 ${user.heartCount}回`});}
+  try{saveTikUsers();setTikEventMessage(duplicate?"⚠️ ハートミーの連続送信を重複として無効化しました。":"✅ 疑似ハートミーを受信しました。",duplicate?"err":"ok");}catch(e){recordAppEvent({eventTypeCode:"ERROR",user,status:"失敗",result:"保存エラー",detail:e.message||"不明なエラー"});setTikEventMessage("⚠️ ハートミー状態を保存できませんでした。","err");}
 }
 function resetSelectedTikUserEvents(){
   const user=selectedTikEventUser();if(!user){setTikEventMessage("⚠️ 疑似ユーザーを選択してください。","err");return;}
   if(!confirm(`${user.displayName}（${user.id}）のコメント・ハートミー状態を削除しますか？`))return;
   user.commentReceived=false;user.commentReceivedAt=0;user.commentCount=0;user.lastComment="";user.lastCommentEventAt=0;user.heartReceived=false;user.heartReceivedAt=0;user.heartCount=0;user.lastHeartEventAt=0;
-  addTikEventLog("delete",user,"イベント削除","コメント・ハートミー状態を初期化");
-  try{saveTikUsers();setTikEventMessage("✅ 選択ユーザーのイベント状態を削除しました。","ok");}catch(e){setTikEventMessage("⚠️ イベント削除を保存できませんでした。","err");}
+  try{saveTikUsers();recordAppEvent({eventTypeCode:"EVENT_DELETED",user,status:"完了",result:"成功",detail:"コメント・ハートミー状態を初期化"});setTikEventMessage("✅ 選択ユーザーのイベント状態を削除しました。","ok");}catch(e){recordAppEvent({eventTypeCode:"ERROR",user,status:"失敗",result:"保存エラー",detail:"イベント状態の削除を保存できませんでした。"});setTikEventMessage("⚠️ イベント削除を保存できませんでした。","err");}
 }
 function clearTikEventLog(){if(!tikEventLog.length)return;if(!confirm("イベントログをすべて削除しますか？"))return;tikEventLog=[];try{saveTikEventLog();setTikEventMessage("✅ イベントログを削除しました。","ok");}catch(e){setTikEventMessage("⚠️ ログを削除できませんでした。","err");}}
 

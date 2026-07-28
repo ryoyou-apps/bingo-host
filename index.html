@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#151515">
-<title>Bingo Host 受付 Ver.2.25</title>
+<title>Bingo Host 受付 Ver.2.26</title>
 <style>
 *{box-sizing:border-box}body{margin:0;background:#f3f4f6;color:#171717;font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Yu Gothic",sans-serif}
 button,input,select{font:inherit}button{cursor:pointer}
@@ -235,7 +235,7 @@ body.tik-mode-open{overflow:hidden}
 </style>
 </head>
 <body>
-<header><h1 id="appTitle" aria-label="Bingo Host">Bingo Host<span id="adminCrown" class="guest-hidden">👑</span></h1><div class="sub">A〜E 全250枚対応・受付＋抽選 Ver.2.25／抽選履歴フローティングバー版</div></header>
+<header><h1 id="appTitle" aria-label="Bingo Host">Bingo Host<span id="adminCrown" class="guest-hidden">👑</span></h1><div class="sub">A〜E 全250枚対応・受付＋抽選 Ver.2.26／Tikホスト権限制御版</div></header>
 <main>
 <form id="form" class="panel entry">
 <h2>参加者を登録</h2>
@@ -390,7 +390,7 @@ body.tik-mode-open{overflow:hidden}
   </button>
 </div>
 
-<div id="appVersionFooter" style="text-align:center;color:#777;font-size:11px;padding:2px 0 18px">Ver.2.25 抽選履歴フローティングバー版</div>
+<div id="appVersionFooter" style="text-align:center;color:#777;font-size:11px;padding:2px 0 18px">Ver.2.26 Tikホスト権限制御版</div>
 </main>
 
 <div id="drawHistoryFloatingBar" class="draw-history-floating-bar" hidden aria-label="抽選履歴操作">
@@ -1122,6 +1122,28 @@ function canOperate(){
   if(appMode.mode==="personal") return true;
   return appMode.mode==="shared" && appMode.role==="host" && hostAuthorized===true;
 }
+/* Tikモード専用：管理者認証済み・共有モード・ホスト選択済み・ホスト確認済みの場合だけ許可 */
+function canOperateTikMode(){
+  return adminAuthenticated===true
+    && appMode.mode==="shared"
+    && appMode.role==="host"
+    && hostAuthorized===true;
+}
+/* Tikモード更新処理の共通権限確認 */
+function requireTikHostPermission(messageTarget="event"){
+  if(canOperateTikMode()) return true;
+  const message="⚠️ Tikモードは、共有モードの確認済みホストだけが操作できます。";
+  if(messageTarget==="settings"){
+    setTikSettingMessage(message,"err");
+  }else if(messageTarget==="user"){
+    setTikUserMessage(message,"err");
+  }else if(messageTarget==="notice"){
+    note(message,"err");
+  }else{
+    setTikEventMessage(message,"err");
+  }
+  return false;
+}
 window.setAdminAuthentication=function(allowed,email){
   adminAuthenticated=allowed===true;
   window.adminAuthenticated=adminAuthenticated;
@@ -1221,7 +1243,19 @@ function renderMode(){
   if(changeBtn)changeBtn.classList.toggle("guest-hidden",!adminAuthenticated);
   if(resetBtn)resetBtn.classList.toggle("guest-hidden",!adminAuthenticated);
   if(testBox)testBox.classList.toggle("guest-hidden",!adminAuthenticated);
-  const tikEntry=$("tikEntryActions");if(tikEntry)tikEntry.classList.toggle("guest-hidden",!adminAuthenticated);
+  const tikAllowed=canOperateTikMode();
+  const tikEntry=$("tikEntryActions");
+  if(tikEntry)tikEntry.classList.toggle("guest-hidden",!tikAllowed);
+  const openTikButton=$("openTikModeBtn");
+  if(openTikButton){
+    openTikButton.disabled=!tikAllowed;
+    openTikButton.setAttribute("aria-disabled",String(!tikAllowed));
+  }
+  const tikScreen=$("tikModeScreen");
+  if(tikScreen && !tikScreen.hidden && !tikAllowed){
+    closeTikMode();
+    note("⚠️ ホスト権限が解除されたため、Tikモードを終了しました。","err");
+  }
   if(help)help.textContent=setupMode?"ここで登録した8桁が、今後のログイン用パスワードになります。":"管理操作を行う場合のみログインしてください。";
   if(password){password.classList.toggle("guest-hidden",adminAuthenticated); if(adminAuthenticated)password.value="";}
   render();
@@ -1307,6 +1341,7 @@ function renderTikSettings(initial=false){
   updateTikPresetState(parsed.ok?parsed.value:null);
 }
 function saveTikSettings(){
+  if(!requireTikHostPermission("settings")) return;
   const parsed=parseTikParticipantLimit();
   if(!parsed.ok){renderTikSettings();setTikSettingMessage(`⚠️ ${parsed.message}`,"err");$("tikParticipantLimit")?.focus();return;}
   const previousLimit=tikSettings.participantLimit;
@@ -1367,6 +1402,7 @@ function renderTikUsers(){
   list.querySelectorAll("[data-tik-user-delete]").forEach(btn=>btn.onclick=()=>deleteTikUser(btn.dataset.tikUserDelete));
 }
 function addTikUser(){
+  if(!requireTikHostPermission("user")) return;
   const input=$("tikUserDisplayName");const displayName=(input?.value||"").trim();
   if(!displayName){setTikUserMessage("⚠️ 表示名を入力してください。","err");input?.focus();return;}
   if(tikUsersState.users.length>=250){setTikUserMessage("⚠️ 疑似ユーザーは最大250人です。","err");return;}
@@ -1378,6 +1414,7 @@ function addTikUser(){
   setTikUserMessage(`✅ ${user.displayName}（${user.id}）を作成しました。`,"ok");input?.focus();
 }
 function editTikUser(id){
+  if(!requireTikHostPermission("user")) return;
   const user=tikUsersState.users.find(u=>u.id===id);if(!user)return;
   const next=prompt(`${user.id} の表示名を変更します。`,user.displayName);if(next===null)return;
   const displayName=next.trim();if(!displayName){setTikUserMessage("⚠️ 表示名を空欄にはできません。","err");return;}
@@ -1385,6 +1422,7 @@ function editTikUser(id){
   try{saveTikUsers();setTikUserMessage(`✅ ${id} の表示名を変更しました。`,"ok");}catch(e){setTikUserMessage("⚠️ 変更を保存できませんでした。","err");}
 }
 function deleteTikUser(id){
+  if(!requireTikHostPermission("user")) return;
   const user=tikUsersState.users.find(u=>u.id===id);if(!user)return;
   if(!confirm(`${user.displayName}（${id}）を削除しますか？`))return;
   tikUsersState.users=tikUsersState.users.filter(u=>u.id!==id);
@@ -1400,6 +1438,7 @@ function parseTikUserGenerateCount(){
   return {ok:true,value};
 }
 function generateTikUsers(){
+  if(!requireTikHostPermission("user")) return;
   const parsed=parseTikUserGenerateCount();if(!parsed.ok){setTikUserMessage(`⚠️ ${parsed.message}`,"err");return;}
   const start=tikUsersState.users.length+1;
   for(let i=0;i<parsed.value;i++){
@@ -1530,6 +1569,7 @@ function renderTikParticipationManagement(){
   if($("tikWaitingList"))$("tikWaitingList").innerHTML=waiting.length?waiting.map(u=>{const waitReason=u.participantCommentMatched&&!u.heartReceived?"ハートミー待ち":u.heartReceived&&!u.participantCommentMatched?"参加コメント待ち":"条件確認中";return `<div class="tik-participant-item"><div class="tik-participant-id">${esc(u.id)}</div><div class="tik-participant-name">${esc(u.displayName)}</div><div class="tik-wait-badges"><span class="tik-wait-badge ${u.participantCommentMatched?'on':'off'}">${u.participantCommentMatched?'コメント条件済み':'参加コメント未成立'}</span><span class="tik-wait-badge ${u.heartReceived?'on':'off'}">${u.heartReceived?'ハートミー済み':'ハートミー未受信'}</span></div><div class="tik-wait-reason">現在：${waitReason}</div><div class="tik-participant-meta">最終イベント：${esc(formatTikEventAt(Math.max(u.participantCommentAt||0,u.commentReceivedAt||0,u.heartReceivedAt||0)))}</div></div>`;}).join(""):'<div class="tik-user-empty">条件待ちのユーザーはいません。</div>';
 }
 function evaluateTikParticipation(user,trigger="event"){
+  if(!requireTikHostPermission("event")) return;
   if(!user)return;
   if(user.assignedCardId){recordAppEvent({eventTypeCode:"DUPLICATE_RECEPTION_REJECTED",user,status:"無効",result:"登録済み",cardNumber:globalNo(user.assignedCardId),detail:"同一ユーザーへの二重発行を拒否"});renderTikParticipationManagement();return;}
   const hasComment=user.participantCommentMatched===true,hasHeart=user.heartReceived===true;
@@ -1556,6 +1596,7 @@ function evaluateTikParticipation(user,trigger="event"){
 }
 
 function sendTikComment(){
+  if(!requireTikHostPermission("event")) return;
   const user=selectedTikEventUser();const input=$("tikCommentInput");const text=(input?.value||"").trim();
   if(!user){setTikEventMessage("⚠️ 疑似ユーザーを選択してください。","err");return;}
   if(!text){setTikEventMessage("⚠️ コメント内容を入力してください。","err");input?.focus();return;}
@@ -1568,6 +1609,7 @@ function sendTikComment(){
   try{saveTikUsers();evaluateTikParticipation(user,"comment");if(!user.assignedCardId)setTikEventMessage(user.participantCommentMatched?"✅ 参加コメント条件が成立しました。":"✅ コメントを受信しましたが、参加ワード条件は未成立です。","ok");}catch(e){recordAppEvent({eventTypeCode:"ERROR",user,status:"失敗",result:"保存エラー",detail:e.message||"不明なエラー"});setTikEventMessage("⚠️ コメント状態を保存できませんでした。","err");}
 }
 function sendTikHeart(){
+  if(!requireTikHostPermission("event")) return;
   const user=selectedTikEventUser();if(!user){setTikEventMessage("⚠️ 疑似ユーザーを選択してください。","err");return;}
   if(user.heartReceived){recordAppEvent({eventTypeCode:"HEART_RECEIVED",user,status:"無効",result:"同一配信で受信済み",detail:"ハートミーは配信ごとに1回のみ有効"});setTikEventMessage("⚠️ この配信ではハートミーを受信済みです。","err");return;}
   const now=Date.now();user.heartCount=1;user.heartReceived=true;user.heartReceivedAt=now;user.lastHeartEventAt=now;
@@ -1575,16 +1617,28 @@ function sendTikHeart(){
   try{saveTikUsers();evaluateTikParticipation(user,"heart");if(!user.assignedCardId)setTikEventMessage("✅ ハートミー条件が成立しました。","ok");}catch(e){recordAppEvent({eventTypeCode:"ERROR",user,status:"失敗",result:"保存エラー",detail:e.message||"不明なエラー"});setTikEventMessage("⚠️ ハートミー状態を保存できませんでした。","err");}
 }
 function resetSelectedTikUserEvents(){
+  if(!requireTikHostPermission("event")) return;
   const user=selectedTikEventUser();if(!user){setTikEventMessage("⚠️ 疑似ユーザーを選択してください。","err");return;}
   if(!confirm(`${user.displayName}（${user.id}）のコメント・ハートミー状態を削除しますか？`))return;
   if(user.assignedCardId){state.regs=state.regs.filter(r=>r.externalUserId!==user.id);save();}
   user.commentReceived=false;user.commentReceivedAt=0;user.commentCount=0;user.lastComment="";user.lastCommentEventAt=0;user.heartReceived=false;user.heartReceivedAt=0;user.heartCount=0;user.lastHeartEventAt=0;user.participantCommentMatched=false;user.participantCommentAt=0;user.participantCommentText="";user.assignedCardId="";user.acceptedAt=0;user.receptionOrder=0;user.issuanceRecord=null;user.fullRejectedAt=0;user.lastParticipationState="";
   try{saveTikUsers();recordAppEvent({eventTypeCode:"EVENT_DELETED",user,status:"完了",result:"成功",detail:"コメント・ハートミー状態を初期化"});setTikEventMessage("✅ 選択ユーザーのイベント状態を削除しました。","ok");}catch(e){recordAppEvent({eventTypeCode:"ERROR",user,status:"失敗",result:"保存エラー",detail:"イベント状態の削除を保存できませんでした。"});setTikEventMessage("⚠️ イベント削除を保存できませんでした。","err");}
 }
-function clearTikEventLog(){if(!tikEventLog.length)return;if(!confirm("イベントログをすべて削除しますか？"))return;tikEventLog=[];try{saveTikEventLog();setTikEventMessage("✅ イベントログを削除しました。","ok");}catch(e){setTikEventMessage("⚠️ ログを削除できませんでした。","err");}}
+function clearTikEventLog(){
+  if(!requireTikHostPermission("event")) return;
+  if(!tikEventLog.length)return;
+  if(!confirm("イベントログをすべて削除しますか？"))return;
+  tikEventLog=[];
+  try{
+    saveTikEventLog();
+    setTikEventMessage("✅ イベントログを削除しました。","ok");
+  }catch(e){
+    setTikEventMessage("⚠️ ログを削除できませんでした。","err");
+  }
+}
 
 function openTikMode(){
-  if(!adminAuthenticated){note("⚠️ Tikモードは管理者ログインが必要です。","err");return;}
+  if(!requireTikHostPermission("notice")) return;
   const screen=$("tikModeScreen");
   if(!screen)return;
   loadTikSettings();

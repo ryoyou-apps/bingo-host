@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#151515">
-<title>Bingo Host 受付 Ver.2.27</title>
+<title>Bingo Host 受付 Ver.2.28</title>
 <style>
 *{box-sizing:border-box}body{margin:0;background:#f3f4f6;color:#171717;font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Yu Gothic",sans-serif}
 button,input,select{font:inherit}button{cursor:pointer}
@@ -232,10 +232,16 @@ body.tik-mode-open{overflow:hidden}
 
 /* 工程3-3：参加条件判定・カード自動発行 */
 .tik-word-grid{display:grid;grid-template-columns:1fr;gap:12px;margin-top:16px}.tik-word-input,.tik-match-select{width:100%;font-size:21px;font-weight:800;padding:16px;border:3px solid #64748b;border-radius:16px;background:#fff;color:#111827}.tik-participation-summary{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin:14px 0;position:sticky;top:8px;z-index:4;padding:8px;border-radius:18px;background:rgba(255,255,255,.96);box-shadow:0 5px 18px rgba(15,23,42,.12);backdrop-filter:blur(8px)}.tik-participation-stat{border:2px solid #d7dde3;border-radius:16px;background:#f8fafc;padding:14px;text-align:center}.tik-participation-stat strong{display:block;font-size:28px;color:#111827}.tik-participation-stat small{display:block;margin-top:4px;color:#64748b;font-weight:800}.tik-participation-section{margin-top:18px}.tik-participation-title{display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:20px;font-weight:900;margin-bottom:10px}.tik-accepted-toggle{width:100%;min-height:52px;margin:0 0 10px;border:2px solid #8a6b25;border-radius:14px;background:#fff9df;color:#5d4300;padding:13px 16px;font-size:17px;font-weight:1000;touch-action:manipulation;-webkit-tap-highlight-color:transparent}.tik-accepted-toggle:active{transform:translateY(1px);background:#f8edbd}.tik-accepted-toggle:focus-visible{outline:3px solid #f5cf5d88;outline-offset:2px}.tik-accepted-list[hidden]{display:none!important}.tik-participant-item{border:2px solid #d8dee5;border-radius:16px;background:#f8fafc;padding:14px;margin-bottom:10px}.tik-reception-order{display:inline-flex;align-items:center;justify-content:center;min-width:42px;padding:5px 9px;margin-bottom:7px;border-radius:999px;background:#111827;color:#f6cf58;font-size:14px;font-weight:1000}.tik-wait-reason{margin-top:8px;font-size:16px;font-weight:1000;color:#9f1239}.tik-participant-id{font-size:14px;font-weight:900;color:#8a6500}.tik-participant-name{font-size:21px;font-weight:900;color:#111827}.tik-participant-meta{margin-top:6px;color:#64748b;line-height:1.55}.tik-card-number{display:inline-block;margin-top:8px;padding:8px 12px;border-radius:999px;background:#111;color:#f6cf58;font-size:20px;font-weight:900}.tik-wait-badges{display:flex;flex-wrap:wrap;gap:7px;margin-top:8px}.tik-wait-badge{padding:6px 9px;border-radius:999px;background:#eef2f7;color:#475569;font-size:13px;font-weight:900}.tik-wait-badge.on{background:#dcfce7;color:#166534}.tik-wait-badge.off{background:#fff1f2;color:#9f1239}.tik-full{border-color:#ef4444;background:#fff7f7}.tik-log-card{font-weight:900;color:#8a6500;margin-top:4px}
+
+/* 通常画面・参加者一覧折りたたみ */
+.participant-list-toggle{width:100%;min-height:54px;margin:12px 0 10px;border:2px solid #8a6b25;border-radius:14px;background:#fff9df;color:#5d4300;padding:13px 16px;font-size:18px;font-weight:1000;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+.participant-list-toggle:active{transform:translateY(1px);background:#f8edbd}
+.participant-list-toggle:focus-visible{outline:3px solid #f5cf5d88;outline-offset:2px}
+#list[hidden]{display:none!important}
 </style>
 </head>
 <body>
-<header><h1 id="appTitle" aria-label="Bingo Host">Bingo Host<span id="adminCrown" class="guest-hidden">👑</span></h1><div class="sub">A〜E 全250枚対応・受付＋抽選 Ver.2.27／Tik受付完了一覧折りたたみ版</div></header>
+<header><h1 id="appTitle" aria-label="Bingo Host">Bingo Host<span id="adminCrown" class="guest-hidden">👑</span></h1><div class="sub">A〜E 全250枚対応・受付＋抽選 Ver.2.28／参加者一覧折りたたみ版</div></header>
 <main>
 <form id="form" class="panel entry">
 <h2>参加者を登録</h2>
@@ -271,7 +277,8 @@ body.tik-mode-open{overflow:hidden}
 <button id="backup" class="secondary" type="button">バックアップ</button>
 <label class="secondary">復元<input id="restore" type="file" accept=".json" hidden></label>
 </div>
-<div id="list"></div>
+<button id="participantListToggleBtn" class="participant-list-toggle" type="button" aria-expanded="false" aria-controls="list">参加者一覧を開く ▼</button>
+<div id="list" hidden></div>
 </div>
 
 
@@ -390,7 +397,7 @@ body.tik-mode-open{overflow:hidden}
   </button>
 </div>
 
-<div id="appVersionFooter" style="text-align:center;color:#777;font-size:11px;padding:2px 0 18px">Ver.2.27 Tik受付完了一覧折りたたみ版</div>
+<div id="appVersionFooter" style="text-align:center;color:#777;font-size:11px;padding:2px 0 18px">Ver.2.28 参加者一覧折りたたみ版</div>
 </main>
 
 <div id="drawHistoryFloatingBar" class="draw-history-floating-bar" hidden aria-label="抽選履歴操作">
@@ -586,6 +593,16 @@ function add(){
  $("card").value="";note(`✅ ${name}さん → No.${globalNo(id)}（${id}）を登録しました。`,"ok");$("card").focus();
 }
 function remove(key){if(!canOperate()){note("⚠️ ホストのみ削除できます。","err");return;}let r=state.regs.find(x=>x.key===key);if(r&&confirm(`${r.name}さんの No.${globalNo(r.cardId)} を削除しますか？`)){state.regs=state.regs.filter(x=>x.key!==key);save()}}
+let participantListExpanded=false;
+function setParticipantListExpanded(expanded){
+ participantListExpanded=expanded===true;
+ const list=$("list"),button=$("participantListToggleBtn");
+ if(list)list.hidden=!participantListExpanded;
+ if(button){
+  button.textContent=participantListExpanded?"参加者一覧を閉じる ▲":"参加者一覧を開く ▼";
+  button.setAttribute("aria-expanded",String(participantListExpanded));
+ }
+}
 function render(){
  let q=$("search").value.trim().toLowerCase(),arr=state.regs.slice();
  if($("sort").value==="name")arr.sort((a,b)=>a.name.localeCompare(b.name,"ja")||globalNo(a.cardId)-globalNo(b.cardId));
@@ -593,6 +610,7 @@ function render(){
  if(q)arr=arr.filter(r=>r.name.toLowerCase().includes(q)||r.cardId.toLowerCase().includes(q)||String(globalNo(r.cardId)).includes(q));
  let groups=[];for(let r of arr){let g=groups.find(x=>x.name===r.name);if(!g){g={name:r.name,items:[]};groups.push(g)}g.items.push(r)}
  $("list").innerHTML=groups.length?groups.map(g=>`<div class="person"><div class="head"><b>${esc(g.name)}</b><span class="pill">${g.items.length}口</span></div><div class="chips">${g.items.map(r=>`<span class="chip">No.${globalNo(r.cardId)} <small>${r.cardId}</small>${canOperate()?`<button type="button" data-del="${r.key}">×</button>`:""}</span>`).join("")}</div></div>`).join(""):'<div class="empty">該当する登録はありません。</div>';
+ setParticipantListExpanded(participantListExpanded);
  document.querySelectorAll("[data-del]").forEach(b=>b.onclick=()=>remove(b.dataset.del));
  let people=new Set(state.regs.map(r=>r.name)).size;$("peoplePill").textContent=`${people}人 / ${state.regs.length}枚`;$("remain").textContent=250-state.regs.length;
  for(let g of "ABCDE")$(g.toLowerCase()+"Count").textContent=state.regs.filter(r=>r.cardId[0]===g).length;
@@ -608,6 +626,7 @@ $("name").addEventListener("keydown",function(e){if(e.key==="Enter"){e.preventDe
 $("next").onclick=()=>{$("name").value="";$("card").value="";$("name").focus()};
 $("focusCard").onclick=()=>$("card").focus();
 $("search").oninput=render;$("sort").onchange=render;$("copy").onclick=copyList;$("backup").onclick=backup;
+$("participantListToggleBtn")?.addEventListener("click",()=>setParticipantListExpanded(!participantListExpanded));
 $("restore").onchange=e=>{if(e.target.files[0])restore(e.target.files[0]);e.target.value=""};
 load();
 

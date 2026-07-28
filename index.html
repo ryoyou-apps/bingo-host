@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#151515">
-<title>Bingo Host 受付 Ver.2.28</title>
+<title>Bingo Host 受付 Ver.2.29</title>
 <style>
 *{box-sizing:border-box}body{margin:0;background:#f3f4f6;color:#171717;font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Yu Gothic",sans-serif}
 button,input,select{font:inherit}button{cursor:pointer}
@@ -227,6 +227,11 @@ body.draw-floating-visible main{padding-bottom:calc(96px + env(safe-area-inset-b
 .tik-log-time{font-size:11px;color:#64748b}.tik-log-title{font-weight:1000;color:#111827;margin-top:2px}.tik-log-detail{font-size:12px;color:#475569;margin-top:3px;line-height:1.45;overflow-wrap:anywhere}
 .tik-log-clear{border:1px solid #b84a42;border-radius:9px;background:#fff1f0;color:#9d211a;padding:7px 10px;font-weight:900}
 .tik-event-badges{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}.tik-event-badge{border-radius:999px;padding:5px 8px;font-size:11px;font-weight:900;background:#e5e7eb;color:#475569}.tik-event-badge.on{background:#dcfce7;color:#166534}
+/* 工程3-3A.6：大会管理基盤 */
+.tik-current-tournament{position:sticky;top:66px;z-index:5;margin-bottom:14px;border:2px solid #8a6b25;border-radius:16px;background:rgba(255,249,223,.97);padding:13px 15px;box-shadow:0 5px 18px rgba(15,23,42,.14);backdrop-filter:blur(8px)}
+.tik-current-tournament-label{font-size:12px;font-weight:1000;color:#7a5b0b}.tik-current-tournament-title{margin-top:3px;font-size:20px;font-weight:1000;color:#111827;overflow-wrap:anywhere}.tik-current-tournament-id{margin-top:5px;font-size:13px;font-weight:900;color:#475569;overflow-wrap:anywhere}
+.tik-tournament-grid{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:end}.tik-tournament-input,.tik-tournament-memo{width:100%;border:2px solid #64748b;border-radius:13px;background:#fff;color:#111827;padding:12px;font-size:17px;font-weight:800}.tik-tournament-memo{min-height:110px;resize:vertical;font-weight:700;line-height:1.55}.tik-tournament-input:focus,.tik-tournament-memo:focus{outline:3px solid #f5cf5d66;border-color:#9a751c}.tik-now-btn{min-height:50px;border:2px solid #8a6b25;border-radius:12px;background:#fff9df;color:#5d4300;padding:10px 13px;font-weight:1000;white-space:nowrap;touch-action:manipulation}.tik-tournament-facts{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:14px}.tik-tournament-fact{border:1px solid #d6dae1;border-radius:12px;background:#f8fafc;padding:11px}.tik-tournament-fact strong{display:block;color:#111827;font-size:14px;overflow-wrap:anywhere}.tik-tournament-fact small{display:block;margin-top:4px;color:#64748b;font-weight:800}.tik-reset-options{display:grid;gap:9px;margin-top:12px}.tik-reset-option{display:flex;align-items:flex-start;gap:10px;border:2px solid #d7dde3;border-radius:13px;background:#f8fafc;padding:12px;font-weight:800;line-height:1.45}.tik-reset-option input{width:20px;height:20px;margin-top:1px;flex:0 0 auto}.tik-danger-btn{width:100%;min-height:54px;margin-top:14px;border:2px solid #b42318;border-radius:13px;background:#fff1f0;color:#9d211a;padding:13px 15px;font-size:17px;font-weight:1000;touch-action:manipulation}.tik-danger-btn:active{transform:translateY(1px);background:#ffe3e0}
+@media(max-width:560px){.tik-current-tournament{top:64px}.tik-tournament-grid{grid-template-columns:1fr}.tik-now-btn{width:100%}.tik-tournament-facts{grid-template-columns:1fr}}
 body.tik-mode-open{overflow:hidden}
 @media(max-width:560px){.tik-setting-summary{grid-template-columns:1fr}.tik-preset-grid{grid-template-columns:repeat(3,1fr)}.tik-user-form,.tik-generator-row,.tik-event-comment-row{grid-template-columns:1fr}.tik-user-add-btn,.tik-generate-btn,.tik-event-btn{width:100%}.tik-user-item-head{flex-direction:column}.tik-user-actions{width:100%}.tik-user-action{flex:1}.tik-event-status-grid{grid-template-columns:1fr}}
 
@@ -241,7 +246,7 @@ body.tik-mode-open{overflow:hidden}
 </style>
 </head>
 <body>
-<header><h1 id="appTitle" aria-label="Bingo Host">Bingo Host<span id="adminCrown" class="guest-hidden">👑</span></h1><div class="sub">A〜E 全250枚対応・受付＋抽選 Ver.2.28／参加者一覧折りたたみ版</div></header>
+<header><h1 id="appTitle" aria-label="Bingo Host">Bingo Host<span id="adminCrown" class="guest-hidden">👑</span></h1><div class="sub">A〜E 全250枚対応・受付＋抽選 Ver.2.29／大会管理基盤版</div></header>
 <main>
 <form id="form" class="panel entry">
 <h2>参加者を登録</h2>
@@ -397,7 +402,7 @@ body.tik-mode-open{overflow:hidden}
   </button>
 </div>
 
-<div id="appVersionFooter" style="text-align:center;color:#777;font-size:11px;padding:2px 0 18px">Ver.2.28 参加者一覧折りたたみ版</div>
+<div id="appVersionFooter" style="text-align:center;color:#777;font-size:11px;padding:2px 0 18px">Ver.2.29 大会管理基盤版</div>
 </main>
 
 <div id="drawHistoryFloatingBar" class="draw-history-floating-bar" hidden aria-label="抽選履歴操作">
@@ -409,9 +414,51 @@ body.tik-mode-open{overflow:hidden}
 <section id="tikModeScreen" class="tik-mode-screen" hidden aria-label="Tikモード">
   <div class="tik-mode-header">
     <button id="closeTikModeBtn" class="tik-mode-back" type="button">← 通常モードへ戻る</button>
-    <div><div class="tik-mode-title">Tikモード</div><div class="tik-mode-sub">第1段階・工程3-3 参加条件・カード自動発行</div></div>
+    <div><div class="tik-mode-title">Tikモード</div><div class="tik-mode-sub">工程3-3A.6 大会管理基盤</div></div>
   </div>
   <div class="tik-mode-main">
+    <div class="tik-current-tournament" aria-label="現在の大会">
+      <div class="tik-current-tournament-label">現在の大会</div>
+      <div id="tikCurrentTournamentTitle" class="tik-current-tournament-title">大会タイトル未設定</div>
+      <div id="tikCurrentTournamentId" class="tik-current-tournament-id">大会ID：作成中</div>
+    </div>
+
+    <div class="tik-mode-card">
+      <span class="tik-mode-badge">工程3-3A.6</span>
+      <h2>大会情報</h2>
+      <div class="tik-mode-note">現在の大会を識別する情報です。大会IDは自動生成され、タイトルを変更しても変わりません。</div>
+
+      <label class="tik-limit-label" for="tikTournamentTitle">大会タイトル</label>
+      <div class="tik-tournament-grid">
+        <input id="tikTournamentTitle" class="tik-tournament-input" type="text" maxlength="100" autocomplete="off" placeholder="大会タイトル未設定">
+        <button id="tikTournamentNowBtn" class="tik-now-btn" type="button">現在日時を入力</button>
+      </div>
+
+      <div class="tik-tournament-facts">
+        <div class="tik-tournament-fact"><strong id="tikTournamentIdValue">—</strong><small>大会ID</small></div>
+        <div class="tik-tournament-fact"><strong id="tikTournamentStatusValue">準備中</strong><small>大会状態</small></div>
+        <div class="tik-tournament-fact"><strong id="tikTournamentStartValue">—</strong><small>大会開始日時</small></div>
+        <div class="tik-tournament-fact"><strong id="tikTournamentEndValue">未設定</strong><small>大会終了日時（予約）</small></div>
+      </div>
+
+      <label class="tik-limit-label" for="tikTournamentMemo">大会メモ</label>
+      <textarea id="tikTournamentMemo" class="tik-tournament-memo" maxlength="1000" placeholder="景品内容、運営メモ、スポンサー、司会者、注意事項など"></textarea>
+      <button id="saveTikTournamentBtn" class="tik-save-btn" type="button">大会情報を保存</button>
+      <div id="tikTournamentMessage" class="tik-setting-message" role="status" aria-live="polite">大会情報を読み込んでいます。</div>
+    </div>
+
+    <div class="tik-mode-card tik-event-panel">
+      <span class="tik-mode-badge">安全操作</span>
+      <h2>Tikモード大会データをリセット</h2>
+      <div class="tik-mode-note">疑似ユーザー、条件待ち、受付完了、Tikイベントログなどを初期化し、新しい大会IDを作成します。手動登録した通常モード参加者は削除しません。</div>
+      <div class="tik-reset-options" role="radiogroup" aria-label="大会データのリセット範囲">
+        <label class="tik-reset-option"><input type="radio" name="tikTournamentResetScope" value="tik-only" checked><span>① Tikモード受付情報だけリセット<br><small>通常モードに登録済みの参加者は残します。</small></span></label>
+        <label class="tik-reset-option"><input type="radio" name="tikTournamentResetScope" value="with-participants"><span>② Tikモード経由で登録した参加者も通常モードから削除<br><small>手動登録した参加者は削除しません。</small></span></label>
+      </div>
+      <button id="resetTikTournamentBtn" class="tik-danger-btn" type="button">Tikモード大会データをリセット</button>
+      <div id="tikTournamentResetMessage" class="tik-setting-message" role="status" aria-live="polite">リセットは二段階確認後に実行されます。</div>
+    </div>
+
     <div class="tik-mode-card">
       <span class="tik-mode-badge">管理者専用</span>
       <h2>参加設定</h2>
@@ -573,15 +620,15 @@ function parseCard(v){
 }
 function globalNo(id){return (id.charCodeAt(0)-65)*50+Number(id.slice(2))}
 function note(msg,type=""){let e=$("notice");e.textContent=msg;e.className="notice "+type}
-function registerParticipantCard({name,cardId,source="manual",externalUserId=""}){
+function registerParticipantCard({name,cardId,source="manual",externalUserId="",tournamentId=""}){
   if(!canOperate())return {ok:false,code:"NO_PERMISSION",message:"ホスト権限が確認できていません。"};
   const cleanName=String(name||"").trim(),id=parseCard(cardId);
   if(!cleanName)return {ok:false,code:"INVALID_NAME",message:"名前を入力してください。"};
   if(!id||!BYID.has(id))return {ok:false,code:"INVALID_CARD",message:"カード番号が正しくありません。"};
-  if(externalUserId && state.regs.some(r=>r.externalUserId===externalUserId))return {ok:false,code:"DUPLICATE_USER",message:"同一ユーザーは登録済みです。"};
+  if(externalUserId && state.regs.some(r=>r.externalUserId===externalUserId&&String(r.tournamentId||"")===String(tournamentId||"")))return {ok:false,code:"DUPLICATE_USER",message:"同一大会の同一ユーザーは登録済みです。"};
   const dup=state.regs.find(r=>r.cardId===id);
   if(dup)return {ok:false,code:"DUPLICATE_CARD",message:`No.${globalNo(id)}（${id}）は ${dup.name}さんに登録済みです。`};
-  const record={key:Date.now()+"-"+Math.random(),name:cleanName,cardId:id,source,externalUserId:externalUserId||""};
+  const record={key:Date.now()+"-"+Math.random(),name:cleanName,cardId:id,source,externalUserId:externalUserId||"",tournamentId:String(tournamentId||"")};
   state.regs.push(record);save();return {ok:true,record};
 }
 window.registerParticipantCard=registerParticipantCard;
@@ -1310,15 +1357,134 @@ if(appTitle){
 
 const TIK_SETTINGS_STORAGE="bingoHostTikSettingsV1";
 const TIK_USERS_STORAGE="bingoHostTikUsersV1";
+const TIK_TOURNAMENT_STORAGE="bingoHostTikTournamentV1";
+const TIK_TOURNAMENT_SEQUENCE_STORAGE="bingoHostTikTournamentSequenceV1";
 const COMMON_EVENT_LOG_STORAGE="bingoHostCommonEventLogV1";
 const LEGACY_TIK_EVENT_LOG_STORAGE="bingoHostTikEventLogV1";
 const COMMON_EVENT_SEQUENCE_STORAGE="bingoHostCommonEventSequenceV1";
 const TIK_DUPLICATE_WINDOW_MS=3000;
 let tikAcceptedListExpanded=false;
+let tikTournament=null;
 let tikSettings={participantLimit:250,participantWord:"ビンゴ参加希望",matchMode:"contains"};
 let tikUsersState={nextSequence:1,users:[]};
 let tikEventLog=[];
 let commonEventSequence=1;
+
+function tournamentStatusLabel(status){
+  return status==="accepting"?"受付中":status==="ended"?"終了":"準備中";
+}
+function localDateParts(value=Date.now()){
+  const d=new Date(value);
+  return {year:d.getFullYear(),month:d.getMonth()+1,day:d.getDate()};
+}
+function localDateKey(value=Date.now()){
+  const p=localDateParts(value);
+  return `${p.year}${String(p.month).padStart(2,"0")}${String(p.day).padStart(2,"0")}`;
+}
+function currentJapaneseDateText(){
+  const p=localDateParts();
+  return `${p.year}年${p.month}月${p.day}日`;
+}
+function nextTournamentId(){
+  const dateKey=localDateKey();
+  let sequenceState={dateKey:"",sequence:0};
+  try{
+    const saved=JSON.parse(localStorage.getItem(TIK_TOURNAMENT_SEQUENCE_STORAGE));
+    if(saved&&typeof saved==="object")sequenceState={dateKey:String(saved.dateKey||""),sequence:Number(saved.sequence)||0};
+  }catch(e){}
+  const sequence=sequenceState.dateKey===dateKey?sequenceState.sequence+1:1;
+  localStorage.setItem(TIK_TOURNAMENT_SEQUENCE_STORAGE,JSON.stringify({dateKey,sequence}));
+  return `TMT-${dateKey}-${String(sequence).padStart(3,"0")}`;
+}
+function createTikTournament(){
+  return {tournamentId:nextTournamentId(),title:"",startedAt:Date.now(),scheduledEndAt:null,status:"preparing",memo:"",createdAt:Date.now(),updatedAt:Date.now()};
+}
+function normalizeTikTournament(raw){
+  if(!raw||typeof raw!=="object"||!String(raw.tournamentId||"").trim())return null;
+  const status=["preparing","accepting","ended"].includes(raw.status)?raw.status:"preparing";
+  return {tournamentId:String(raw.tournamentId),title:String(raw.title||"").trim(),startedAt:Number(raw.startedAt)||Date.now(),scheduledEndAt:raw.scheduledEndAt==null?null:(Number(raw.scheduledEndAt)||null),status,memo:String(raw.memo||""),createdAt:Number(raw.createdAt)||Number(raw.startedAt)||Date.now(),updatedAt:Number(raw.updatedAt)||Date.now()};
+}
+function saveTikTournamentState(){
+  if(!tikTournament)return;
+  localStorage.setItem(TIK_TOURNAMENT_STORAGE,JSON.stringify(tikTournament));
+}
+function loadTikTournament(){
+  let created=false;
+  try{tikTournament=normalizeTikTournament(JSON.parse(localStorage.getItem(TIK_TOURNAMENT_STORAGE)));}catch(e){tikTournament=null;}
+  if(!tikTournament){tikTournament=createTikTournament();saveTikTournamentState();created=true;}
+  renderTikTournament(true);
+  setTikTournamentMessage(created?"新しい大会IDを自動生成しました。大会タイトルとメモを保存してください。":"大会情報を読み込みました。");
+}
+function setTikTournamentMessage(message,type=""){
+  const el=$("tikTournamentMessage");if(!el)return;
+  el.textContent=message;el.className=`tik-setting-message${type?` ${type}`:""}`;
+}
+function setTikTournamentResetMessage(message,type=""){
+  const el=$("tikTournamentResetMessage");if(!el)return;
+  el.textContent=message;el.className=`tik-setting-message${type?` ${type}`:""}`;
+}
+function renderTikTournament(fillInputs=false){
+  if(!tikTournament)return;
+  const displayTitle=tikTournament.title||"大会タイトル未設定";
+  if($("tikCurrentTournamentTitle"))$("tikCurrentTournamentTitle").textContent=displayTitle;
+  if($("tikCurrentTournamentId"))$("tikCurrentTournamentId").textContent=`大会ID：${tikTournament.tournamentId}`;
+  if($("tikTournamentIdValue"))$("tikTournamentIdValue").textContent=tikTournament.tournamentId;
+  if($("tikTournamentStatusValue"))$("tikTournamentStatusValue").textContent=tournamentStatusLabel(tikTournament.status);
+  if($("tikTournamentStartValue"))$("tikTournamentStartValue").textContent=formatTikCreatedAt(tikTournament.startedAt);
+  if($("tikTournamentEndValue"))$("tikTournamentEndValue").textContent=tikTournament.scheduledEndAt?formatTikCreatedAt(tikTournament.scheduledEndAt):"未設定";
+  if(fillInputs){if($("tikTournamentTitle"))$("tikTournamentTitle").value=tikTournament.title;if($("tikTournamentMemo"))$("tikTournamentMemo").value=tikTournament.memo;}
+}
+function fillCurrentDateInTournamentTitle(){
+  if(!requireTikHostPermission("settings"))return;
+  const input=$("tikTournamentTitle");if(!input)return;
+  input.value=currentJapaneseDateText();input.focus();input.setSelectionRange(input.value.length,input.value.length);
+  setTikTournamentMessage("現在の日付を入力しました。続けて大会名を追記し、「大会情報を保存」を押してください。");
+}
+function saveTikTournament(){
+  if(!requireTikHostPermission("settings"))return;
+  if(!tikTournament){tikTournament=createTikTournament();}
+  tikTournament.title=String($("tikTournamentTitle")?.value||"").trim();
+  tikTournament.memo=String($("tikTournamentMemo")?.value||"");
+  tikTournament.updatedAt=Date.now();
+  try{saveTikTournamentState();renderTikTournament(true);setTikTournamentMessage(`✅ ${tikTournament.title||"大会タイトル未設定"} を保存しました。`,"ok");}
+  catch(e){setTikTournamentMessage("⚠️ 大会情報を保存できませんでした。Safariの保存設定を確認してください。","err");}
+}
+function resetTikTournamentData(){
+  if(!requireTikHostPermission("event"))return;
+  if(!confirm("大会データをリセットしますか？"))return;
+  const currentTitle=tikTournament?.title||"";
+  const expected=currentTitle||"RESET";
+  const entered=prompt(currentTitle?`確認のため、現在の大会タイトルを入力してください。\n${currentTitle}`:"大会タイトル未設定です。確認のため RESET と入力してください。");
+  if(entered===null)return;
+  if(String(entered).trim()!==expected){setTikTournamentResetMessage("⚠️ 確認文字が一致しないため、リセットを中止しました。","err");return;}
+  const scope=document.querySelector('input[name="tikTournamentResetScope"]:checked')?.value||"tik-only";
+  try{
+    if(scope==="with-participants"){
+      state.regs=state.regs.filter(r=>r.source!=="tik");
+      save();
+    }
+    tikUsersState={nextSequence:1,users:[]};
+    tikEventLog=[];
+    tikSettings={participantLimit:250,participantWord:"ビンゴ参加希望",matchMode:"contains"};
+    tikAcceptedListExpanded=false;
+    localStorage.removeItem(TIK_USERS_STORAGE);
+    localStorage.removeItem(COMMON_EVENT_LOG_STORAGE);
+    localStorage.removeItem(LEGACY_TIK_EVENT_LOG_STORAGE);
+    localStorage.removeItem(TIK_SETTINGS_STORAGE);
+    tikTournament=createTikTournament();
+    saveTikTournamentState();
+    saveTikUsers();
+    localStorage.setItem(TIK_SETTINGS_STORAGE,JSON.stringify(tikSettings));
+    renderTikSettings(true);
+    renderTikEventLog();
+    renderTikTournament(true);
+    setTikUserMessage("疑似ユーザーはまだ登録されていません。");
+    setTikEventMessage("疑似ユーザーを選択してください。");
+    setTikSettingMessage("大会リセット後の初期値は250人です。","ok");
+    setTikTournamentMessage("新しい大会情報を作成しました。","ok");
+    setTikTournamentResetMessage(scope==="with-participants"?"✅ 大会データとTikモード経由の通常参加者をリセットしました。":"✅ Tikモード大会データをリセットしました。","ok");
+  }catch(e){setTikTournamentResetMessage(`⚠️ リセット処理に失敗しました：${e.message||"不明なエラー"}`,"err");}
+}
 
 function loadTikSettings(){
   try{
@@ -1385,7 +1551,7 @@ function normalizeTikUsersState(raw){
   for(const user of users){
     if(ids.has(user.id))continue;
     ids.add(user.id);
-    unique.push({id:user.id,displayName:user.displayName.trim()||user.id,createdAt:Number(user.createdAt)||Date.now(),commentReceived:user.commentReceived===true,commentReceivedAt:Number(user.commentReceivedAt)||0,commentCount:Number(user.commentCount)||0,lastComment:String(user.lastComment||""),lastCommentEventAt:Number(user.lastCommentEventAt)||0,heartReceived:user.heartReceived===true,heartReceivedAt:Number(user.heartReceivedAt)||0,heartCount:Number(user.heartCount)||0,lastHeartEventAt:Number(user.lastHeartEventAt)||0,participantCommentMatched:user.participantCommentMatched===true,participantCommentAt:Number(user.participantCommentAt)||0,participantCommentText:String(user.participantCommentText||""),assignedCardId:String(user.assignedCardId||""),acceptedAt:Number(user.acceptedAt)||0,receptionOrder:Number(user.receptionOrder)||0,fullRejectedAt:Number(user.fullRejectedAt)||0,lastParticipationState:String(user.lastParticipationState||""),issuanceRecord:user.issuanceRecord&&typeof user.issuanceRecord==="object"?user.issuanceRecord:null});
+    unique.push({id:user.id,tournamentId:String(user.tournamentId||tikTournament?.tournamentId||""),displayName:user.displayName.trim()||user.id,createdAt:Number(user.createdAt)||Date.now(),commentReceived:user.commentReceived===true,commentReceivedAt:Number(user.commentReceivedAt)||0,commentCount:Number(user.commentCount)||0,lastComment:String(user.lastComment||""),lastCommentEventAt:Number(user.lastCommentEventAt)||0,heartReceived:user.heartReceived===true,heartReceivedAt:Number(user.heartReceivedAt)||0,heartCount:Number(user.heartCount)||0,lastHeartEventAt:Number(user.lastHeartEventAt)||0,participantCommentMatched:user.participantCommentMatched===true,participantCommentAt:Number(user.participantCommentAt)||0,participantCommentText:String(user.participantCommentText||""),assignedCardId:String(user.assignedCardId||""),acceptedAt:Number(user.acceptedAt)||0,receptionOrder:Number(user.receptionOrder)||0,fullRejectedAt:Number(user.fullRejectedAt)||0,lastParticipationState:String(user.lastParticipationState||""),issuanceRecord:user.issuanceRecord&&typeof user.issuanceRecord==="object"?{...user.issuanceRecord,tournamentId:String(user.issuanceRecord.tournamentId||user.tournamentId||tikTournament?.tournamentId||"")}:null});
   }
   const highest=unique.reduce((max,u)=>{const m=u.id.match(/^TEST-(\d+)$/);return m?Math.max(max,Number(m[1])):max;},0);
   return {nextSequence:Math.max(Number(raw?.nextSequence)||1,highest+1),users:unique};
@@ -1427,7 +1593,7 @@ function addTikUser(){
   const input=$("tikUserDisplayName");const displayName=(input?.value||"").trim();
   if(!displayName){setTikUserMessage("⚠️ 表示名を入力してください。","err");input?.focus();return;}
   if(tikUsersState.users.length>=250){setTikUserMessage("⚠️ 疑似ユーザーは最大250人です。","err");return;}
-  const user={id:nextTikUserId(),displayName,createdAt:Date.now(),commentReceived:false,commentReceivedAt:0,commentCount:0,lastComment:"",lastCommentEventAt:0,heartReceived:false,heartReceivedAt:0,heartCount:0,lastHeartEventAt:0,participantCommentMatched:false,participantCommentAt:0,participantCommentText:"",assignedCardId:"",acceptedAt:0,fullRejectedAt:0,lastParticipationState:""};
+  const user={id:nextTikUserId(),tournamentId:tikTournament?.tournamentId||"",displayName,createdAt:Date.now(),commentReceived:false,commentReceivedAt:0,commentCount:0,lastComment:"",lastCommentEventAt:0,heartReceived:false,heartReceivedAt:0,heartCount:0,lastHeartEventAt:0,participantCommentMatched:false,participantCommentAt:0,participantCommentText:"",assignedCardId:"",acceptedAt:0,fullRejectedAt:0,lastParticipationState:""};
   tikUsersState.users.push(user);
   try{saveTikUsers();}catch(e){recordAppEvent({eventTypeCode:"ERROR",user,status:"失敗",result:"保存エラー",detail:"疑似ユーザーを保存できませんでした。"});setTikUserMessage("⚠️ 疑似ユーザーを保存できませんでした。","err");return;}
   recordAppEvent({eventTypeCode:"USER_CREATED",user,status:"完了",result:"成功",detail:"手動作成"});
@@ -1464,7 +1630,7 @@ function generateTikUsers(){
   const start=tikUsersState.users.length+1;
   for(let i=0;i<parsed.value;i++){
     const id=nextTikUserId();
-    tikUsersState.users.push({id,displayName:`テスト${String(start+i).padStart(3,"0")}`,createdAt:Date.now()+i,commentReceived:false,commentReceivedAt:0,commentCount:0,lastComment:"",lastCommentEventAt:0,heartReceived:false,heartReceivedAt:0,heartCount:0,lastHeartEventAt:0});
+    tikUsersState.users.push({id,tournamentId:tikTournament?.tournamentId||"",displayName:`テスト${String(start+i).padStart(3,"0")}`,createdAt:Date.now()+i,commentReceived:false,commentReceivedAt:0,commentCount:0,lastComment:"",lastCommentEventAt:0,heartReceived:false,heartReceivedAt:0,heartCount:0,lastHeartEventAt:0});
   }
   const generated=tikUsersState.users.slice(-parsed.value);
   try{saveTikUsers();}catch(e){recordAppEvent({eventTypeCode:"ERROR",status:"失敗",result:"保存エラー",detail:"テストデータを保存できませんでした。"});setTikUserMessage("⚠️ テストデータを保存できませんでした。","err");return;}
@@ -1515,7 +1681,7 @@ function normalizeTikEventLog(raw){
     const type=x.eventTypeCode||(legacyType==="comment"?"COMMENT_RECEIVED":legacyType==="heart"?"HEART_RECEIVED":legacyType==="delete"?"EVENT_DELETED":legacyType==="error"?"ERROR":legacyType==="duplicate"?(String(x.eventType||"").includes("ハート")?"HEART_RECEIVED":"COMMENT_RECEIVED"):"ERROR");
     const status=String(x.status||(legacyType==="duplicate"?"無効":legacyType==="error"?"失敗":"完了"));
     const result=String(x.result||(status==="無効"?"重複のため無効":status==="失敗"?"入力エラー":"成功"));
-    return {eventId:/^EVT-\d{6,}$/.test(String(x.eventId||x.id||""))?String(x.eventId||x.id):"",occurredAt:Number(x.occurredAt||x.at)||Date.now(),eventTypeCode:String(type),eventType:String(x.eventTypeLabel||(!legacyType?x.eventType:"")||eventTypeLabel(type)),userId:String(x.userId||""),displayName:String(x.displayName||""),status,result,detail:String(x.detail||""),source:String(x.source||"tik-mode"),cardNumber:Number(x.cardNumber)||0};
+    return {eventId:/^EVT-\d{6,}$/.test(String(x.eventId||x.id||""))?String(x.eventId||x.id):"",occurredAt:Number(x.occurredAt||x.at)||Date.now(),eventTypeCode:String(type),eventType:String(x.eventTypeLabel||(!legacyType?x.eventType:"")||eventTypeLabel(type)),userId:String(x.userId||""),displayName:String(x.displayName||""),status,result,detail:String(x.detail||""),source:String(x.source||"tik-mode"),cardNumber:Number(x.cardNumber)||0,tournamentId:String(x.tournamentId||"")};
   }).sort((a,b)=>a.occurredAt-b.occurredAt);
   let tempSeq=1;const used=new Set(normalized.filter(x=>x.eventId).map(x=>x.eventId));
   for(const event of normalized){if(event.eventId)continue;let id;do{id=`EVT-${String(tempSeq++).padStart(6,"0")}`;}while(used.has(id));event.eventId=id;used.add(id);}
@@ -1531,7 +1697,7 @@ function loadTikEventLog(){
 }
 function saveTikEventLog(){localStorage.setItem(COMMON_EVENT_LOG_STORAGE,JSON.stringify(tikEventLog.slice(-2000)));renderTikEventLog();}
 function recordAppEvent({eventTypeCode,eventType,user=null,status="完了",result="成功",detail="",source="tik-mode",persist=true,cardNumber=0}){
-  const event={eventId:nextCommonEventId(),occurredAt:Date.now(),eventTypeCode:String(eventTypeCode||"ERROR"),eventType:String(eventType||eventTypeLabel(eventTypeCode)),userId:String(user?.id||""),displayName:String(user?.displayName||""),status:String(status),result:String(result),detail:String(detail||""),source:String(source||"app"),cardNumber:Number(cardNumber)||0};
+  const event={eventId:nextCommonEventId(),occurredAt:Date.now(),eventTypeCode:String(eventTypeCode||"ERROR"),eventType:String(eventType||eventTypeLabel(eventTypeCode)),userId:String(user?.id||""),displayName:String(user?.displayName||""),status:String(status),result:String(result),detail:String(detail||""),source:String(source||"app"),cardNumber:Number(cardNumber)||0,tournamentId:String(user?.tournamentId||tikTournament?.tournamentId||"")};
   tikEventLog.push(event);if(persist){try{saveTikEventLog();}catch(e){console.warn("event log save failed",e);}}return event;
 }
 function updateAppEvent(eventId,changes={}){const event=tikEventLog.find(x=>x.eventId===eventId);if(!event)return null;Object.assign(event,changes);try{saveTikEventLog();}catch(e){console.warn("event log update failed",e);}return event;}
@@ -1563,7 +1729,7 @@ function renderTikEventLog(){
   list.innerHTML=rows.length?rows.map(x=>{
     const who=[x.userId,x.displayName].filter(Boolean).join(" ")||"システム";
     const css=eventCssType(x.eventTypeCode,x.status);
-    return `<div class="tik-log-item ${esc(css)}"><div class="tik-log-time">${esc(formatTikEventAt(x.occurredAt))}　${esc(x.eventId)}</div><div class="tik-log-title">${esc(x.eventType)}</div><div class="tik-log-meta"><span class="tik-log-chip ${esc(eventStatusClass(x.status))}">状態：${esc(x.status)}</span><span class="tik-log-chip">結果：${esc(x.result)}</span></div><div class="tik-log-detail">${esc(who)}${x.cardNumber?`<div class="tik-log-card">カード No.${esc(x.cardNumber)}</div>`:""}${x.detail?`<br>${esc(x.detail)}`:""}</div></div>`;
+    return `<div class="tik-log-item ${esc(css)}"><div class="tik-log-time">${esc(formatTikEventAt(x.occurredAt))}　${esc(x.eventId)}</div><div class="tik-log-title">${esc(x.eventType)}</div><div class="tik-log-meta"><span class="tik-log-chip ${esc(eventStatusClass(x.status))}">状態：${esc(x.status)}</span><span class="tik-log-chip">結果：${esc(x.result)}</span></div><div class="tik-log-detail">${esc(who)}${x.cardNumber?`<div class="tik-log-card">カード No.${esc(x.cardNumber)}</div>`:""}${x.tournamentId?`<br>大会ID：${esc(x.tournamentId)}`:""}${x.detail?`<br>${esc(x.detail)}`:""}</div></div>`;
   }).join(""):'<div class="tik-user-empty">イベントログはまだありません。</div>';
 }
 function commentMatchesParticipationWord(text){
@@ -1573,7 +1739,7 @@ function commentMatchesParticipationWord(text){
 function tikAcceptedUsers(){return tikUsersState.users.filter(u=>u.assignedCardId&&u.acceptedAt);}
 function tikWaitingUsers(){return tikUsersState.users.filter(u=>!u.assignedCardId&&!u.fullRejectedAt&&(u.participantCommentMatched||u.heartReceived));}
 function nextTikReceptionOrder(){return tikAcceptedUsers().reduce((max,u)=>Math.max(max,Number(u.receptionOrder)||0),0)+1;}
-function buildTikIssuanceRecord(user,cardId,receptionOrder,issuedAt){const card=BYID.get(cardId);return {tournamentId:"",participantId:user.id,displayName:user.displayName,cardId,cardNumber:globalNo(cardId),cardGrid:card?.grid?card.grid.map(row=>row.slice()):[],issuedAt,receptionOrder,source:"tik",designId:"default",designVersion:"1",cardImageStatus:"not_generated",cardImageUrl:null,receiveStatus:"not_ready",lastViewedAt:null};}
+function buildTikIssuanceRecord(user,cardId,receptionOrder,issuedAt){const card=BYID.get(cardId);return {tournamentId:tikTournament?.tournamentId||"",participantId:user.id,displayName:user.displayName,cardId,cardNumber:globalNo(cardId),cardGrid:card?.grid?card.grid.map(row=>row.slice()):[],issuedAt,receptionOrder,source:"tik",designId:"default",designVersion:"1",cardImageStatus:"not_generated",cardImageUrl:null,receiveStatus:"not_ready",lastViewedAt:null};}
 function lowestUnusedCardId(){const used=new Set(state.regs.map(r=>r.cardId));for(let n=1;n<=250;n++){const id=parseCard(String(n));if(id&&!used.has(id))return id;}return null;}
 function setTikAcceptedListExpanded(expanded){
   tikAcceptedListExpanded=expanded===true;
@@ -1618,7 +1784,7 @@ function evaluateTikParticipation(user,trigger="event"){
   if(!cardId){recordAppEvent({eventTypeCode:"CARD_ISSUE_ERROR",user,status:"失敗",result:"未使用カードなし",detail:"1〜250番がすべて使用済み"});renderTikParticipationManagement();return;}
   const cardNo=globalNo(cardId);recordAppEvent({eventTypeCode:"CARD_ISSUE_STARTED",user,status:"処理中",result:"開始",cardNumber:cardNo,detail:`カード ${cardId} を予約`});
   if(state.regs.some(r=>r.cardId===cardId)){recordAppEvent({eventTypeCode:"DUPLICATE_CARD_REJECTED",user,status:"無効",result:"カード重複",cardNumber:cardNo,detail:"発行直前の重複確認で拒否"});renderTikParticipationManagement();return;}
-  const result=registerParticipantCard({name:user.displayName,cardId,source:"tik",externalUserId:user.id});
+  const result=registerParticipantCard({name:user.displayName,cardId,source:"tik",externalUserId:user.id,tournamentId:tikTournament?.tournamentId||""});
   if(!result.ok){const permissionContext=result.code==="NO_PERMISSION"?`処理段階：既存参加者登録／モード：${appMode?.mode||"不明"}／役割：${appMode?.role||"未選択"}／管理者：${adminAuthenticated?"認証済み":"未認証"}／ホスト権限：${hostAuthorized?"確認済み":"未確認"}／${result.message}`:result.message;recordAppEvent({eventTypeCode:"PARTICIPANT_REGISTER_ERROR",user,status:"失敗",result:result.code,cardNumber:cardNo,detail:permissionContext});renderTikParticipationManagement();return;}
   const acceptedAt=Date.now();const receptionOrder=nextTikReceptionOrder();user.assignedCardId=cardId;user.acceptedAt=acceptedAt;user.receptionOrder=receptionOrder;user.issuanceRecord=buildTikIssuanceRecord(user,cardId,receptionOrder,acceptedAt);user.lastParticipationState="ACCEPTED";saveTikUsers();
   recordAppEvent({eventTypeCode:"CARD_ISSUED",user,status:"完了",result:"成功",cardNumber:cardNo,detail:`${cardId} を自動発行`});
@@ -1673,6 +1839,7 @@ function openTikMode(){
   if(!requireTikHostPermission("notice")) return;
   const screen=$("tikModeScreen");
   if(!screen)return;
+  loadTikTournament();
   loadTikSettings();
   loadTikUsers();
   loadTikEventLog();
@@ -1692,6 +1859,11 @@ function closeTikMode(){
   updateDrawHistoryFloatingVisibility();
   $("openTikModeBtn")?.focus();
 }
+$("tikTournamentNowBtn")?.addEventListener("click",fillCurrentDateInTournamentTitle);
+$("saveTikTournamentBtn")?.addEventListener("click",saveTikTournament);
+$("resetTikTournamentBtn")?.addEventListener("click",resetTikTournamentData);
+$("tikTournamentTitle")?.addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();saveTikTournament();}});
+
 $("tikParticipantLimit")?.addEventListener("input",e=>{
   const original=e.target.value;
   const sanitized=original.replace(/\D/g,"").slice(0,3);
@@ -1727,6 +1899,7 @@ $("tikAcceptedToggleBtn")?.addEventListener("click",()=>setTikAcceptedListExpand
 $("openTikModeBtn").onclick=openTikMode;
 $("closeTikModeBtn").onclick=closeTikMode;
 document.addEventListener("keydown",e=>{if(e.key==="Escape" && !$("tikModeScreen")?.hidden)closeTikMode();});
+loadTikTournament();
 loadTikSettings();
 loadTikUsers();
 loadTikEventLog();

@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#151515">
-<title>Bingo Host 受付 Ver.2.30</title>
+<title>Bingo Host 受付 Ver.2.30.2</title>
 <style>
 *{box-sizing:border-box}body{margin:0;background:#f3f4f6;color:#171717;font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Yu Gothic",sans-serif}
 button,input,select{font:inherit}button{cursor:pointer}
@@ -250,7 +250,7 @@ body.tik-mode-open{overflow:hidden}
 </style>
 </head>
 <body>
-<header><h1 id="appTitle" aria-label="Bingo Host">Bingo Host<span id="adminCrown" class="guest-hidden">👑</span></h1><div class="sub">A〜E 全250枚対応・受付＋抽選 Ver.2.30.1／大会情報共有同期修正版</div></header>
+<header><h1 id="appTitle" aria-label="Bingo Host">Bingo Host<span id="adminCrown" class="guest-hidden">👑</span></h1><div class="sub">A〜E 全250枚対応・受付＋抽選 Ver.2.30.2／ゲスト同期安定化修正版</div></header>
 <main>
 <section id="currentTournamentBanner" class="panel current-tournament-banner" aria-label="現在の大会">
   <div class="current-tournament-label">現在の大会</div>
@@ -1461,7 +1461,7 @@ function previewTournamentTitle(){
   if($("currentTournamentTitle"))$("currentTournamentTitle").textContent=draft;
   setTournamentMessage("大会タイトルを編集中です。「大会情報を保存」を押すとTikモードにも反映されます。");
 }
-function saveTournament(){
+async function saveTournament(){
   if(!canOperate()){setTournamentMessage("⚠️ 大会情報を保存できるのは管理者または確認済みホストです。","err");return;}
   if(!tikTournament)tikTournament=createTikTournament();
   tikTournament.title=String($("tournamentTitle")?.value||"").trim();
@@ -1470,11 +1470,14 @@ function saveTournament(){
   try{
     saveTikTournamentState();
     renderTournament(true);
-    if(window.cloudPush && appMode?.mode==="shared" && appMode?.role==="host"){
-      window.cloudPush().catch(e=>setTournamentMessage(`⚠️ 大会情報は端末内へ保存しましたが、共有同期に失敗しました：${e.message||"不明なエラー"}`,"err"));
+    if(appMode?.mode==="shared" && appMode?.role==="host"){
+      if(window.cloudPushTournament) await window.cloudPushTournament();
+      else if(window.cloudPush) await window.cloudPush();
     }
     setTournamentMessage(`✅ ${tikTournament.title||"大会タイトル未設定"} を保存し、Tikモードと共有ゲストへ反映しました。`,"ok");
-  }catch(e){setTournamentMessage("⚠️ 大会情報を保存できませんでした。Safariの保存設定を確認してください。","err");}
+  }catch(e){
+    setTournamentMessage(`⚠️ 大会情報は端末内へ保存しましたが、共有同期に失敗しました：${e.message||"不明なエラー"}`,"err");
+  }
 }
 function openTournamentResetDialog(){
   if(!canOperate()){setTournamentMessage("⚠️ 大会データをリセットできるのは管理者または確認済みホストです。","err");return;}
@@ -1971,7 +1974,13 @@ window.getCloudPayload = function(){
 window.applyCloudPayload = function(payload){
   if(!payload) return;
   if(payload.state && Array.isArray(payload.state.regs)) state = payload.state;
-  if(payload.drawState && Array.isArray(payload.drawState.drawn)) drawState = payload.drawState;
+  if(payload.drawState && Array.isArray(payload.drawState.drawn)){
+    drawState = payload.drawState;
+    // ゲストは履歴操作を行えないため、受信時は必ず最新位置を表示する。
+    // これにより 0/1 などの履歴確認状態へ取り残されることを防ぐ。
+    if(appMode?.role==="guest") drawViewPosition=drawState.drawn.length;
+    else if(drawViewPosition>drawState.drawn.length) drawViewPosition=drawState.drawn.length;
+  }
   const incomingTournament=normalizeTikTournament(payload.tournament);
   if(incomingTournament) tikTournament=incomingTournament;
   try{localStorage.setItem(STORAGE,JSON.stringify(state))}catch(e){}
@@ -2275,6 +2284,25 @@ window.cloudPush = async function(){
   if(!result.committed){
     window.setCloudHostAuthorization?.(false);
     throw new Error("ホスト権限を確認できないため書き込みを中止しました");
+  }
+};
+
+window.cloudPushTournament = async function(){
+  const rr=roomRef();
+  const room=window.getCloudRoom?.();
+  if(!rr || !room || window.getCloudRole?.()!=="host" || !window.canCloudHostWrite?.() || !isApprovedAdmin(auth.currentUser)){
+    throw new Error("共有ホスト権限を確認できません");
+  }
+  const user=await ensureAuth();
+  const tournament=window.getCloudPayload?.()?.tournament;
+  if(!tournament) throw new Error("大会情報がありません");
+  const result=await runTransaction(rr,current=>{
+    if(!current || current.hostUid!==user.uid) return;
+    return {...current,hostUid:user.uid,tournament,updatedAt:Date.now()};
+  },{applyLocally:false});
+  if(!result.committed){
+    window.setCloudHostAuthorization?.(false);
+    throw new Error("ホスト権限を確認できないため大会情報の同期を中止しました");
   }
 };
 

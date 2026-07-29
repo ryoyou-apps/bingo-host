@@ -250,7 +250,7 @@ body.tik-mode-open{overflow:hidden}
 </style>
 </head>
 <body>
-<header><h1 id="appTitle" aria-label="Bingo Host">Bingo Host<span id="adminCrown" class="guest-hidden">👑</span></h1><div class="sub">A〜E 全250枚対応・受付＋抽選 Ver.2.30／大会情報一元管理版</div></header>
+<header><h1 id="appTitle" aria-label="Bingo Host">Bingo Host<span id="adminCrown" class="guest-hidden">👑</span></h1><div class="sub">A〜E 全250枚対応・受付＋抽選 Ver.2.30.1／大会情報共有同期修正版</div></header>
 <main>
 <section id="currentTournamentBanner" class="panel current-tournament-banner" aria-label="現在の大会">
   <div class="current-tournament-label">現在の大会</div>
@@ -437,7 +437,7 @@ body.tik-mode-open{overflow:hidden}
   </button>
 </div>
 
-<div id="appVersionFooter" style="text-align:center;color:#777;font-size:11px;padding:2px 0 18px">Ver.2.30 大会情報一元管理版</div>
+<div id="appVersionFooter" style="text-align:center;color:#777;font-size:11px;padding:2px 0 18px">Ver.2.30.1 大会情報共有同期修正版</div>
 </main>
 
 <div id="drawHistoryFloatingBar" class="draw-history-floating-bar" hidden aria-label="抽選履歴操作">
@@ -1470,7 +1470,10 @@ function saveTournament(){
   try{
     saveTikTournamentState();
     renderTournament(true);
-    setTournamentMessage(`✅ ${tikTournament.title||"大会タイトル未設定"} を保存し、Tikモードにも反映しました。`,"ok");
+    if(window.cloudPush && appMode?.mode==="shared" && appMode?.role==="host"){
+      window.cloudPush().catch(e=>setTournamentMessage(`⚠️ 大会情報は端末内へ保存しましたが、共有同期に失敗しました：${e.message||"不明なエラー"}`,"err"));
+    }
+    setTournamentMessage(`✅ ${tikTournament.title||"大会タイトル未設定"} を保存し、Tikモードと共有ゲストへ反映しました。`,"ok");
   }catch(e){setTournamentMessage("⚠️ 大会情報を保存できませんでした。Safariの保存設定を確認してください。","err");}
 }
 function openTournamentResetDialog(){
@@ -1961,17 +1964,22 @@ renderMode();
 window.getCloudPayload = function(){
   return {
     state: JSON.parse(JSON.stringify(state)),
-    drawState: JSON.parse(JSON.stringify(drawState))
+    drawState: JSON.parse(JSON.stringify(drawState)),
+    tournament: tikTournament ? JSON.parse(JSON.stringify(tikTournament)) : null
   };
 };
 window.applyCloudPayload = function(payload){
   if(!payload) return;
   if(payload.state && Array.isArray(payload.state.regs)) state = payload.state;
   if(payload.drawState && Array.isArray(payload.drawState.drawn)) drawState = payload.drawState;
+  const incomingTournament=normalizeTikTournament(payload.tournament);
+  if(incomingTournament) tikTournament=incomingTournament;
   try{localStorage.setItem(STORAGE,JSON.stringify(state))}catch(e){}
   try{localStorage.setItem(DRAW_STORAGE,JSON.stringify(drawState))}catch(e){}
+  if(incomingTournament){try{saveTikTournamentState()}catch(e){}}
   render();
   renderDrawAndJudge();
+  if(incomingTournament) renderTournament(true);
   if(typeof applyRolePermissions==="function") applyRolePermissions();
 };
 window.getCloudRoom = function(){

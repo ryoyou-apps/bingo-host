@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#151515">
-<title>Bingo Host 受付 Ver.2.31.0</title>
+<title>Bingo Host 受付 Ver.2.31.1</title>
 <style>
 *{box-sizing:border-box}body{margin:0;background:#f3f4f6;color:#171717;font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Yu Gothic",sans-serif}
 button,input,select{font:inherit}button{cursor:pointer}
@@ -248,7 +248,7 @@ body.tik-mode-open{overflow:hidden}
 .participant-list-toggle:focus-visible{outline:3px solid #f5cf5d88;outline-offset:2px}
 #list[hidden]{display:none!important}
 
-/* Ver.2.31.0 工程3-3B 第1実装：デジタルビンゴカード */
+/* Ver.2.31.1 バックアップ名・大会タイトル表示改善版 */
 .digital-card-list{display:grid;gap:8px;margin-top:10px}
 .digital-card-item{border:1px solid #d6dae1;border-radius:13px;background:#f8fafc;overflow:hidden}
 .digital-card-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:center;padding:10px 11px}
@@ -274,7 +274,7 @@ body.tik-mode-open{overflow:hidden}
 </style>
 </head>
 <body>
-<header><h1 id="appTitle" aria-label="Bingo Host">Bingo Host<span id="adminCrown" class="guest-hidden">👑</span></h1><div class="sub">A〜E 全250枚対応・受付＋抽選 Ver.2.31.0／デジタルカード第1実装</div></header>
+<header><h1 id="appTitle" aria-label="Bingo Host">Bingo Host<span id="adminCrown" class="guest-hidden">👑</span></h1><div class="sub">A〜E 全250枚対応・受付＋抽選 Ver.2.31.1／バックアップ名・大会タイトル表示改善版</div></header>
 <main>
 <section id="currentTournamentBanner" class="panel current-tournament-banner" aria-label="現在の大会">
   <div class="current-tournament-label">現在の大会</div>
@@ -461,7 +461,7 @@ body.tik-mode-open{overflow:hidden}
   </button>
 </div>
 
-<div id="appVersionFooter" style="text-align:center;color:#777;font-size:11px;padding:2px 0 18px">Ver.2.31.0 工程3-3B デジタルカード第1実装</div>
+<div id="appVersionFooter" style="text-align:center;color:#777;font-size:11px;padding:2px 0 18px">Ver.2.31.1 バックアップ名・大会タイトル表示改善版</div>
 </main>
 
 <div id="drawHistoryFloatingBar" class="draw-history-floating-bar" hidden aria-label="抽選履歴操作">
@@ -695,8 +695,25 @@ function getDigitalCardStatus(cardId){
  return {code:"none",label:"⚪未リーチ"};
 }
 function getTournamentTitleForCard(){
- const title=(typeof tournamentState!=="undefined"&&tournamentState&&tournamentState.title)?String(tournamentState.title).trim():"";
+ const title=(typeof tikTournament!=="undefined"&&tikTournament&&tikTournament.title)?String(tikTournament.title).trim():"";
  return title||"ビンゴカード";
+}
+function sanitizeBackupTitle(value){
+ return String(value||"")
+  .replace(/[\\/:*?"<>|]/g,"_")
+  .replace(/[\r\n\t]+/g," ")
+  .replace(/\s+/g," ")
+  .trim()
+  .slice(0,50)||"大会タイトル未設定";
+}
+function formatBackupTimestamp(value=Date.now()){
+ const d=new Date(value);
+ const pad=n=>String(n).padStart(2,"0");
+ return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}_${pad(d.getHours())}-${pad(d.getMinutes())}`;
+}
+function createBackupFileName(){
+ const title=sanitizeBackupTitle(typeof tikTournament!=="undefined"&&tikTournament?tikTournament.title:"");
+ return `${title}_${formatBackupTimestamp()}.json`;
 }
 function digitalCardKey(reg){return `${reg.key||reg.name}::${reg.cardId}`;}
 function renderDigitalCard(reg){
@@ -735,7 +752,7 @@ function render(){
  $("recent").innerHTML=state.regs.length?"<b>直近の登録</b><br>"+state.regs.slice(-5).reverse().map(r=>`✅ ${esc(r.name)}　No.${globalNo(r.cardId)}（${r.cardId}）`).join("<br>"):"まだ登録されていません。";
 }
 async function copyList(){let t=state.regs.map((r,i)=>`${i+1}. ${r.name}　No.${globalNo(r.cardId)}（${r.cardId}）`).join("\n");if(!t)return note("コピーする登録がありません。","err");try{await navigator.clipboard.writeText(t);note("✅ 一覧をコピーしました。","ok")}catch(e){prompt("コピーしてください",t)}}
-function backup(){if(!canOperate()){note("⚠️ ホストのみバックアップできます。","err");return;}let a=document.createElement("a");a.href=URL.createObjectURL(new Blob([JSON.stringify(state,null,2)],{type:"application/json"}));a.download="bingo-host-backup.json";a.click()}
+function backup(){if(!canOperate()){note("⚠️ ホストのみバックアップできます。","err");return;}const url=URL.createObjectURL(new Blob([JSON.stringify(state,null,2)],{type:"application/json"}));const a=document.createElement("a");a.href=url;a.download=createBackupFileName();a.click();setTimeout(()=>URL.revokeObjectURL(url),1000)}
 function restore(f){if(!canOperate()){note("⚠️ ホストのみ復元できます。","err");return;}let rd=new FileReader();rd.onload=()=>{try{let x=JSON.parse(rd.result);if(!x||!Array.isArray(x.regs))throw 0;state=x;save();note("✅ 復元しました。","ok")}catch(e){note("⚠️ 復元できませんでした。","err")}};rd.readAsText(f)}
 const registerBtn=$("registerBtn");
 registerBtn.addEventListener("click",function(e){e.preventDefault();e.stopPropagation();add();});

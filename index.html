@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#151515">
-<title>Bingo Host 受付 Ver.2.30.2</title>
+<title>Bingo Host 受付 Ver.2.31.0</title>
 <style>
 *{box-sizing:border-box}body{margin:0;background:#f3f4f6;color:#171717;font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Yu Gothic",sans-serif}
 button,input,select{font:inherit}button{cursor:pointer}
@@ -247,10 +247,34 @@ body.tik-mode-open{overflow:hidden}
 .participant-list-toggle:active{transform:translateY(1px);background:#f8edbd}
 .participant-list-toggle:focus-visible{outline:3px solid #f5cf5d88;outline-offset:2px}
 #list[hidden]{display:none!important}
+
+/* Ver.2.31.0 工程3-3B 第1実装：デジタルビンゴカード */
+.digital-card-list{display:grid;gap:8px;margin-top:10px}
+.digital-card-item{border:1px solid #d6dae1;border-radius:13px;background:#f8fafc;overflow:hidden}
+.digital-card-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:center;padding:10px 11px}
+.digital-card-info{display:flex;align-items:center;gap:8px;flex-wrap:wrap;min-width:0}
+.digital-card-id{font-weight:1000;font-size:17px;color:#111827}
+.digital-card-status{font-size:13px;font-weight:1000;white-space:nowrap}
+.digital-card-toggle{border:1px solid #8a6b25;border-radius:10px;background:#fff9df;color:#5d4300;padding:8px 10px;font-weight:1000;white-space:nowrap}
+.digital-card-body{padding:12px;border-top:1px solid #d6dae1;background:#fff}
+.digital-card-body[hidden]{display:none!important}
+.digital-card-shell{width:min(100%,420px);margin:0 auto;border:2px solid #111827;border-radius:16px;padding:12px;background:#fff;box-shadow:0 4px 14px #0f172a18}
+.digital-card-tournament{text-align:center;font-size:14px;font-weight:900;color:#475569;overflow-wrap:anywhere}
+.digital-card-owner{text-align:center;font-size:20px;font-weight:1000;margin-top:5px;overflow-wrap:anywhere}
+.digital-card-number{text-align:center;font-size:14px;font-weight:900;color:#7a5b0b;margin-top:2px}
+.digital-card-state{text-align:center;font-size:15px;font-weight:1000;margin:8px 0}
+.digital-card-head,.digital-card-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:5px}
+.digital-card-head{margin-bottom:5px}.digital-card-head span{text-align:center;font-size:20px;font-weight:1000;color:#111827}
+.digital-card-cell{aspect-ratio:1/1;display:flex;align-items:center;justify-content:center;border:1px solid #94a3b8;border-radius:9px;background:#fff;font-size:clamp(16px,5vw,23px);font-weight:1000;color:#111827}
+.digital-card-cell.is-drawn{background:#ffe36e;border-color:#d99a00;color:#4b3300;box-shadow:inset 0 0 0 2px #fff6a5}
+.digital-card-cell.is-free{background:#111827;border-color:#111827;color:#f6cf58;font-size:clamp(11px,3.5vw,16px)}
+.digital-card-missing{padding:12px;border-radius:10px;background:#fff1f0;color:#9d211a;font-weight:900;text-align:center}
+@media(max-width:430px){.digital-card-row{grid-template-columns:1fr auto}.digital-card-shell{padding:9px}.digital-card-head,.digital-card-grid{gap:4px}.digital-card-cell{border-radius:7px}}
+
 </style>
 </head>
 <body>
-<header><h1 id="appTitle" aria-label="Bingo Host">Bingo Host<span id="adminCrown" class="guest-hidden">👑</span></h1><div class="sub">A〜E 全250枚対応・受付＋抽選 Ver.2.30.2／ゲスト同期安定化修正版</div></header>
+<header><h1 id="appTitle" aria-label="Bingo Host">Bingo Host<span id="adminCrown" class="guest-hidden">👑</span></h1><div class="sub">A〜E 全250枚対応・受付＋抽選 Ver.2.31.0／デジタルカード第1実装</div></header>
 <main>
 <section id="currentTournamentBanner" class="panel current-tournament-banner" aria-label="現在の大会">
   <div class="current-tournament-label">現在の大会</div>
@@ -437,7 +461,7 @@ body.tik-mode-open{overflow:hidden}
   </button>
 </div>
 
-<div id="appVersionFooter" style="text-align:center;color:#777;font-size:11px;padding:2px 0 18px">Ver.2.30.1 大会情報共有同期修正版</div>
+<div id="appVersionFooter" style="text-align:center;color:#777;font-size:11px;padding:2px 0 18px">Ver.2.31.0 工程3-3B デジタルカード第1実装</div>
 </main>
 
 <div id="drawHistoryFloatingBar" class="draw-history-floating-bar" hidden aria-label="抽選履歴操作">
@@ -652,8 +676,9 @@ function add(){
  if(!result.ok){note(`⚠️ ${result.message}`,"err");(!name?$("name"):$("card"))?.focus();return;}
  $("card").value="";note(`✅ ${name}さん → No.${globalNo(id)}（${id}）を登録しました。`,"ok");$("card").focus();
 }
-function remove(key){if(!canOperate()){note("⚠️ ホストのみ削除できます。","err");return;}let r=state.regs.find(x=>x.key===key);if(r&&confirm(`${r.name}さんの No.${globalNo(r.cardId)} を削除しますか？`)){state.regs=state.regs.filter(x=>x.key!==key);save()}}
+function remove(key){if(!canOperate()){note("⚠️ ホストのみ削除できます。","err");return;}let r=state.regs.find(x=>x.key===key);if(r&&confirm(`${r.name}さんの No.${globalNo(r.cardId)} を削除しますか？`)){expandedDigitalCardKeys.delete(digitalCardKey(r));state.regs=state.regs.filter(x=>x.key!==key);save()}}
 let participantListExpanded=false;
+const expandedDigitalCardKeys=new Set();
 function setParticipantListExpanded(expanded){
  participantListExpanded=expanded===true;
  const list=$("list"),button=$("participantListToggleBtn");
@@ -663,15 +688,48 @@ function setParticipantListExpanded(expanded){
   button.setAttribute("aria-expanded",String(participantListExpanded));
  }
 }
+function getDigitalCardStatus(cardId){
+ const j=judgeCard(cardId);
+ if(j.bingo>0)return {code:"bingo",label:"🟢ビンゴ"};
+ if(j.reach>0)return {code:"reach",label:"🟡リーチ"};
+ return {code:"none",label:"⚪未リーチ"};
+}
+function getTournamentTitleForCard(){
+ const title=(typeof tournamentState!=="undefined"&&tournamentState&&tournamentState.title)?String(tournamentState.title).trim():"";
+ return title||"ビンゴカード";
+}
+function digitalCardKey(reg){return `${reg.key||reg.name}::${reg.cardId}`;}
+function renderDigitalCard(reg){
+ const card=BYID.get(reg.cardId);
+ const status=getDigitalCardStatus(reg.cardId);
+ if(!card||!card.grid)return `<div class="digital-card-missing">${esc(reg.cardId)} のカード配列が見つかりません。</div>`;
+ const drawn=new Set(getVisibleDrawn());
+ const cells=card.grid.flatMap(row=>row.map(number=>{
+  const isFree=Number(number)===0;
+  const isDrawn=isFree||drawn.has(Number(number));
+  const classes=`digital-card-cell${isFree?" is-free":""}${isDrawn&&!isFree?" is-drawn":""}`;
+  return `<div class="${classes}">${isFree?"FREE":number}</div>`;
+ })).join("");
+ return `<div class="digital-card-shell"><div class="digital-card-tournament">${esc(getTournamentTitleForCard())}</div><div class="digital-card-owner">${esc(reg.name)}</div><div class="digital-card-number">カード番号 ${esc(reg.cardId)}／No.${globalNo(reg.cardId)}</div><div class="digital-card-state">${status.label}</div><div class="digital-card-head"><span>B</span><span>I</span><span>N</span><span>G</span><span>O</span></div><div class="digital-card-grid">${cells}</div></div>`;
+}
+function renderDigitalCardItem(reg){
+ const key=digitalCardKey(reg),expanded=expandedDigitalCardKeys.has(key),status=getDigitalCardStatus(reg.cardId);
+ return `<div class="digital-card-item"><div class="digital-card-row"><div class="digital-card-info"><span class="digital-card-id">${esc(reg.cardId)}</span><span class="digital-card-status">${status.label}</span></div><button type="button" class="digital-card-toggle" data-card-toggle="${esc(key)}" aria-expanded="${expanded}">${expanded?"閉じる ▲":"開く ▼"}</button></div><div class="digital-card-body" data-card-body="${esc(key)}"${expanded?"":" hidden"}>${expanded?renderDigitalCard(reg):""}</div></div>`;
+}
+function toggleDigitalCard(key){
+ if(expandedDigitalCardKeys.has(key))expandedDigitalCardKeys.delete(key);else expandedDigitalCardKeys.add(key);
+ render();
+}
 function render(){
  let q=$("search").value.trim().toLowerCase(),arr=state.regs.slice();
  if($("sort").value==="name")arr.sort((a,b)=>a.name.localeCompare(b.name,"ja")||globalNo(a.cardId)-globalNo(b.cardId));
  if($("sort").value==="card")arr.sort((a,b)=>globalNo(a.cardId)-globalNo(b.cardId));
  if(q)arr=arr.filter(r=>r.name.toLowerCase().includes(q)||r.cardId.toLowerCase().includes(q)||String(globalNo(r.cardId)).includes(q));
  let groups=[];for(let r of arr){let g=groups.find(x=>x.name===r.name);if(!g){g={name:r.name,items:[]};groups.push(g)}g.items.push(r)}
- $("list").innerHTML=groups.length?groups.map(g=>`<div class="person"><div class="head"><b>${esc(g.name)}</b><span class="pill">${g.items.length}口</span></div><div class="chips">${g.items.map(r=>`<span class="chip">No.${globalNo(r.cardId)} <small>${r.cardId}</small>${canOperate()?`<button type="button" data-del="${r.key}">×</button>`:""}</span>`).join("")}</div></div>`).join(""):'<div class="empty">該当する登録はありません。</div>';
+ $("list").innerHTML=groups.length?groups.map(g=>`<div class="person"><div class="head"><b>${esc(g.name)}（${g.items.length}枚）</b><span class="pill">${g.items.length}枚</span></div><div class="digital-card-list">${g.items.map(renderDigitalCardItem).join("")}</div><div class="chips">${g.items.map(r=>`<span class="chip">No.${globalNo(r.cardId)} <small>${r.cardId}</small>${canOperate()?`<button type="button" data-del="${r.key}">×</button>`:""}</span>`).join("")}</div></div>`).join(""):'<div class="empty">該当する登録はありません。</div>';
  setParticipantListExpanded(participantListExpanded);
  document.querySelectorAll("[data-del]").forEach(b=>b.onclick=()=>remove(b.dataset.del));
+ document.querySelectorAll("[data-card-toggle]").forEach(b=>b.onclick=()=>toggleDigitalCard(b.dataset.cardToggle));
  let people=new Set(state.regs.map(r=>r.name)).size;$("peoplePill").textContent=`${people}人 / ${state.regs.length}枚`;$("remain").textContent=250-state.regs.length;
  for(let g of "ABCDE")$(g.toLowerCase()+"Count").textContent=state.regs.filter(r=>r.cardId[0]===g).length;
  $("recent").innerHTML=state.regs.length?"<b>直近の登録</b><br>"+state.regs.slice(-5).reverse().map(r=>`✅ ${esc(r.name)}　No.${globalNo(r.cardId)}（${r.cardId}）`).join("<br>"):"まだ登録されていません。";
@@ -703,6 +761,7 @@ function saveDraw(){
   drawViewPosition=drawState.drawn.length;
   try{localStorage.setItem(DRAW_STORAGE,JSON.stringify(drawState))}catch(e){}
   renderDrawAndJudge();
+  render();
   if(window.cloudPush && canOperate() && appMode?.mode==="shared" && appMode?.role==="host") window.cloudPush().catch(e=>note(`⚠️ 同期できません：${e.message}`,"err"));
 }
 function getLines(grid){

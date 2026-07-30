@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#151515">
-<title>Bingo Host 受付 Ver.2.31.6</title>
+<title>Bingo Host 受付 Ver.2.32.0</title>
 <style>
 *{box-sizing:border-box}body{margin:0;background:#f3f4f6;color:#171717;font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Yu Gothic",sans-serif}
 button,input,select{font:inherit}button{cursor:pointer}
@@ -248,7 +248,7 @@ body.tik-mode-open{overflow:hidden}
 .participant-list-toggle:focus-visible{outline:3px solid #f5cf5d88;outline-offset:2px}
 #list[hidden]{display:none!important}
 
-/* Ver.2.31.6 Pink・Neonテーマ完成度向上版 */
+/* Ver.2.32.0 工程3-4 ホスト終了・権限解放 第1実装 */
 .digital-card-list{display:grid;gap:8px;margin-top:10px}
 .digital-card-item{border:1px solid #d6dae1;border-radius:13px;background:#f8fafc;overflow:hidden}
 .digital-card-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:center;padding:10px 11px}
@@ -278,7 +278,7 @@ body.tik-mode-open{overflow:hidden}
 .judge-list-content{margin-top:10px}
 .judge-list-content[hidden]{display:none!important}
 
-/* Ver.2.31.6 カードテーマ・ライン強調 */
+/* Ver.2.32.0 カードテーマ・ライン強調 */
 .card-theme-fieldset{margin:14px 0 0;padding:12px;border:2px solid #d7dde3;border-radius:14px;background:#f8fafc}
 .card-theme-fieldset legend{padding:0 7px;font-size:17px;font-weight:1000;color:#111827}
 .card-theme-options{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
@@ -355,10 +355,28 @@ box-shadow:0 8px 22px rgba(33,45,70,.18),inset 0 0 0 2px #fff7d6,inset 0 0 0 5px
 .theme-neon .digital-card-cell.is-bingo-line{background:#0d664d;border-color:#60ffbb;color:#effff9;box-shadow:0 0 9px #34f5a899}
 @media(max-width:520px){.card-theme-options{grid-template-columns:1fr}.card-theme-option span{min-height:46px}}
 
+/* Ver.2.32.0 ホスト終了ダイアログ */
+.host-end-wrap{margin-top:14px;padding-top:14px;border-top:1px solid #5f4b1f}
+.host-end-btn{width:100%;min-height:52px;border:2px solid #d97706;border-radius:12px;background:#2a1707;color:#ffd38a;font-weight:1000;font-size:17px}
+.host-end-btn.guest-hidden{display:none!important}
+.host-end-message{margin-top:9px;padding:10px 12px;border-radius:10px;background:#272727;color:#e8e8e8;border:1px solid #555;line-height:1.5;font-weight:800}
+.host-end-message:empty{display:none}
+.host-end-message.err{display:block;background:#3a1515;color:#ffb4ad;border-color:#9f3a32}
+.host-end-overlay{position:fixed;inset:0;z-index:13000;display:flex;align-items:center;justify-content:center;padding:18px;background:rgba(7,9,14,.78);backdrop-filter:blur(5px)}
+.host-end-overlay[hidden]{display:none!important}
+.host-end-dialog{width:min(560px,96vw);border-radius:20px;background:#fff;padding:22px;box-shadow:0 24px 80px #0008}
+.host-end-dialog h2{margin:0 0 10px;font-size:23px}
+.host-end-dialog p{margin:0 0 16px;line-height:1.7;white-space:pre-line}
+.host-end-actions{display:grid;gap:9px}
+.host-end-actions button{min-height:50px;border-radius:12px;font-weight:1000;padding:10px 12px}
+.host-end-backup{border:0;background:#1267d6;color:#fff}
+.host-end-danger{border:0;background:#b3261e;color:#fff}
+.host-end-cancel{border:1px solid #aaa;background:#fff;color:#222}
+
 </style>
 </head>
 <body>
-<header><h1 id="appTitle" aria-label="Bingo Host">Bingo Host<span id="adminCrown" class="guest-hidden">👑</span></h1><div class="sub">A〜E 全250枚対応・受付＋抽選 Ver.2.31.6／Pink・Neonテーマ完成度向上版</div></header>
+<header><h1 id="appTitle" aria-label="Bingo Host">Bingo Host<span id="adminCrown" class="guest-hidden">👑</span></h1><div class="sub">A〜E 全250枚対応・受付＋抽選 Ver.2.32.0／工程3-4 ホスト終了・権限解放 第1実装</div></header>
 <main>
 <section id="currentTournamentBanner" class="panel current-tournament-banner" aria-label="現在の大会">
   <div class="current-tournament-label">現在の大会</div>
@@ -475,6 +493,10 @@ box-shadow:0 8px 22px rgba(33,45,70,.18),inset 0 0 0 2px #fff7d6,inset 0 0 0 5px
     <div id="tikEntryActions" class="tik-entry-actions guest-hidden">
       <button id="openTikModeBtn" class="tik-entry-btn" type="button">Tikモードを開く</button>
     </div>
+    <div id="hostEndWrap" class="host-end-wrap guest-hidden">
+      <button id="hostEndBtn" class="host-end-btn" type="button">🏁 ホスト終了</button>
+      <div id="hostEndMessage" class="host-end-message" role="status" aria-live="polite"></div>
+    </div>
     <div id="adminHelp" class="admin-help">管理操作を行う場合のみログインしてください。</div>
     <div id="adminLockMessage" class="admin-lock"></div>
     <div id="adminStatus" class="admin-status warn">閲覧モード</div>
@@ -560,7 +582,7 @@ box-shadow:0 8px 22px rgba(33,45,70,.18),inset 0 0 0 2px #fff7d6,inset 0 0 0 5px
   </button>
 </div>
 
-<div id="appVersionFooter" style="text-align:center;color:#777;font-size:11px;padding:2px 0 18px">Ver.2.31.6 Pink・Neonテーマ完成度向上版</div>
+<div id="appVersionFooter" style="text-align:center;color:#777;font-size:11px;padding:2px 0 18px">Ver.2.32.0 工程3-4 ホスト終了・権限解放 第1実装</div>
 </main>
 
 <div id="drawHistoryFloatingBar" class="draw-history-floating-bar" hidden aria-label="抽選履歴操作">
@@ -717,6 +739,23 @@ box-shadow:0 8px 22px rgba(33,45,70,.18),inset 0 0 0 2px #fff7d6,inset 0 0 0 5px
   </div>
 </div>
 
+<div id="hostEndOverlay" class="host-end-overlay" hidden role="dialog" aria-modal="true" aria-labelledby="hostEndTitle">
+  <div class="host-end-dialog">
+    <h2 id="hostEndTitle">ホスト終了</h2>
+    <p id="hostEndText">大会のホストを終了します。
+大会データは削除されません。</p>
+    <div id="hostEndInitialActions" class="host-end-actions">
+      <button id="hostEndBackupBtn" class="host-end-backup" type="button">バックアップして終了</button>
+      <button id="hostEndWithoutBackupBtn" class="host-end-danger" type="button">バックアップせず終了</button>
+      <button id="hostEndCancelBtn" class="host-end-cancel" type="button">キャンセル</button>
+    </div>
+    <div id="hostEndFinalActions" class="host-end-actions" hidden>
+      <button id="hostEndConfirmBtn" class="host-end-danger" type="button">ホストを終了</button>
+      <button id="hostEndFinalCancelBtn" class="host-end-cancel" type="button">終了を取り消す</button>
+    </div>
+  </div>
+</div>
+
 <div id="celebrationOverlay" class="celebration-overlay" hidden role="dialog" aria-live="assertive" aria-modal="true">
   <div class="celebration-card">
     <div id="celebrationIcon" class="celebration-icon"></div>
@@ -735,6 +774,11 @@ const MODE_STORAGE="bingoHostModeV23";
 let state={regs:[]};
 let appMode={mode:"personal",room:"",role:""};
 let hostAuthorized=false;
+let hostEndBusy=false;
+const HOST_SESSION_STORAGE="bingoHostSessionV2320";
+function saveLocalHostSession(session){try{localStorage.setItem(HOST_SESSION_STORAGE,JSON.stringify(session||{}))}catch(e){}}
+function createActiveHostSession(hostId=""){return {active:true,hostId:String(hostId||""),startedAt:new Date().toISOString(),endedAt:null};}
+function createEndedHostSession(previous){return {active:false,hostId:null,startedAt:previous?.startedAt||null,endedAt:new Date().toISOString()};}
 let adminAuthenticated=false;
 let adminEmail="";
 let adminPanelRevealed=new URLSearchParams(location.search).get("setup")==="1";
@@ -904,11 +948,20 @@ function render(){
  $("recent").innerHTML=state.regs.length?"<b>直近の登録</b><br>"+state.regs.slice(-5).reverse().map(r=>`✅ ${esc(r.name)}　No.${globalNo(r.cardId)}（${r.cardId}）`).join("<br>"):"まだ登録されていません。";
 }
 async function copyList(){let t=state.regs.map((r,i)=>`${i+1}. ${r.name}　No.${globalNo(r.cardId)}（${r.cardId}）`).join("\n");if(!t)return note("コピーする登録がありません。","err");try{await navigator.clipboard.writeText(t);note("✅ 一覧をコピーしました。","ok")}catch(e){prompt("コピーしてください",t)}}
-function backup(){
- if(!canOperate()){note("⚠️ ホストのみバックアップできます。","err");return;}
- const payload={...JSON.parse(JSON.stringify(state)),tournament:tikTournament?JSON.parse(JSON.stringify(tikTournament)):null};
- const url=URL.createObjectURL(new Blob([JSON.stringify(payload,null,2)],{type:"application/json"}));
- const a=document.createElement("a");a.href=url;a.download=createBackupFileName();a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
+function backup(options={}){
+ if(!canOperate()){const err=new Error("ホストのみバックアップできます。");if(!options.silent)note(`⚠️ ${err.message}`,"err");throw err;}
+ try{
+  const payload={...JSON.parse(JSON.stringify(state)),tournament:tikTournament?JSON.parse(JSON.stringify(tikTournament)):null};
+  const json=JSON.stringify(payload,null,2);
+  if(!json)throw new Error("バックアップデータを作成できませんでした。");
+  const url=URL.createObjectURL(new Blob([json],{type:"application/json"}));
+  const a=document.createElement("a");a.href=url;a.download=createBackupFileName();a.style.display="none";document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
+  if(!options.silent)note("✅ バックアップのダウンロードを開始しました。","ok");
+  return true;
+ }catch(e){
+  if(!options.silent)note(`⚠️ バックアップに失敗しました：${e.message||e}`,"err");
+  throw e;
+ }
 }
 function restore(f){
  if(!canOperate()){note("⚠️ ホストのみ復元できます。","err");return;}
@@ -1543,6 +1596,50 @@ function applyRolePermissions(){
     el.disabled=!adminAuthenticated;
     el.classList.toggle("guest-lock",!adminAuthenticated);
   });
+  const hostEndWrap=$("hostEndWrap"),hostEndBtn=$("hostEndBtn");
+  const showHostEnd=canOperateTikMode();
+  if(hostEndWrap)hostEndWrap.classList.toggle("guest-hidden",!showHostEnd);
+  if(hostEndBtn){hostEndBtn.disabled=!showHostEnd||hostEndBusy;hostEndBtn.classList.toggle("guest-lock",!showHostEnd||hostEndBusy);}
+}
+
+function setHostEndMessage(message="",type=""){const el=$("hostEndMessage");if(!el)return;el.textContent=message;el.className="host-end-message"+(type?` ${type}`:"");}
+function openHostEndDialog(){
+ if(!canOperateTikMode()){setHostEndMessage("ホスト権限が確認できません。","err");return;}
+ $("hostEndText").textContent="大会のホストを終了します。\n大会データは削除されません。";
+ $("hostEndInitialActions").hidden=false;$("hostEndFinalActions").hidden=true;
+ $("hostEndOverlay").hidden=false;
+}
+function closeHostEndDialog(){if(hostEndBusy)return;$("hostEndOverlay").hidden=true;}
+function showHostEndFinalConfirmation(withBackup){
+ $("hostEndInitialActions").hidden=true;$("hostEndFinalActions").hidden=false;
+ $("hostEndConfirmBtn").textContent=withBackup?"ホストを終了":"終了する";
+ $("hostEndText").textContent=withBackup
+  ?"バックアップのダウンロードを開始しました。\nホストを終了しますか？"
+  :"バックアップを保存せずにホストを終了します。\n大会データはFirebaseに残りますが、端末用のバックアップファイルは作成されません。\nよろしいですか？";
+}
+function startBackupThenHostEnd(){
+ try{backup({silent:true});showHostEndFinalConfirmation(true);}
+ catch(e){setHostEndMessage(`バックアップに失敗したため、ホストは終了していません：${e.message||e}`,"err");$("hostEndOverlay").hidden=true;}
+}
+async function confirmHostEnd(){
+ if(hostEndBusy)return;
+ if(!canOperateTikMode()){setHostEndMessage("ホスト権限が確認できないため終了できません。","err");$("hostEndOverlay").hidden=true;return;}
+ hostEndBusy=true;applyRolePermissions();
+ try{
+  if(typeof window.cloudEndHostSession!=="function")throw new Error("Firebaseのホスト終了処理を利用できません。");
+  await window.cloudEndHostSession();
+  hostAuthorized=false;
+  appMode={mode:"shared",room:appMode.room||"",role:"guest"};
+  saveMode();
+  saveLocalHostSession(createEndedHostSession(null));
+  $("hostEndOverlay").hidden=true;
+  setHostEndMessage("ホストを終了しました。大会データはそのまま閲覧できます。");
+  note("✅ ホストを終了しました。大会データは削除されていません。","ok");
+  renderMode();
+ }catch(e){
+  setHostEndMessage(`ホスト終了に失敗しました。権限は解放されていません：${e.message||e}`,"err");
+  note(`⚠️ ホスト終了に失敗しました：${e.message||e}`,"err");
+ }finally{hostEndBusy=false;applyRolePermissions();}
 }
 
 function renderMode(){
@@ -1576,7 +1673,7 @@ function renderMode(){
     panel.classList.toggle("admin-on",adminAuthenticated);
     panel.classList.toggle("admin-concealed",!adminAuthenticated&&!adminPanelRevealed&&!setupMode);
   }
-  const crown=$("adminCrown");if(crown)crown.classList.toggle("guest-hidden",!adminAuthenticated);
+  const crown=$("adminCrown");if(crown)crown.classList.toggle("guest-hidden",!canOperateTikMode());
   if(summary)summary.textContent=adminAuthenticated?"◆ 管理者モード":setupMode?"🔐 初回設定":"🔒 ログイン";
   if(as){
     as.className="admin-status "+(adminAuthenticated?"ok":"warn");
@@ -2214,7 +2311,7 @@ $("clearTikEventLogBtn").onclick=clearTikEventLog;
 $("tikAcceptedToggleBtn")?.addEventListener("click",()=>setTikAcceptedListExpanded(!tikAcceptedListExpanded));
 $("openTikModeBtn").onclick=openTikMode;
 $("closeTikModeBtn").onclick=closeTikMode;
-document.addEventListener("keydown",e=>{if(e.key!=="Escape")return;if(!$("tournamentResetOverlay")?.hidden){closeTournamentResetDialog();return;}if(!$("tikModeScreen")?.hidden)closeTikMode();});
+document.addEventListener("keydown",e=>{if(e.key!=="Escape")return;if(!$("hostEndOverlay")?.hidden){closeHostEndDialog();return;}if(!$("tournamentResetOverlay")?.hidden){closeTournamentResetDialog();return;}if(!$("tikModeScreen")?.hidden)closeTikMode();});
 loadTikTournament();
 loadTikSettings();
 loadTikUsers();
@@ -2227,6 +2324,13 @@ $("sharedModeBtn").onclick=setSharedMode;
 $("hostRoleBtn").onclick=chooseHostRole;
 $("guestRoleBtn").onclick=chooseGuestRole;
 $("joinRoomBtn").onclick=joinRoom;
+$("hostEndBtn")?.addEventListener("click",openHostEndDialog);
+$("hostEndBackupBtn")?.addEventListener("click",startBackupThenHostEnd);
+$("hostEndWithoutBackupBtn")?.addEventListener("click",()=>showHostEndFinalConfirmation(false));
+$("hostEndCancelBtn")?.addEventListener("click",closeHostEndDialog);
+$("hostEndFinalCancelBtn")?.addEventListener("click",closeHostEndDialog);
+$("hostEndConfirmBtn")?.addEventListener("click",confirmHostEnd);
+$("hostEndOverlay")?.addEventListener("click",e=>{if(e.target===$("hostEndOverlay"))closeHostEndDialog();});
 loadMode();
 ensureAdminPanelAtTop();
 if(appMode.mode==="shared") hostAuthorized=false;
@@ -2532,6 +2636,22 @@ window.cloudDiagnostic = async function(){
   const started=performance.now();await get(rr);return Math.max(1,Math.round(performance.now()-started));
 };
 
+window.cloudEndHostSession = async function(){
+  const rr=roomRef();
+  const room=window.getCloudRoom?.();
+  if(!rr||!room||window.getCloudRole?.()!=="host"||!window.canCloudHostWrite?.()||!isApprovedAdmin(auth.currentUser))throw new Error("共有ホスト権限を確認できません");
+  const user=await ensureAuth();
+  const endedAt=new Date().toISOString();
+  const result=await runTransaction(rr,current=>{
+    if(!current||current.hostUid!==user.uid)return;
+    const previous=current.hostSession||{};
+    return {...current,hostUid:null,hostSession:{active:false,hostId:null,startedAt:previous.startedAt||null,endedAt},updatedAt:Date.now()};
+  },{applyLocally:false});
+  if(!result.committed)throw new Error("ホスト権限を解放できませんでした");
+  window.setCloudHostAuthorization?.(false);
+  return true;
+};
+
 window.cloudPush = async function(){
   const rr = roomRef();
   const room = window.getCloudRoom?.();
@@ -2546,6 +2666,7 @@ window.cloudPush = async function(){
     return {
       ...current,
       hostUid:user.uid,
+      hostSession:{active:true,hostId:user.uid,startedAt:current.hostSession?.startedAt||new Date().toISOString(),endedAt:null},
       ...payload,
       updatedAt:Date.now()
     };
@@ -2584,6 +2705,7 @@ window.cloudResetRoom = async function(){
     if(!current || current.hostUid!==user.uid) return;
     return {
       hostUid:user.uid,
+      hostSession:{active:true,hostId:user.uid,startedAt:current.hostSession?.startedAt||new Date().toISOString(),endedAt:null},
       state:{regs:[]},
       drawState:{drawn:[]},
       updatedAt:Date.now()
@@ -2620,10 +2742,16 @@ window.cloudConnect = async function(){
       setRoomStatus(`ホスト権限を確認中／大会コード：${room}`);
       const payload = window.getCloudPayload?.() || {state:{regs:[]},drawState:{drawn:[]}};
       const claim = await runTransaction(rr,current=>{
+        const nowIso=new Date().toISOString();
         if(current===null){
-          return {hostUid:user.uid,...payload,updatedAt:Date.now()};
+          return {hostUid:user.uid,hostSession:{active:true,hostId:user.uid,startedAt:nowIso,endedAt:null},...payload,updatedAt:Date.now()};
         }
-        if(current.hostUid===user.uid) return current;
+        if(current.hostUid===user.uid && current.hostSession?.active!==false){
+          return {...current,hostSession:{active:true,hostId:user.uid,startedAt:current.hostSession?.startedAt||nowIso,endedAt:null}};
+        }
+        if(!current.hostUid || current.hostSession?.active===false){
+          return {...current,hostUid:user.uid,hostSession:{active:true,hostId:user.uid,startedAt:nowIso,endedAt:null},updatedAt:Date.now()};
+        }
         return;
       },{applyLocally:false});
 
@@ -2638,6 +2766,7 @@ window.cloudConnect = async function(){
         }
       }else{
         window.setCloudHostAuthorization?.(true);
+        saveLocalHostSession(createActiveHostSession(user.uid));
       }
     }else{
       window.setCloudHostAuthorization?.(false);

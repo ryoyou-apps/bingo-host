@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#151515">
-<title>Bingo Host 受付 Ver.2.31.2</title>
+<title>Bingo Host 受付 Ver.2.31.3</title>
 <style>
 *{box-sizing:border-box}body{margin:0;background:#f3f4f6;color:#171717;font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Yu Gothic",sans-serif}
 button,input,select{font:inherit}button{cursor:pointer}
@@ -248,7 +248,7 @@ body.tik-mode-open{overflow:hidden}
 .participant-list-toggle:focus-visible{outline:3px solid #f5cf5d88;outline-offset:2px}
 #list[hidden]{display:none!important}
 
-/* Ver.2.31.2 リーチ・ビンゴ一覧 折りたたみ改善版 */
+/* Ver.2.31.3 カードテーマ・リーチ／ビンゴライン強調版 */
 .digital-card-list{display:grid;gap:8px;margin-top:10px}
 .digital-card-item{border:1px solid #d6dae1;border-radius:13px;background:#f8fafc;overflow:hidden}
 .digital-card-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:center;padding:10px 11px}
@@ -278,10 +278,39 @@ body.tik-mode-open{overflow:hidden}
 .judge-list-content{margin-top:10px}
 .judge-list-content[hidden]{display:none!important}
 
+/* Ver.2.31.3 カードテーマ・ライン強調 */
+.card-theme-fieldset{margin:14px 0 0;padding:12px;border:2px solid #d7dde3;border-radius:14px;background:#f8fafc}
+.card-theme-fieldset legend{padding:0 7px;font-size:17px;font-weight:1000;color:#111827}
+.card-theme-options{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.card-theme-option{position:relative;display:block;cursor:pointer}
+.card-theme-option input{position:absolute;opacity:0;pointer-events:none}
+.card-theme-option span{min-height:48px;display:flex;align-items:center;justify-content:center;border:2px solid #94a3b8;border-radius:12px;background:#fff;color:#334155;font-weight:1000;padding:10px 7px;text-align:center}
+.card-theme-option input:checked+span{border-color:#8a6b25;background:#fff3bd;color:#5d4300;box-shadow:0 0 0 3px #f5cf5d55}
+.card-theme-option input:focus-visible+span{outline:3px solid #2563eb55;outline-offset:2px}
+.digital-card-shell.theme-pink{border-color:#db4f8d;background:linear-gradient(145deg,#fff,#ffeaf4);box-shadow:0 7px 20px #db4f8d2c}
+.theme-pink .digital-card-tournament,.theme-pink .digital-card-number{color:#8f2457}.theme-pink .digital-card-head span{color:#b62f70}
+.theme-pink .digital-card-cell{background:#fffafd;border-color:#e3a2bf;color:#3f1830}
+.digital-card-shell.theme-japanese{border:3px solid #b38a2e;background:repeating-linear-gradient(35deg,#fffdf3 0,#fffdf3 12px,#faf3dc 13px,#faf3dc 15px);box-shadow:0 7px 20px #6b4a1826}
+.theme-japanese .digital-card-tournament,.theme-japanese .digital-card-number{color:#8f241c}.theme-japanese .digital-card-head span{color:#9f251c;text-shadow:0 1px #f1d58a}
+.theme-japanese .digital-card-cell{background:#fffdf5;border-color:#b38a2e;color:#172033}
+.digital-card-shell.theme-neon{border:2px solid #6ee7ff;background:linear-gradient(145deg,#07091a,#12102a);box-shadow:0 0 14px #6ee7ff66,0 0 22px #d946ef33;color:#fff}
+.theme-neon .digital-card-tournament,.theme-neon .digital-card-number{color:#8be9ff}.theme-neon .digital-card-owner,.theme-neon .digital-card-state{color:#fff}.theme-neon .digital-card-head span{color:#ff79da;text-shadow:0 0 7px #ff79daaa}
+.theme-neon .digital-card-cell{background:#12182f;border-color:#6474c7;color:#fff}
+.digital-card-cell.is-drawn{background:#ffe36e;border-color:#d99a00;color:#4b3300;box-shadow:inset 0 0 0 2px #fff6a5}
+.digital-card-cell.is-free{background:#111827;border-color:#111827;color:#f6cf58}
+.digital-card-cell.is-reach-line{background:#ffcf74;border:2px solid #ea8c00;color:#4b2c00;box-shadow:inset 0 0 0 2px #fff0bd}
+.digital-card-cell.is-reach-wait{outline:3px solid #ef6c00;outline-offset:-4px;font-size:clamp(18px,5.5vw,25px)}
+.digital-card-cell.is-bingo-line{background:linear-gradient(145deg,#fff3a0,#45c878);border:3px solid #168b45;color:#12351f;box-shadow:inset 0 0 0 2px #fff9c9}
+.theme-neon .digital-card-cell.is-drawn{background:#51359d;border-color:#b58cff;color:#fff;box-shadow:0 0 7px #9c6cff88}
+.theme-neon .digital-card-cell.is-free{background:#291447;border-color:#ff79da;color:#fff2fb;box-shadow:0 0 7px #ff79da77}
+.theme-neon .digital-card-cell.is-reach-line{background:#754313;border-color:#ffb22e;color:#fff5d6;box-shadow:0 0 8px #ff9f1c99}
+.theme-neon .digital-card-cell.is-bingo-line{background:#0d664d;border-color:#60ffbb;color:#effff9;box-shadow:0 0 9px #34f5a899}
+@media(max-width:520px){.card-theme-options{grid-template-columns:1fr}.card-theme-option span{min-height:46px}}
+
 </style>
 </head>
 <body>
-<header><h1 id="appTitle" aria-label="Bingo Host">Bingo Host<span id="adminCrown" class="guest-hidden">👑</span></h1><div class="sub">A〜E 全250枚対応・受付＋抽選 Ver.2.31.2／リーチ・ビンゴ一覧 折りたたみ改善版</div></header>
+<header><h1 id="appTitle" aria-label="Bingo Host">Bingo Host<span id="adminCrown" class="guest-hidden">👑</span></h1><div class="sub">A〜E 全250枚対応・受付＋抽選 Ver.2.31.3／カードテーマ・リーチ／ビンゴライン強調版</div></header>
 <main>
 <section id="currentTournamentBanner" class="panel current-tournament-banner" aria-label="現在の大会">
   <div class="current-tournament-label">現在の大会</div>
@@ -306,6 +335,15 @@ body.tik-mode-open{overflow:hidden}
     </div>
     <label class="label" for="tournamentMemo">大会メモ</label>
     <textarea id="tournamentMemo" class="tournament-memo" maxlength="1000" placeholder="景品内容、運営メモ、スポンサー、司会者、注意事項など"></textarea>
+    <fieldset class="card-theme-fieldset">
+      <legend>カードテーマ</legend>
+      <div class="card-theme-options" role="radiogroup" aria-label="カードテーマ">
+        <label class="card-theme-option"><input type="radio" name="cardTheme" value="pink" checked><span>🌸 Pink</span></label>
+        <label class="card-theme-option"><input type="radio" name="cardTheme" value="japanese"><span>🎋 Japanese</span></label>
+        <label class="card-theme-option"><input type="radio" name="cardTheme" value="neon"><span>🌃 Neon</span></label>
+      </div>
+      <div class="hint">テーマ名だけを大会情報へ保存します。選択するとカード表示をプレビューし、「大会情報を保存」で確定します。</div>
+    </fieldset>
     <div class="tournament-actions">
       <button id="saveTournamentBtn" class="tournament-save-btn" type="button">大会情報を保存</button>
       <button id="openTournamentResetBtn" class="tournament-danger-btn" type="button">大会受付データをリセット</button>
@@ -474,7 +512,7 @@ body.tik-mode-open{overflow:hidden}
   </button>
 </div>
 
-<div id="appVersionFooter" style="text-align:center;color:#777;font-size:11px;padding:2px 0 18px">Ver.2.31.2 リーチ・ビンゴ一覧 折りたたみ改善版</div>
+<div id="appVersionFooter" style="text-align:center;color:#777;font-size:11px;padding:2px 0 18px">Ver.2.31.3 カードテーマ・リーチ／ビンゴライン強調版</div>
 </main>
 
 <div id="drawHistoryFloatingBar" class="draw-history-floating-bar" hidden aria-label="抽選履歴操作">
@@ -721,6 +759,18 @@ function setBingoListExpanded(expanded){
   button.setAttribute("aria-expanded",String(bingoListExpanded));
  }
 }
+const CARD_THEMES=new Set(["pink","japanese","neon"]);
+function normalizeCardTheme(value){return CARD_THEMES.has(String(value||"").toLowerCase())?String(value).toLowerCase():"pink";}
+function getSavedCardTheme(){return normalizeCardTheme(tikTournament?.cardDesign?.theme);}
+function getSelectedCardTheme(){
+ const checked=document.querySelector('input[name="cardTheme"]:checked');
+ return normalizeCardTheme(checked?.value||getSavedCardTheme());
+}
+function setCardThemeInput(theme){
+ const value=normalizeCardTheme(theme);
+ const input=document.querySelector(`input[name="cardTheme"][value="${value}"]`);
+ if(input)input.checked=true;
+}
 function getDigitalCardStatus(cardId){
  const j=judgeCard(cardId);
  if(j.bingo>0)return {code:"bingo",label:"🟢ビンゴ"};
@@ -751,16 +801,25 @@ function createBackupFileName(){
 function digitalCardKey(reg){return `${reg.key||reg.name}::${reg.cardId}`;}
 function renderDigitalCard(reg){
  const card=BYID.get(reg.cardId);
- const status=getDigitalCardStatus(reg.cardId);
+ const judged=judgeCard(reg.cardId);
+ const status=judged.bingo>0?{code:"bingo",label:"🟢ビンゴ"}:judged.reach>0?{code:"reach",label:"🟡リーチ"}:{code:"none",label:"⚪未リーチ"};
  if(!card||!card.grid)return `<div class="digital-card-missing">${esc(reg.cardId)} のカード配列が見つかりません。</div>`;
  const drawn=new Set(getVisibleDrawn());
- const cells=card.grid.flatMap(row=>row.map(number=>{
-  const isFree=Number(number)===0;
-  const isDrawn=isFree||drawn.has(Number(number));
-  const classes=`digital-card-cell${isFree?" is-free":""}${isDrawn&&!isFree?" is-drawn":""}`;
-  return `<div class="${classes}">${isFree?"FREE":number}</div>`;
+ const bingoCells=new Set((judged.bingoLineIndexes||[]).flatMap(index=>getLineCoordinates(index).map(([r,c])=>`${r}:${c}`)));
+ const reachCells=new Set((judged.reachLineIndexes||[]).flatMap(index=>getLineCoordinates(index).map(([r,c])=>`${r}:${c}`)));
+ const reachWaits=new Set((judged.reachWaitCells||[]).map(([r,c])=>`${r}:${c}`));
+ const cells=card.grid.flatMap((row,r)=>row.map((number,c)=>{
+  const key=`${r}:${c}`,isFree=Number(number)===0,isDrawn=isFree||drawn.has(Number(number));
+  const classes=["digital-card-cell"];
+  if(isFree)classes.push("is-free");
+  if(isDrawn&&!isFree)classes.push("is-drawn");
+  if(reachCells.has(key))classes.push("is-reach-line");
+  if(reachWaits.has(key))classes.push("is-reach-wait");
+  if(bingoCells.has(key))classes.push("is-bingo-line");
+  return `<div class="${classes.join(" ")}">${isFree?"FREE":number}</div>`;
  })).join("");
- return `<div class="digital-card-shell"><div class="digital-card-tournament">${esc(getTournamentTitleForCard())}</div><div class="digital-card-owner">${esc(reg.name)}</div><div class="digital-card-number">カード番号 ${esc(reg.cardId)}／No.${globalNo(reg.cardId)}</div><div class="digital-card-state">${status.label}</div><div class="digital-card-head"><span>B</span><span>I</span><span>N</span><span>G</span><span>O</span></div><div class="digital-card-grid">${cells}</div></div>`;
+ const theme=getSelectedCardTheme();
+ return `<div class="digital-card-shell theme-${theme}"><div class="digital-card-tournament">${esc(getTournamentTitleForCard())}</div><div class="digital-card-owner">${esc(reg.name)}</div><div class="digital-card-number">カード番号 ${esc(reg.cardId)}／No.${globalNo(reg.cardId)}</div><div class="digital-card-state">${status.label}</div><div class="digital-card-head"><span>B</span><span>I</span><span>N</span><span>G</span><span>O</span></div><div class="digital-card-grid">${cells}</div></div>`;
 }
 function renderDigitalCardItem(reg){
  const key=digitalCardKey(reg),expanded=expandedDigitalCardKeys.has(key),status=getDigitalCardStatus(reg.cardId);
@@ -785,8 +844,26 @@ function render(){
  $("recent").innerHTML=state.regs.length?"<b>直近の登録</b><br>"+state.regs.slice(-5).reverse().map(r=>`✅ ${esc(r.name)}　No.${globalNo(r.cardId)}（${r.cardId}）`).join("<br>"):"まだ登録されていません。";
 }
 async function copyList(){let t=state.regs.map((r,i)=>`${i+1}. ${r.name}　No.${globalNo(r.cardId)}（${r.cardId}）`).join("\n");if(!t)return note("コピーする登録がありません。","err");try{await navigator.clipboard.writeText(t);note("✅ 一覧をコピーしました。","ok")}catch(e){prompt("コピーしてください",t)}}
-function backup(){if(!canOperate()){note("⚠️ ホストのみバックアップできます。","err");return;}const url=URL.createObjectURL(new Blob([JSON.stringify(state,null,2)],{type:"application/json"}));const a=document.createElement("a");a.href=url;a.download=createBackupFileName();a.click();setTimeout(()=>URL.revokeObjectURL(url),1000)}
-function restore(f){if(!canOperate()){note("⚠️ ホストのみ復元できます。","err");return;}let rd=new FileReader();rd.onload=()=>{try{let x=JSON.parse(rd.result);if(!x||!Array.isArray(x.regs))throw 0;state=x;save();note("✅ 復元しました。","ok")}catch(e){note("⚠️ 復元できませんでした。","err")}};rd.readAsText(f)}
+function backup(){
+ if(!canOperate()){note("⚠️ ホストのみバックアップできます。","err");return;}
+ const payload={...JSON.parse(JSON.stringify(state)),tournament:tikTournament?JSON.parse(JSON.stringify(tikTournament)):null};
+ const url=URL.createObjectURL(new Blob([JSON.stringify(payload,null,2)],{type:"application/json"}));
+ const a=document.createElement("a");a.href=url;a.download=createBackupFileName();a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
+}
+function restore(f){
+ if(!canOperate()){note("⚠️ ホストのみ復元できます。","err");return;}
+ let rd=new FileReader();
+ rd.onload=()=>{try{
+  const x=JSON.parse(rd.result);if(!x||!Array.isArray(x.regs))throw 0;
+  const incomingTournament=normalizeTikTournament(x.tournament);
+  const {tournament,...restoredState}=x;
+  state=restoredState;
+  if(incomingTournament){tikTournament=incomingTournament;saveTikTournamentState();renderTournament(true);}
+  else if(tikTournament){tikTournament.cardDesign={theme:"pink"};saveTikTournamentState();renderTournament(true);}
+  save();note("✅ 復元しました。","ok");
+ }catch(e){note("⚠️ 復元できませんでした。","err")}};
+ rd.readAsText(f);
+}
 const registerBtn=$("registerBtn");
 registerBtn.addEventListener("click",function(e){e.preventDefault();e.stopPropagation();add();});
 $("card").addEventListener("keydown",function(e){if(e.key==="Enter"){e.preventDefault();add();}});
@@ -831,23 +908,32 @@ function isDrawHistoryMode(){return drawViewPosition<drawState.drawn.length}
 function recordDrawHistoryEvent(eventTypeCode,result,detail,status="完了"){
   try{window.appEventLog?.record({eventTypeCode,eventType:eventTypeLabel(eventTypeCode),status,result,detail,source:"normal-draw"})}catch(e){console.warn("draw history log failed",e)}
 }
+function getLineCoordinates(index){
+ if(index>=0&&index<5)return Array.from({length:5},(_,c)=>[index,c]);
+ if(index>=5&&index<10)return Array.from({length:5},(_,r)=>[r,index-5]);
+ if(index===10)return Array.from({length:5},(_,i)=>[i,i]);
+ if(index===11)return Array.from({length:5},(_,i)=>[i,4-i]);
+ return [];
+}
 function judgeCard(cardId){
   const card=BYID.get(cardId);
-  if(!card||!card.grid)return {bingo:0,reach:0,waits:[]};
+  if(!card||!card.grid)return {bingo:0,reach:0,waits:[],bingoLineIndexes:[],reachLineIndexes:[],reachWaitCells:[]};
   const hit=new Set(getVisibleDrawn());
   hit.add(0); // FREE
   let bingo=0,reach=0;
-  const waits=[];
-  for(const line of getLines(card.grid)){
+  const waits=[],bingoLineIndexes=[],reachLineIndexes=[],reachWaitCells=[];
+  getLines(card.grid).forEach((line,lineIndex)=>{
     const missing=line.filter(n=>!hit.has(n));
     if(missing.length===0){
-      bingo++;
+      bingo++;bingoLineIndexes.push(lineIndex);
     }else if(missing.length===1){
-      reach++;
-      waits.push(missing[0]);
+      reach++;reachLineIndexes.push(lineIndex);waits.push(missing[0]);
+      const coords=getLineCoordinates(lineIndex);
+      const missingIndex=line.findIndex(n=>n===missing[0]);
+      if(coords[missingIndex])reachWaitCells.push(coords[missingIndex]);
     }
-  }
-  return {bingo,reach,waits:[...new Set(waits)].sort((a,b)=>a-b)};
+  });
+  return {bingo,reach,waits:[...new Set(waits)].sort((a,b)=>a-b),bingoLineIndexes,reachLineIndexes,reachWaitCells};
 }
 function drawOne(){
   if(!canOperate()){note("⚠️ ホストのみ抽選できます。","err");return;}
@@ -1372,6 +1458,10 @@ function applyRolePermissions(){
     el.disabled=locked;
     el.classList.toggle("guest-lock",locked);
   });
+  document.querySelectorAll('input[name="cardTheme"]').forEach(el=>{
+    el.disabled=locked;
+    el.closest(".card-theme-option")?.classList.toggle("guest-lock",locked);
+  });
 
   ["registerBtn","next","focusCard","drawBtn","manualAddBtn","undoBtn","redoBtn","resetDrawBtn","fullResetBtn","backup","restore","tournamentNowBtn","saveTournamentBtn","openTournamentResetBtn"].forEach(id=>{
     const el=$(id);
@@ -1526,12 +1616,12 @@ function nextTournamentId(){
   return `TMT-${dateKey}-${String(sequence).padStart(3,"0")}`;
 }
 function createTikTournament(){
-  return {tournamentId:nextTournamentId(),title:"",startedAt:Date.now(),scheduledEndAt:null,status:"preparing",memo:"",createdAt:Date.now(),updatedAt:Date.now()};
+  return {tournamentId:nextTournamentId(),title:"",startedAt:Date.now(),scheduledEndAt:null,status:"preparing",memo:"",cardDesign:{theme:"pink"},createdAt:Date.now(),updatedAt:Date.now()};
 }
 function normalizeTikTournament(raw){
   if(!raw||typeof raw!=="object"||!String(raw.tournamentId||"").trim())return null;
   const status=["preparing","accepting","ended"].includes(raw.status)?raw.status:"preparing";
-  return {tournamentId:String(raw.tournamentId),title:String(raw.title||"").trim(),startedAt:Number(raw.startedAt)||Date.now(),scheduledEndAt:raw.scheduledEndAt==null?null:(Number(raw.scheduledEndAt)||null),status,memo:String(raw.memo||""),createdAt:Number(raw.createdAt)||Number(raw.startedAt)||Date.now(),updatedAt:Number(raw.updatedAt)||Date.now()};
+  return {tournamentId:String(raw.tournamentId),title:String(raw.title||"").trim(),startedAt:Number(raw.startedAt)||Date.now(),scheduledEndAt:raw.scheduledEndAt==null?null:(Number(raw.scheduledEndAt)||null),status,memo:String(raw.memo||""),cardDesign:{theme:normalizeCardTheme(raw.cardDesign?.theme)},createdAt:Number(raw.createdAt)||Number(raw.startedAt)||Date.now(),updatedAt:Number(raw.updatedAt)||Date.now()};
 }
 function saveTikTournamentState(){
   if(!tikTournament)return;
@@ -1562,7 +1652,9 @@ function renderTournament(fillInputs=false){
   if(fillInputs){
     if($("tournamentTitle"))$("tournamentTitle").value=tikTournament.title;
     if($("tournamentMemo"))$("tournamentMemo").value=tikTournament.memo;
+    setCardThemeInput(tikTournament.cardDesign?.theme);
   }
+  if(typeof render==="function")render();
 }
 function renderTikTournament(fillInputs=false){renderTournament(fillInputs);}
 function fillCurrentDateInTournamentTitle(){
@@ -1581,6 +1673,7 @@ async function saveTournament(){
   if(!tikTournament)tikTournament=createTikTournament();
   tikTournament.title=String($("tournamentTitle")?.value||"").trim();
   tikTournament.memo=String($("tournamentMemo")?.value||"");
+  tikTournament.cardDesign={theme:getSelectedCardTheme()};
   tikTournament.updatedAt=Date.now();
   try{
     saveTikTournamentState();
@@ -2023,6 +2116,7 @@ $("cancelTournamentResetBtn")?.addEventListener("click",closeTournamentResetDial
 $("confirmTournamentResetBtn")?.addEventListener("click",resetTikTournamentData);
 $("tournamentResetOverlay")?.addEventListener("click",e=>{if(e.target===$("tournamentResetOverlay"))closeTournamentResetDialog();});
 $("tournamentTitle")?.addEventListener("input",previewTournamentTitle);
+document.querySelectorAll('input[name="cardTheme"]').forEach(input=>input.addEventListener("change",()=>{render();setTournamentMessage("カードテーマをプレビューしています。「大会情報を保存」を押すと確定し、共有ゲストへ反映されます。");}));
 $("tournamentTitle")?.addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();saveTournament();}});
 
 $("tikParticipantLimit")?.addEventListener("input",e=>{

@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#151515">
-<title>Bingo Host 受付 Ver.2.31.3</title>
+<title>Bingo Host 受付 Ver.2.31.6</title>
 <style>
 *{box-sizing:border-box}body{margin:0;background:#f3f4f6;color:#171717;font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Yu Gothic",sans-serif}
 button,input,select{font:inherit}button{cursor:pointer}
@@ -248,7 +248,7 @@ body.tik-mode-open{overflow:hidden}
 .participant-list-toggle:focus-visible{outline:3px solid #f5cf5d88;outline-offset:2px}
 #list[hidden]{display:none!important}
 
-/* Ver.2.31.3 カードテーマ・リーチ／ビンゴライン強調版 */
+/* Ver.2.31.6 Pink・Neonテーマ完成度向上版 */
 .digital-card-list{display:grid;gap:8px;margin-top:10px}
 .digital-card-item{border:1px solid #d6dae1;border-radius:13px;background:#f8fafc;overflow:hidden}
 .digital-card-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:center;padding:10px 11px}
@@ -278,7 +278,7 @@ body.tik-mode-open{overflow:hidden}
 .judge-list-content{margin-top:10px}
 .judge-list-content[hidden]{display:none!important}
 
-/* Ver.2.31.3 カードテーマ・ライン強調 */
+/* Ver.2.31.6 カードテーマ・ライン強調 */
 .card-theme-fieldset{margin:14px 0 0;padding:12px;border:2px solid #d7dde3;border-radius:14px;background:#f8fafc}
 .card-theme-fieldset legend{padding:0 7px;font-size:17px;font-weight:1000;color:#111827}
 .card-theme-options{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
@@ -287,19 +287,67 @@ body.tik-mode-open{overflow:hidden}
 .card-theme-option span{min-height:48px;display:flex;align-items:center;justify-content:center;border:2px solid #94a3b8;border-radius:12px;background:#fff;color:#334155;font-weight:1000;padding:10px 7px;text-align:center}
 .card-theme-option input:checked+span{border-color:#8a6b25;background:#fff3bd;color:#5d4300;box-shadow:0 0 0 3px #f5cf5d55}
 .card-theme-option input:focus-visible+span{outline:3px solid #2563eb55;outline-offset:2px}
-.digital-card-shell.theme-pink{border-color:#db4f8d;background:linear-gradient(145deg,#fff,#ffeaf4);box-shadow:0 7px 20px #db4f8d2c}
-.theme-pink .digital-card-tournament,.theme-pink .digital-card-number{color:#8f2457}.theme-pink .digital-card-head span{color:#b62f70}
-.theme-pink .digital-card-cell{background:#fffafd;border-color:#e3a2bf;color:#3f1830}
-.digital-card-shell.theme-japanese{border:3px solid #b38a2e;background:repeating-linear-gradient(35deg,#fffdf3 0,#fffdf3 12px,#faf3dc 13px,#faf3dc 15px);box-shadow:0 7px 20px #6b4a1826}
-.theme-japanese .digital-card-tournament,.theme-japanese .digital-card-number{color:#8f241c}.theme-japanese .digital-card-head span{color:#9f251c;text-shadow:0 1px #f1d58a}
-.theme-japanese .digital-card-cell{background:#fffdf5;border-color:#b38a2e;color:#172033}
-.digital-card-shell.theme-neon{border:2px solid #6ee7ff;background:linear-gradient(145deg,#07091a,#12102a);box-shadow:0 0 14px #6ee7ff66,0 0 22px #d946ef33;color:#fff}
+.digital-card-shell.theme-pink{position:relative;overflow:hidden;border:3px solid #e4a4bf;background:linear-gradient(145deg,#fff,#fff1f7 55%,#ffe4ef);box-shadow:0 9px 24px #d85c912d,inset 0 0 0 2px #fff,inset 0 0 0 5px #f4d4e2;color:#3f1830}
+.theme-pink::before{content:"";position:absolute;inset:8px;pointer-events:none;border:1px solid rgba(214,157,76,.58);border-radius:12px;box-shadow:inset 0 0 16px rgba(255,255,255,.75)}
+.theme-pink .digital-card-tournament,.theme-pink .digital-card-owner,.theme-pink .digital-card-number,.theme-pink .digital-card-state,.theme-pink .digital-card-head,.theme-pink .digital-card-grid{position:relative;z-index:2}
+.theme-pink .digital-card-tournament,.theme-pink .digital-card-number{color:#8f2457}.theme-pink .digital-card-owner{color:#4a2337}.theme-pink .digital-card-head span{color:#b62f70;text-shadow:0 1px #fff}
+.theme-pink .digital-card-cell{background:#fffafd;border-color:#e3a2bf;color:#3f1830;box-shadow:inset 0 0 0 1px #fff}
+.pink-decor{display:none}.theme-pink .pink-decor{display:block;position:relative;z-index:1;height:70px;margin:-3px -3px 10px;overflow:hidden;border-radius:12px 12px 9px 9px;background:linear-gradient(135deg,#fff 0 24%,#ffeef6 24% 68%,#f9d9e7 68%);border-bottom:2px solid #e8b9cd}
+.pink-decor .pk-ribbon{position:absolute;left:50%;top:12px;width:44px;height:28px;transform:translateX(-50%);background:#e875aa;border-radius:50% 50% 45% 45%;box-shadow:0 3px 8px #c44c7c33}
+.pink-decor .pk-ribbon::before,.pink-decor .pk-ribbon::after{content:"";position:absolute;top:6px;width:32px;height:24px;background:#ef92bd;border-radius:60% 15% 60% 15%}
+.pink-decor .pk-ribbon::before{right:28px;transform:rotate(18deg)}.pink-decor .pk-ribbon::after{left:28px;transform:scaleX(-1) rotate(18deg)}
+.pink-decor .pk-pearl{position:absolute;left:16px;top:12px;width:10px;height:10px;border-radius:50%;background:#fff;box-shadow:14px 6px 0 #fff8fc,28px -1px 0 #fff,42px 7px 0 #fff8fc,56px 1px 0 #fff,0 0 0 2px #efd9e4}
+.pink-decor .pk-gem{position:absolute;right:21px;top:13px;width:28px;height:28px;background:linear-gradient(145deg,#fff,#ffd9ef 35%,#cf6fa4 70%,#fff);clip-path:polygon(50% 0,88% 24%,100% 62%,50% 100%,0 62%,12% 24%);filter:drop-shadow(0 2px 4px #b64d7b55)}
+.pink-decor .pk-macaron{position:absolute;left:22px;bottom:10px;width:38px;height:24px;border-radius:50%;background:#f3a4c5;box-shadow:inset 0 -7px 0 #d96f9e,0 2px 5px #b75f8433}
+.pink-decor .pk-macaron::after{content:"";position:absolute;left:3px;right:3px;top:10px;height:4px;background:#fff7fb;border-radius:999px}
+.pink-decor .pk-heart{position:absolute;right:72px;bottom:14px;width:18px;height:18px;background:#e782ad;transform:rotate(45deg);border-radius:4px;opacity:.85}
+.pink-decor .pk-heart::before,.pink-decor .pk-heart::after{content:"";position:absolute;width:18px;height:18px;border-radius:50%;background:#e782ad}.pink-decor .pk-heart::before{left:-9px}.pink-decor .pk-heart::after{top:-9px}
+.pink-lace-strip{display:none}.theme-pink .pink-lace-strip{display:block;position:relative;z-index:2;height:15px;margin:9px 0 -2px;background:radial-gradient(circle at 8px 0,transparent 6px,#fff 6.5px 8px,transparent 8.5px),radial-gradient(circle at 24px 0,transparent 6px,#e6b7cc 6.5px 8px,transparent 8.5px);background-size:32px 15px;opacity:.92}
+.digital-card-shell.theme-japanese{position:relative;overflow:hidden;border:3px solid #c5a24b;background:
+linear-gradient(135deg,rgba(255,255,255,.96),rgba(249,245,230,.97)),
+repeating-linear-gradient(45deg,rgba(20,49,83,.035) 0 1px,transparent 1px 12px),
+repeating-linear-gradient(-45deg,rgba(180,35,24,.025) 0 1px,transparent 1px 14px);
+box-shadow:0 8px 22px rgba(33,45,70,.18),inset 0 0 0 2px #fff7d6,inset 0 0 0 5px rgba(197,162,75,.18);color:#172033}
+.theme-japanese::before{content:"";position:absolute;inset:7px;pointer-events:none;border:1px solid rgba(197,162,75,.56);border-radius:12px;box-shadow:inset 0 0 18px rgba(197,162,75,.09)}
+.theme-japanese .digital-card-tournament,.theme-japanese .digital-card-owner,.theme-japanese .digital-card-number,.theme-japanese .digital-card-state,.theme-japanese .digital-card-head,.theme-japanese .digital-card-grid{position:relative;z-index:2}
+.theme-japanese .digital-card-tournament{color:#143153;letter-spacing:.08em}.theme-japanese .digital-card-owner{color:#172033}.theme-japanese .digital-card-number{color:#a52b22}.theme-japanese .digital-card-head span{color:#a52b22;text-shadow:0 1px #f3d98b}
+.theme-japanese .digital-card-cell{background:#fffef8;border-color:#b9963f;color:#172033;box-shadow:inset 0 0 0 1px rgba(255,255,255,.75)}
+.japanese-decor{display:none}.theme-japanese .japanese-decor{display:block;position:relative;z-index:1;height:76px;margin:-3px -3px 9px;overflow:hidden;border-radius:12px 12px 8px 8px;background:linear-gradient(#edf4fb 0 58%,#f8f2df 58% 100%);border-bottom:2px solid #c5a24b}
+.japanese-decor .jp-sun{position:absolute;width:34px;height:34px;border-radius:50%;right:28px;top:10px;background:#b42318;box-shadow:0 0 0 5px rgba(180,35,24,.08)}
+.japanese-decor .jp-fuji{position:absolute;left:50%;bottom:13px;width:150px;height:58px;transform:translateX(-50%);background:linear-gradient(155deg,transparent 0 32%,#17385d 33% 100%);clip-path:polygon(50% 0,100% 100%,0 100%)}
+.japanese-decor .jp-fuji::after{content:"";position:absolute;left:37px;top:9px;width:76px;height:29px;background:#fff;clip-path:polygon(50% 0,61% 34%,71% 22%,84% 53%,100% 100%,0 100%,18% 57%,31% 24%,42% 37%)}
+.japanese-decor .jp-torii{position:absolute;left:15px;bottom:11px;width:46px;height:42px;border-left:6px solid #b42318;border-right:6px solid #b42318}
+.japanese-decor .jp-torii::before{content:"";position:absolute;left:-12px;top:2px;width:58px;height:6px;background:#b42318;border-radius:2px;box-shadow:0 9px 0 -1px #b42318}
+.japanese-decor .jp-pagoda{position:absolute;right:18px;bottom:9px;width:36px;height:42px;background:linear-gradient(90deg,transparent 0 13px,#172033 13px 23px,transparent 23px);clip-path:polygon(50% 0,65% 16%,94% 22%,66% 27%,89% 38%,64% 42%,84% 55%,62% 58%,76% 72%,24% 72%,38% 58%,16% 55%,36% 42%,11% 38%,34% 27%,6% 22%,35% 16%)}
+.japanese-decor .jp-cloud{position:absolute;left:72px;top:14px;width:42px;height:12px;border:2px solid rgba(197,162,75,.72);border-left:0;border-right:0;border-radius:50%}
+.japanese-decor .jp-cloud::after{content:"";position:absolute;left:16px;top:9px;width:48px;height:10px;border-top:2px solid rgba(197,162,75,.62);border-radius:50%}
+.japanese-pattern-strip{display:none}.theme-japanese .japanese-pattern-strip{display:block;position:relative;z-index:2;height:15px;margin:9px 0 -2px;border-radius:0 0 8px 8px;background:radial-gradient(circle at 10px 0,transparent 8px,#143153 8.5px 10px,transparent 10.5px),radial-gradient(circle at 30px 0,transparent 8px,#143153 8.5px 10px,transparent 10.5px);background-size:40px 15px;opacity:.72}
+.digital-card-shell.theme-neon{position:relative;overflow:hidden;border:2px solid #6ee7ff;background:radial-gradient(circle at top,#17113a 0,#090b1f 58%,#050711 100%);box-shadow:0 0 14px #6ee7ff66,0 0 24px #d946ef3d,inset 0 0 0 1px #2f1f58;color:#fff}
+.theme-neon::before{content:"";position:absolute;inset:7px;pointer-events:none;border:1px solid rgba(255,121,218,.55);border-radius:12px;box-shadow:0 0 8px rgba(255,121,218,.28),inset 0 0 14px rgba(110,231,255,.08)}
+.theme-neon .digital-card-tournament,.theme-neon .digital-card-owner,.theme-neon .digital-card-number,.theme-neon .digital-card-state,.theme-neon .digital-card-head,.theme-neon .digital-card-grid{position:relative;z-index:2}
 .theme-neon .digital-card-tournament,.theme-neon .digital-card-number{color:#8be9ff}.theme-neon .digital-card-owner,.theme-neon .digital-card-state{color:#fff}.theme-neon .digital-card-head span{color:#ff79da;text-shadow:0 0 7px #ff79daaa}
 .theme-neon .digital-card-cell{background:#12182f;border-color:#6474c7;color:#fff}
+.neon-decor{display:none}.theme-neon .neon-decor{display:block;position:relative;z-index:1;height:74px;margin:-3px -3px 10px;overflow:hidden;border-radius:12px 12px 9px 9px;background:linear-gradient(180deg,#080a1d,#11113a);border-bottom:1px solid #6ee7ff;box-shadow:inset 0 -8px 15px rgba(30,18,75,.45)}
+.neon-decor .nn-light{position:absolute;left:10px;right:10px;top:7px;height:3px;border-radius:999px;background:linear-gradient(90deg,#6ee7ff,#ff79da,#9f7cff,#6ee7ff);box-shadow:0 0 8px #6ee7ff,0 0 12px #ff79da}
+.neon-decor .nn-roulette{position:absolute;left:17px;bottom:9px;width:45px;height:45px;border-radius:50%;border:4px solid #ff79da;box-shadow:0 0 8px #ff79da99,inset 0 0 0 4px #1f2147;background:conic-gradient(#ff4d7a 0 12.5%,#10131f 12.5% 25%,#6ee7ff 25% 37.5%,#10131f 37.5% 50%,#ff4d7a 50% 62.5%,#10131f 62.5% 75%,#6ee7ff 75% 87.5%,#10131f 87.5%)}
+.neon-decor .nn-roulette::after{content:"";position:absolute;inset:13px;border-radius:50%;background:#ffd166;box-shadow:0 0 6px #ffd166}
+.neon-decor .nn-card{position:absolute;left:78px;bottom:11px;width:30px;height:42px;border:2px solid #6ee7ff;border-radius:5px;background:#11182c;color:#ff6b8a;box-shadow:0 0 7px #6ee7ff77;transform:rotate(-8deg)}
+.neon-decor .nn-card::before{content:"A";position:absolute;left:4px;top:2px;font-size:12px;font-weight:1000}.neon-decor .nn-card::after{content:"♥";position:absolute;left:8px;top:13px;font-size:19px}
+.neon-decor .nn-dice{position:absolute;right:76px;bottom:13px;width:34px;height:34px;border:2px solid #ff79da;border-radius:7px;background:#161833;box-shadow:0 0 8px #ff79da88}
+.neon-decor .nn-dice::before{content:"•  •\A  •\A•  •";white-space:pre;position:absolute;inset:2px;color:#fff;font-size:12px;line-height:9px;text-align:center}
+.neon-decor .nn-chip{position:absolute;right:18px;bottom:10px;width:46px;height:46px;border-radius:50%;border:6px dashed #ffd166;background:#30165f;box-shadow:0 0 9px #9f7cff99,inset 0 0 0 5px #11182f}
+.neon-decor .nn-chip::after{content:"★";position:absolute;inset:5px;color:#fff;text-align:center;font-size:17px;text-shadow:0 0 5px #fff}
+.neon-casino-strip{display:none}.theme-neon .neon-casino-strip{display:block;position:relative;z-index:2;height:13px;margin:9px 0 -1px;border-radius:999px;background:repeating-linear-gradient(90deg,#6ee7ff 0 12px,#ff79da 12px 24px,#ffd166 24px 36px,#9f7cff 36px 48px);box-shadow:0 0 7px #6ee7ff88;opacity:.84}
 .digital-card-cell.is-drawn{background:#ffe36e;border-color:#d99a00;color:#4b3300;box-shadow:inset 0 0 0 2px #fff6a5}
 .digital-card-cell.is-free{background:#111827;border-color:#111827;color:#f6cf58}
 .digital-card-cell.is-reach-line{background:#ffcf74;border:2px solid #ea8c00;color:#4b2c00;box-shadow:inset 0 0 0 2px #fff0bd}
-.digital-card-cell.is-reach-wait{outline:3px solid #ef6c00;outline-offset:-4px;font-size:clamp(18px,5.5vw,25px)}
+.digital-card-shell{--reach-wait-color:#ef6c00;--reach-wait-glow:#ef6c0099}
+.digital-card-cell.is-reach-wait{position:relative;background:#fff;border:3px solid var(--reach-wait-color);color:inherit;box-shadow:0 0 0 1px #fff,0 0 9px var(--reach-wait-glow);font-size:clamp(18px,5.5vw,25px)}
+.theme-pink{--reach-wait-color:#db2777;--reach-wait-glow:#db277799}.theme-pink .digital-card-cell.is-reach-wait{background:#fffafd;color:#3f1830}
+.theme-japanese{--reach-wait-color:#b42318;--reach-wait-glow:#b4231888}.theme-japanese .digital-card-cell.is-reach-wait{background:#fffdf5;color:#172033}
+.theme-neon{--reach-wait-color:#ff79da;--reach-wait-glow:#ff79dacc}.theme-neon .digital-card-cell.is-reach-wait{background:#12182f;color:#fff}
+.digital-card-cell.is-reach-wait.is-reach-flash{animation:reachWaitFlash .42s ease-in-out 3}
+@keyframes reachWaitFlash{0%,100%{transform:scale(1);box-shadow:0 0 0 1px #fff,0 0 8px var(--reach-wait-glow)}50%{transform:scale(1.055);box-shadow:0 0 0 2px #fff,0 0 18px 5px var(--reach-wait-glow)}}
 .digital-card-cell.is-bingo-line{background:linear-gradient(145deg,#fff3a0,#45c878);border:3px solid #168b45;color:#12351f;box-shadow:inset 0 0 0 2px #fff9c9}
 .theme-neon .digital-card-cell.is-drawn{background:#51359d;border-color:#b58cff;color:#fff;box-shadow:0 0 7px #9c6cff88}
 .theme-neon .digital-card-cell.is-free{background:#291447;border-color:#ff79da;color:#fff2fb;box-shadow:0 0 7px #ff79da77}
@@ -310,7 +358,7 @@ body.tik-mode-open{overflow:hidden}
 </style>
 </head>
 <body>
-<header><h1 id="appTitle" aria-label="Bingo Host">Bingo Host<span id="adminCrown" class="guest-hidden">👑</span></h1><div class="sub">A〜E 全250枚対応・受付＋抽選 Ver.2.31.3／カードテーマ・リーチ／ビンゴライン強調版</div></header>
+<header><h1 id="appTitle" aria-label="Bingo Host">Bingo Host<span id="adminCrown" class="guest-hidden">👑</span></h1><div class="sub">A〜E 全250枚対応・受付＋抽選 Ver.2.31.6／Pink・Neonテーマ完成度向上版</div></header>
 <main>
 <section id="currentTournamentBanner" class="panel current-tournament-banner" aria-label="現在の大会">
   <div class="current-tournament-label">現在の大会</div>
@@ -512,7 +560,7 @@ body.tik-mode-open{overflow:hidden}
   </button>
 </div>
 
-<div id="appVersionFooter" style="text-align:center;color:#777;font-size:11px;padding:2px 0 18px">Ver.2.31.3 カードテーマ・リーチ／ビンゴライン強調版</div>
+<div id="appVersionFooter" style="text-align:center;color:#777;font-size:11px;padding:2px 0 18px">Ver.2.31.6 Pink・Neonテーマ完成度向上版</div>
 </main>
 
 <div id="drawHistoryFloatingBar" class="draw-history-floating-bar" hidden aria-label="抽選履歴操作">
@@ -732,6 +780,8 @@ let participantListExpanded=false;
 let reachListExpanded=false;
 let bingoListExpanded=false;
 const expandedDigitalCardKeys=new Set();
+const newlyReachedDigitalCardIds=new Set();
+let reachFlashClearTimer=null;
 function setParticipantListExpanded(expanded){
  participantListExpanded=expanded===true;
  const list=$("list"),button=$("participantListToggleBtn");
@@ -799,6 +849,12 @@ function createBackupFileName(){
  return `${title}_${formatBackupTimestamp()}.json`;
 }
 function digitalCardKey(reg){return `${reg.key||reg.name}::${reg.cardId}`;}
+function markNewReachCards(groups){
+ newlyReachedDigitalCardIds.clear();
+ for(const group of (groups||[]))for(const item of (group.items||[]))newlyReachedDigitalCardIds.add(item.cardId);
+ if(reachFlashClearTimer)clearTimeout(reachFlashClearTimer);
+ reachFlashClearTimer=setTimeout(()=>newlyReachedDigitalCardIds.clear(),1800);
+}
 function renderDigitalCard(reg){
  const card=BYID.get(reg.cardId);
  const judged=judgeCard(reg.cardId);
@@ -813,13 +869,17 @@ function renderDigitalCard(reg){
   const classes=["digital-card-cell"];
   if(isFree)classes.push("is-free");
   if(isDrawn&&!isFree)classes.push("is-drawn");
-  if(reachCells.has(key))classes.push("is-reach-line");
-  if(reachWaits.has(key))classes.push("is-reach-wait");
+  if(reachWaits.has(key)){
+    classes.push("is-reach-wait");
+    if(newlyReachedDigitalCardIds.has(reg.cardId))classes.push("is-reach-flash");
+  }else if(reachCells.has(key)){
+    classes.push("is-reach-line");
+  }
   if(bingoCells.has(key))classes.push("is-bingo-line");
   return `<div class="${classes.join(" ")}">${isFree?"FREE":number}</div>`;
  })).join("");
  const theme=getSelectedCardTheme();
- return `<div class="digital-card-shell theme-${theme}"><div class="digital-card-tournament">${esc(getTournamentTitleForCard())}</div><div class="digital-card-owner">${esc(reg.name)}</div><div class="digital-card-number">カード番号 ${esc(reg.cardId)}／No.${globalNo(reg.cardId)}</div><div class="digital-card-state">${status.label}</div><div class="digital-card-head"><span>B</span><span>I</span><span>N</span><span>G</span><span>O</span></div><div class="digital-card-grid">${cells}</div></div>`;
+ return `<div class="digital-card-shell theme-${theme}"><div class="pink-decor" aria-hidden="true"><span class="pk-ribbon"></span><span class="pk-pearl"></span><span class="pk-gem"></span><span class="pk-macaron"></span><span class="pk-heart"></span></div><div class="japanese-decor" aria-hidden="true"><span class="jp-sun"></span><span class="jp-fuji"></span><span class="jp-torii"></span><span class="jp-pagoda"></span><span class="jp-cloud"></span></div><div class="neon-decor" aria-hidden="true"><span class="nn-light"></span><span class="nn-roulette"></span><span class="nn-card"></span><span class="nn-dice"></span><span class="nn-chip"></span></div><div class="digital-card-tournament">${esc(getTournamentTitleForCard())}</div><div class="digital-card-owner">${esc(reg.name)}</div><div class="digital-card-number">カード番号 ${esc(reg.cardId)}／No.${globalNo(reg.cardId)}</div><div class="digital-card-state">${status.label}</div><div class="digital-card-head"><span>B</span><span>I</span><span>N</span><span>G</span><span>O</span></div><div class="digital-card-grid">${cells}</div><div class="pink-lace-strip" aria-hidden="true"></div><div class="japanese-pattern-strip" aria-hidden="true"></div><div class="neon-casino-strip" aria-hidden="true"></div></div>`;
 }
 function renderDigitalCardItem(reg){
  const key=digitalCardKey(reg),expanded=expandedDigitalCardKeys.has(key),status=getDigitalCardStatus(reg.cardId);
@@ -1207,6 +1267,7 @@ function renderDrawAndJudge(){
     const drawAdvanced=!drawNavigationOnly && !historyMode && lastRenderedDrawLength!==null && latestStep>lastRenderedDrawLength;
     if(drawAdvanced){
       const number=drawState.drawn[latestStep-1];
+      markNewReachCards(newReach);
       if(newBingo.length)showCelebration("bingo",number,newBingo);
       else if(newReach.length)showCelebration("reach",number,newReach);
     }

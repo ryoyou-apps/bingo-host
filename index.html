@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#151515">
-<title>Bingo Host 受付 Ver.2.31.3</title>
+<title>Bingo Host 受付 Ver.2.31.4</title>
 <style>
 *{box-sizing:border-box}body{margin:0;background:#f3f4f6;color:#171717;font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Yu Gothic",sans-serif}
 button,input,select{font:inherit}button{cursor:pointer}
@@ -248,7 +248,7 @@ body.tik-mode-open{overflow:hidden}
 .participant-list-toggle:focus-visible{outline:3px solid #f5cf5d88;outline-offset:2px}
 #list[hidden]{display:none!important}
 
-/* Ver.2.31.3 カードテーマ・リーチ／ビンゴライン強調版 */
+/* Ver.2.31.4 リーチ待ちマス視認性改善版 */
 .digital-card-list{display:grid;gap:8px;margin-top:10px}
 .digital-card-item{border:1px solid #d6dae1;border-radius:13px;background:#f8fafc;overflow:hidden}
 .digital-card-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:center;padding:10px 11px}
@@ -278,7 +278,7 @@ body.tik-mode-open{overflow:hidden}
 .judge-list-content{margin-top:10px}
 .judge-list-content[hidden]{display:none!important}
 
-/* Ver.2.31.3 カードテーマ・ライン強調 */
+/* Ver.2.31.4 カードテーマ・ライン強調 */
 .card-theme-fieldset{margin:14px 0 0;padding:12px;border:2px solid #d7dde3;border-radius:14px;background:#f8fafc}
 .card-theme-fieldset legend{padding:0 7px;font-size:17px;font-weight:1000;color:#111827}
 .card-theme-options{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
@@ -299,7 +299,13 @@ body.tik-mode-open{overflow:hidden}
 .digital-card-cell.is-drawn{background:#ffe36e;border-color:#d99a00;color:#4b3300;box-shadow:inset 0 0 0 2px #fff6a5}
 .digital-card-cell.is-free{background:#111827;border-color:#111827;color:#f6cf58}
 .digital-card-cell.is-reach-line{background:#ffcf74;border:2px solid #ea8c00;color:#4b2c00;box-shadow:inset 0 0 0 2px #fff0bd}
-.digital-card-cell.is-reach-wait{outline:3px solid #ef6c00;outline-offset:-4px;font-size:clamp(18px,5.5vw,25px)}
+.digital-card-shell{--reach-wait-color:#ef6c00;--reach-wait-glow:#ef6c0099}
+.digital-card-cell.is-reach-wait{position:relative;background:#fff;border:3px solid var(--reach-wait-color);color:inherit;box-shadow:0 0 0 1px #fff,0 0 9px var(--reach-wait-glow);font-size:clamp(18px,5.5vw,25px)}
+.theme-pink{--reach-wait-color:#db2777;--reach-wait-glow:#db277799}.theme-pink .digital-card-cell.is-reach-wait{background:#fffafd;color:#3f1830}
+.theme-japanese{--reach-wait-color:#b42318;--reach-wait-glow:#b4231888}.theme-japanese .digital-card-cell.is-reach-wait{background:#fffdf5;color:#172033}
+.theme-neon{--reach-wait-color:#ff79da;--reach-wait-glow:#ff79dacc}.theme-neon .digital-card-cell.is-reach-wait{background:#12182f;color:#fff}
+.digital-card-cell.is-reach-wait.is-reach-flash{animation:reachWaitFlash .42s ease-in-out 3}
+@keyframes reachWaitFlash{0%,100%{transform:scale(1);box-shadow:0 0 0 1px #fff,0 0 8px var(--reach-wait-glow)}50%{transform:scale(1.055);box-shadow:0 0 0 2px #fff,0 0 18px 5px var(--reach-wait-glow)}}
 .digital-card-cell.is-bingo-line{background:linear-gradient(145deg,#fff3a0,#45c878);border:3px solid #168b45;color:#12351f;box-shadow:inset 0 0 0 2px #fff9c9}
 .theme-neon .digital-card-cell.is-drawn{background:#51359d;border-color:#b58cff;color:#fff;box-shadow:0 0 7px #9c6cff88}
 .theme-neon .digital-card-cell.is-free{background:#291447;border-color:#ff79da;color:#fff2fb;box-shadow:0 0 7px #ff79da77}
@@ -310,7 +316,7 @@ body.tik-mode-open{overflow:hidden}
 </style>
 </head>
 <body>
-<header><h1 id="appTitle" aria-label="Bingo Host">Bingo Host<span id="adminCrown" class="guest-hidden">👑</span></h1><div class="sub">A〜E 全250枚対応・受付＋抽選 Ver.2.31.3／カードテーマ・リーチ／ビンゴライン強調版</div></header>
+<header><h1 id="appTitle" aria-label="Bingo Host">Bingo Host<span id="adminCrown" class="guest-hidden">👑</span></h1><div class="sub">A〜E 全250枚対応・受付＋抽選 Ver.2.31.4／リーチ待ちマス視認性改善版</div></header>
 <main>
 <section id="currentTournamentBanner" class="panel current-tournament-banner" aria-label="現在の大会">
   <div class="current-tournament-label">現在の大会</div>
@@ -512,7 +518,7 @@ body.tik-mode-open{overflow:hidden}
   </button>
 </div>
 
-<div id="appVersionFooter" style="text-align:center;color:#777;font-size:11px;padding:2px 0 18px">Ver.2.31.3 カードテーマ・リーチ／ビンゴライン強調版</div>
+<div id="appVersionFooter" style="text-align:center;color:#777;font-size:11px;padding:2px 0 18px">Ver.2.31.4 リーチ待ちマス視認性改善版</div>
 </main>
 
 <div id="drawHistoryFloatingBar" class="draw-history-floating-bar" hidden aria-label="抽選履歴操作">
@@ -732,6 +738,8 @@ let participantListExpanded=false;
 let reachListExpanded=false;
 let bingoListExpanded=false;
 const expandedDigitalCardKeys=new Set();
+const newlyReachedDigitalCardIds=new Set();
+let reachFlashClearTimer=null;
 function setParticipantListExpanded(expanded){
  participantListExpanded=expanded===true;
  const list=$("list"),button=$("participantListToggleBtn");
@@ -799,6 +807,12 @@ function createBackupFileName(){
  return `${title}_${formatBackupTimestamp()}.json`;
 }
 function digitalCardKey(reg){return `${reg.key||reg.name}::${reg.cardId}`;}
+function markNewReachCards(groups){
+ newlyReachedDigitalCardIds.clear();
+ for(const group of (groups||[]))for(const item of (group.items||[]))newlyReachedDigitalCardIds.add(item.cardId);
+ if(reachFlashClearTimer)clearTimeout(reachFlashClearTimer);
+ reachFlashClearTimer=setTimeout(()=>newlyReachedDigitalCardIds.clear(),1800);
+}
 function renderDigitalCard(reg){
  const card=BYID.get(reg.cardId);
  const judged=judgeCard(reg.cardId);
@@ -813,8 +827,12 @@ function renderDigitalCard(reg){
   const classes=["digital-card-cell"];
   if(isFree)classes.push("is-free");
   if(isDrawn&&!isFree)classes.push("is-drawn");
-  if(reachCells.has(key))classes.push("is-reach-line");
-  if(reachWaits.has(key))classes.push("is-reach-wait");
+  if(reachWaits.has(key)){
+    classes.push("is-reach-wait");
+    if(newlyReachedDigitalCardIds.has(reg.cardId))classes.push("is-reach-flash");
+  }else if(reachCells.has(key)){
+    classes.push("is-reach-line");
+  }
   if(bingoCells.has(key))classes.push("is-bingo-line");
   return `<div class="${classes.join(" ")}">${isFree?"FREE":number}</div>`;
  })).join("");
@@ -1207,6 +1225,7 @@ function renderDrawAndJudge(){
     const drawAdvanced=!drawNavigationOnly && !historyMode && lastRenderedDrawLength!==null && latestStep>lastRenderedDrawLength;
     if(drawAdvanced){
       const number=drawState.drawn[latestStep-1];
+      markNewReachCards(newReach);
       if(newBingo.length)showCelebration("bingo",number,newBingo);
       else if(newReach.length)showCelebration("reach",number,newReach);
     }

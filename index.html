@@ -248,7 +248,7 @@ body.tik-mode-open{overflow:hidden}
 .participant-list-toggle:focus-visible{outline:3px solid #f5cf5d88;outline-offset:2px}
 #list[hidden]{display:none!important}
 
-/* Ver.2.32.0 工程3-4 ホスト終了・権限解放 第1実装 */
+/* Ver.2.32.0-R1 工程3-4 ホスト再取得 不具合修正版 */
 .digital-card-list{display:grid;gap:8px;margin-top:10px}
 .digital-card-item{border:1px solid #d6dae1;border-radius:13px;background:#f8fafc;overflow:hidden}
 .digital-card-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:center;padding:10px 11px}
@@ -376,7 +376,7 @@ box-shadow:0 8px 22px rgba(33,45,70,.18),inset 0 0 0 2px #fff7d6,inset 0 0 0 5px
 </style>
 </head>
 <body>
-<header><h1 id="appTitle" aria-label="Bingo Host">Bingo Host<span id="adminCrown" class="guest-hidden">👑</span></h1><div class="sub">A〜E 全250枚対応・受付＋抽選 Ver.2.32.0／工程3-4 ホスト終了・権限解放 第1実装</div></header>
+<header><h1 id="appTitle" aria-label="Bingo Host">Bingo Host<span id="adminCrown" class="guest-hidden">👑</span></h1><div class="sub">A〜E 全250枚対応・受付＋抽選 Ver.2.32.0-R1／工程3-4 ホスト再取得 不具合修正版</div></header>
 <main>
 <section id="currentTournamentBanner" class="panel current-tournament-banner" aria-label="現在の大会">
   <div class="current-tournament-label">現在の大会</div>
@@ -582,7 +582,7 @@ box-shadow:0 8px 22px rgba(33,45,70,.18),inset 0 0 0 2px #fff7d6,inset 0 0 0 5px
   </button>
 </div>
 
-<div id="appVersionFooter" style="text-align:center;color:#777;font-size:11px;padding:2px 0 18px">Ver.2.32.0 工程3-4 ホスト終了・権限解放 第1実装</div>
+<div id="appVersionFooter" style="text-align:center;color:#777;font-size:11px;padding:2px 0 18px">Ver.2.32.0-R1 工程3-4 ホスト再取得 不具合修正版</div>
 </main>
 
 <div id="drawHistoryFloatingBar" class="draw-history-floating-bar" hidden aria-label="抽選履歴操作">
@@ -2427,6 +2427,22 @@ async function ensureAuth(){
 function isApprovedAdmin(user){
   return !!(user && user.email && user.email.toLowerCase() === ADMIN_LOGIN_EMAIL);
 }
+
+/* Ver.2.32.0-R1: 管理者ログイン直後の認証反映を待ってからホスト取得する */
+async function waitForApprovedAdmin(timeoutMs=8000){
+  const started=Date.now();
+  while(Date.now()-started<timeoutMs){
+    const user=auth.currentUser;
+    if(isApprovedAdmin(user)){
+      try{await user.getIdToken(true);}catch(e){}
+      currentUser=user;
+      window.setAdminAuthentication?.(true,"管理者");
+      return user;
+    }
+    await new Promise(resolve=>setTimeout(resolve,100));
+  }
+  throw new Error("管理者認証の完了を確認できませんでした。もう一度ログインしてください。");
+}
 function syncAdminState(user){
   currentUser=user||null;
   window.setAdminAuthentication?.(isApprovedAdmin(user),isApprovedAdmin(user)?"管理者":"");
@@ -2477,7 +2493,9 @@ async function adminLogin(){
   }
   try{
     if(button){button.disabled=true;button.textContent="確認中…";}
-    await signInWithEmailAndPassword(auth,ADMIN_LOGIN_EMAIL,password);
+    const credential=await signInWithEmailAndPassword(auth,ADMIN_LOGIN_EMAIL,password);
+    await credential.user.getIdToken(true);
+    syncAdminState(credential.user);
     clearAdminFailures();
     if(input)input.value="";
     const panel=document.getElementById("adminPanel");
@@ -2645,7 +2663,12 @@ window.cloudEndHostSession = async function(){
   const result=await runTransaction(rr,current=>{
     if(!current||current.hostUid!==user.uid)return;
     const previous=current.hostSession||{};
-    return {...current,hostUid:null,hostSession:{active:false,hostId:null,startedAt:previous.startedAt||null,endedAt},updatedAt:Date.now()};
+    /*
+      hostUidは既存Firebaseルールの再取得用アンカーとして保持する。
+      実際のホスト稼働状態はhostSession.activeだけで判定し、hostIdは終了時にnullへ戻す。
+      これにより大会データを残したまま、同じ管理者UIDを使う同一端末・別端末から再取得できる。
+    */
+    return {...current,hostUid:user.uid,hostSession:{active:false,hostId:null,startedAt:previous.startedAt||null,endedAt},updatedAt:Date.now()};
   },{applyLocally:false});
   if(!result.committed)throw new Error("ホスト権限を解放できませんでした");
   window.setCloudHostAuthorization?.(false);
@@ -2720,7 +2743,12 @@ window.cloudConnect = async function(){
   if(!room || !role) return;
 
   try{
-    const user = await ensureAuth();
+    let user;
+    if(role === "host"){
+      user = await waitForApprovedAdmin();
+    }else{
+      user = await ensureAuth();
+    }
 
     if(unsubscribe){
       unsubscribe();
@@ -2747,9 +2775,14 @@ window.cloudConnect = async function(){
           return {hostUid:user.uid,hostSession:{active:true,hostId:user.uid,startedAt:nowIso,endedAt:null},...payload,updatedAt:Date.now()};
         }
         if(current.hostUid===user.uid && current.hostSession?.active!==false){
-          return {...current,hostSession:{active:true,hostId:user.uid,startedAt:current.hostSession?.startedAt||nowIso,endedAt:null}};
+          return {...current,hostSession:{active:true,hostId:user.uid,startedAt:current.hostSession?.startedAt||nowIso,endedAt:null},updatedAt:Date.now()};
         }
-        if(!current.hostUid || current.hostSession?.active===false){
+        /* 終了済みセッションは、認証済みの同一管理者UIDから新しいセッションとして再取得する */
+        if(current.hostUid===user.uid && current.hostSession?.active===false){
+          return {...current,hostUid:user.uid,hostSession:{active:true,hostId:user.uid,startedAt:nowIso,endedAt:null},updatedAt:Date.now()};
+        }
+        /* 旧データ互換：hostUidが存在しない部屋も、ルールが許可する場合は取得を試みる */
+        if(!current.hostUid){
           return {...current,hostUid:user.uid,hostSession:{active:true,hostId:user.uid,startedAt:nowIso,endedAt:null},updatedAt:Date.now()};
         }
         return;
@@ -2777,7 +2810,9 @@ window.cloudConnect = async function(){
 
       if(liveSnap.exists()){
         const data = liveSnap.val() || {};
-        if(role==="host" && data.hostUid!==user.uid){
+        const liveHostActive=data.hostSession?.active!==false;
+        const liveHostMatches=data.hostUid===user.uid && (data.hostSession?.hostId==null || data.hostSession?.hostId===user.uid);
+        if(role==="host" && (!liveHostActive || !liveHostMatches)){
           window.forceGuestMode?.(room,"⚠️ ホスト権限が変更されたため、ゲストに切り替えました。");
           role="guest";
         }
